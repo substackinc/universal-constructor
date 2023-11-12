@@ -18,7 +18,7 @@ app.listen(port, () => {
 app.post('/execute', (req, res) => {
   const command = req.body.command;
 
-  console.log ("Running: ", command);
+  console.log(`\n\n${new Date()}\nRunning: ${command}`)
   exec(command, { cwd: workingDirectory}, (error, stdout, stderr) => {
     if (error) {
       return res.status(500).send(`Error: ${error.message}`);
