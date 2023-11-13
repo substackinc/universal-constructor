@@ -1,9 +1,12 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import { exec } from 'child_process';
 
 const app = express();
 app.use(express.json()); // For parsing application/json
 const port = 3000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing'
 
@@ -29,4 +32,8 @@ app.post('/execute', (req, res) => {
     console.log(`Output: ${stdout}`)
     res.status(200).send(`Output: ${stdout}`);
   });
+});
+
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(__dirname + '/privacy-policy.html');
 });
