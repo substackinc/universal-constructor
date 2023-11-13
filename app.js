@@ -24,9 +24,11 @@ app.post('/execute', (req, res) => {
   console.log(`\n\n${new Date()}\nRunning: ${command}`)
   exec(command, { cwd: workingDirectory}, (error, stdout, stderr) => {
     if (error) {
+      console.error(`Error: ${error.message}`)
       return res.status(500).send(`Error: ${error.message}`);
     }
     if (stderr) {
+      console.error(`Stderror: ${stderr}`)
       return res.status(500).send(`Stderr: ${stderr}`);
     }
     console.log(`Output: ${stdout}`)
