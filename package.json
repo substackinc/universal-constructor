@@ -7,9 +7,14 @@
   "name": "gpts-testing",
   "version": "1.0.0",
   "main": "app.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-dev": "nodemon app.js",
+    "start-ngrok": "ngrok start --all",
+    "start-all": "concurrently \"npm run start-dev\" \"npm run start-ngrok\""
   },
   "author": "",
   "license": "ISC",
