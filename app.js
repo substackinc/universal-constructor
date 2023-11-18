@@ -70,3 +70,49 @@ app.post('/execute2', (req, res) => {
 app.get('/privacy-policy', (req, res) => {
   res.sendFile(__dirname + '/privacy-policy.html');
 });
+
+app.get('/read-files', async (req, res) => {
+  try {
+    const files = req.query.files.split(',');
+    const lineRanges = req.query.lines ? req.query.lines.split(';').map(range => range.split('-').map(Number)) : [];
+    let fileContents = {};
+
+    for (const [index, file] of files.entries()) {
+      const filePath = path.join(workingDirectory, file);
+      const data = await fs.promises.readFile(filePath, 'utf8');
+      const lines = data.split('\n');
+      if (lineRanges[index]) {
+        const [start, end] = lineRanges[index];
+        fileContents[file] = lines.slice(start - 1, end).join('\n');
+      } else {
+        fileContents[file] = data;
+      }
+    }
+
+    res.json(fileContents);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error reading files');
+  }
+});
+
+app.put('/write-file', async (req, res) => {
+  try {
+    const { file, content, lines } = req.body;
+    const filePath = path.join(workingDirectory, file);
+    if (lines) {
+      const [start, end] = lines.split('-').map(Number);
+      const data = await fs.promises.readFile(filePath, 'utf8');
+      let fileLines = data.split('\n');
+      const newContentLines = content.split('\n');
+      fileLines.splice(start - 1, end - start + 1, ...newContentLines);
+      await fs.promises.writeFile(filePath, fileLines.join('\n'), 'utf8');
+    } else {
+      await fs.promises.writeFile(filePath, content, 'utf8');
+    }
+    res.status(200).send('File updated successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error updating file');
+  }
+});
