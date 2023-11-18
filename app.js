@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import { exec, spawn } from 'child_process';
+import fs from 'fs';
 
 const app = express();
 app.use(express.json()); // For parsing application/json
