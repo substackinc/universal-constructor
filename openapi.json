@@ -1,0 +1,203 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Custom API Server",
+    "description": "A simple server for demonstrating a custom API with Node.js and Express.",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://adapting-mutual-grizzly.ngrok-free.app"
+    }
+  ],
+  "paths": {
+    "/execute2": {
+      "post": {
+        "description": "Run a specified shell command with arguments in the environment and get back the result",
+        "operationId": "exec",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "command": {
+                    "type": "string"
+                  },
+                  "arguments": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "command",
+                  "args"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "output": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/read-files": {
+      "get": {
+        "summary": "Reads content from specified files",
+        "description": "Allows reading multiple files, optionally with specified ranges of line numbers.",
+        "operationId": "readFiles",
+        "parameters": [
+          {
+            "name": "files",
+            "in": "query",
+            "required": true,
+            "description": "A comma-separated list of file names.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lines",
+            "in": "query",
+            "required": false,
+            "description": "Optional, semicolon-separated list of line ranges for each file.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+(-[0-9]+)?(;[0-9]+(-[0-9]+)?)*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/write-file": {
+      "put": {
+        "summary": "Updates or creates a file",
+        "description": "Allows updating a range of lines within a file or creating a new file with specified content.",
+        "operationId": "writeFiles",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "The name of the file to be written to."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content to write into the file."
+                  },
+                  "lines": {
+                    "type": "string",
+                    "description": "Optional, range of line numbers to replace in the format 'start-end'."
+                  }
+                },
+                "required": ["file", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File updated successfully"
+          },
+          "500": {
+            "description": "Error updating file"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Project Summary",
+        "description": "Provides a summary of the project, including a list of files with details, and git status and diff.",
+        "operationId": "getProjectSummary",
+        "responses": {
+          "200": {
+            "description": "Project summary returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "filesSummary": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/FileSummary"
+                      }
+                    },
+                    "gitStatus": {
+                      "type": "string"
+                    },
+                    "gitDiff": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FileSummary": {
+        "type": "object",
+        "properties": {
+          "lineCount": {
+            "type": "integer"
+          },
+          "symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summaryDocumentation": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

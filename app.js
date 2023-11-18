@@ -1,7 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
-import { exec, spawn } from 'child_process';
+import { exec, spawn, execSync } from 'child_process';
 import fs from 'fs';
 
 const app = express();
@@ -10,10 +10,6 @@ const port = 3000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing'
-
-app.get('/', (req, res) => {
-  res.send('Hello World CBTEST the secret is: exploding sloths\n');
-});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
@@ -72,6 +68,10 @@ app.get('/privacy-policy', (req, res) => {
   res.sendFile(__dirname + '/privacy-policy.html');
 });
 
+app.get('/openapi', (req, res) => {
+  res.sendFile(__dirname + '/openapi.json');
+});
+
 app.get('/read-files', async (req, res) => {
   try {
     const files = req.query.files.split(',');
@@ -117,3 +117,51 @@ app.put('/write-file', async (req, res) => {
     res.status(500).send('Error updating file');
   }
 });
+
+app.get('/', async (req, res) => {
+  try {
+    const filesSummary = {};
+    const items = fs.readdirSync(workingDirectory);
+
+    for (const item of items) {
+      const itemPath = path.join(workingDirectory, item);
+      const itemStats = fs.lstatSync(itemPath);
+
+      if (itemStats.isFile()) {
+        const data = fs.readFileSync(itemPath, 'utf8');
+        const lines = data.split('\n');
+
+        filesSummary[item] = {
+          lineCount: lines.length,
+          symbols: extractSymbols(data),
+          summaryDocumentation: extractSummaryDocumentation(lines)
+        };
+      }
+    }
+
+    // Running git commands
+    const gitStatus = execSync('git status', { cwd: workingDirectory }).toString();
+    const gitDiff = execSync('git diff', { cwd: workingDirectory }).toString();
+
+    const response = {
+      filesSummary,
+      gitStatus,
+      gitDiff
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(`Error processing project summary: ${error.message}`);
+  }
+});
+
+function extractSymbols(fileContent) {
+  // Implementation...
+  return [];
+}
+
+function extractSummaryDocumentation(lines) {
+  // Implementation...
+  return '';
+}
