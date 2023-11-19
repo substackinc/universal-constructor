@@ -1,15 +1,45 @@
-import repl from 'repl';
+import readline from 'readline';
 
-const replServer = repl.start({
-    prompt: 'Human> ',
-    eval: myEval
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
 });
 
-function myEval(input, context, filename, callback) {
-    setTimeout(() => console.log('yo'), 1000)
-    callback(null, `You said ${input}`)
+let inputBuffer = [];
+let isNewInput = true;
+
+function displayPrompt(force = false) {
+    if (isNewInput || force) {
+        process.stdout.write('\n# Human\n> ');
+        isNewInput = false;
+    }
 }
 
-replServer.on('exit', () => {
-    console.log('REPL server exited');
+displayPrompt();
+
+rl.on('line', (line) => {
+    if (line.trim() === '') {
+        // User pressed enter on an empty line
+        if (inputBuffer.length > 0) {
+            // Two enters in a row - process the input
+            processInput(inputBuffer.join('\n'));
+            inputBuffer = [];
+            isNewInput = true;
+            displayPrompt();
+        } else {
+            displayPrompt(true); // User pressed enter on an empty line twice, redisplay prompt
+        }
+    } else {
+        // Add non-empty line to the buffer
+        inputBuffer.push(line);
+    }
+}).on('close', () => {
+    console.log('REPL closed.');
+    process.exit(0);
 });
+
+function processInput(input) {
+    console.log(`# Computer\nYou entered:\n${input}`);
+    // Placeholder for further input processing logic
+}
