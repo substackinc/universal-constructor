@@ -1,0 +1,16 @@
+{
+  "name": "exec_shell",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "command": {
+        "type": "string",
+        "description": "The zsh shell command to run"
+      }
+    },
+    "required": [
+      "location"
+    ]
+  },
+  "description": "Run a command in a bash shell"
+}
