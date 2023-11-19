@@ -63,7 +63,7 @@
     "/read-files": {
       "get": {
         "summary": "Reads content from specified files",
-        "description": "Allows reading multiple files, optionally with specified ranges of line numbers.",
+        "description": "Allows reading multiple files, optionally with specified ranges of line numbers. Line numbers are added for informational purposes.",
         "operationId": "readFiles",
         "parameters": [
           {

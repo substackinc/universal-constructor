@@ -75,19 +75,13 @@ app.get('/openapi', (req, res) => {
 app.get('/read-files', async (req, res) => {
   try {
     const files = req.query.files.split(',');
-    const lineRanges = req.query.lines ? req.query.lines.split(';').map(range => range.split('-').map(Number)) : [];
     let fileContents = {};
 
-    for (const [index, file] of files.entries()) {
+    for (const file of files) {
       const filePath = path.join(workingDirectory, file);
       const data = await fs.promises.readFile(filePath, 'utf8');
-      const lines = data.split('\n');
-      if (lineRanges[index]) {
-        const [start, end] = lineRanges[index];
-        fileContents[file] = lines.slice(start - 1, end).join('\n');
-      } else {
-        fileContents[file] = data;
-      }
+      const lines = data.split('\n').map((line, index) => `${index + 1}: ${line}`);
+      fileContents[file] = lines.join('\n');
     }
 
     res.json(fileContents);
@@ -100,17 +94,26 @@ app.get('/read-files', async (req, res) => {
 app.put('/write-file', async (req, res) => {
   try {
     const { file, content, lines } = req.body;
+    console.log(`Editing ${file} ${lines}`)
     const filePath = path.join(workingDirectory, file);
+    const data = await fs.promises.readFile(filePath, 'utf8');
+    let fileLines = data.split('\n');
+
     if (lines) {
       const [start, end] = lines.split('-').map(Number);
-      const data = await fs.promises.readFile(filePath, 'utf8');
-      let fileLines = data.split('\n');
-      const newContentLines = content.split('\n');
-      fileLines.splice(start - 1, end - start + 1, ...newContentLines);
-      await fs.promises.writeFile(filePath, fileLines.join('\n'), 'utf8');
+      if (start === end) {
+        // Insert logic
+        fileLines.splice(start - 1, 0, content);
+      } else {
+        // Replace logic
+        fileLines.splice(start - 1, end - start + 1, content);
+      }
     } else {
-      await fs.promises.writeFile(filePath, content, 'utf8');
+      // Overwrite entire file if no lines are specified
+      fileLines = [content];
     }
+
+    await fs.promises.writeFile(filePath, fileLines.join('\n'), 'utf8');
     res.status(200).send('File updated successfully');
   } catch (error) {
     console.error(error);
