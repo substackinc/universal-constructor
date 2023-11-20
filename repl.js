@@ -1,3 +1,4 @@
+// repl.js
 import readline from 'readline';
 import {createThread, sendMessageAndLogReply, updateAssistant} from './assistant.js';
 
@@ -67,3 +68,18 @@ async function main() {
 
 main(); // Running the main function if this script is executed directly
 
+let ctrlCPressed = false;
+
+process.on('SIGINT', () => {
+    if (ctrlCPressed) {
+        console.log('Second Ctrl-C detected, exiting.');
+        process.exit(1); // Exit immediately.
+    } else {
+        console.log('Ctrl-C pressed, interrupting current operation...');
+        // Place logic here to interrupt ongoing operations, such as aborting a request
+        ctrlCPressed = true;
+
+        // Optionally, use a timer to reset the flag after some time has passed.
+        setTimeout(() => ctrlCPressed = false, 2000); // 2 seconds to press again to exit
+    }
+});

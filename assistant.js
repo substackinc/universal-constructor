@@ -17,7 +17,9 @@ const instructions = `As ${name}, your role is to manage software development ta
 
 Run commands in the current working directory, i.e. 'ls' without specifying a path.
 
-To read the API docs, use the retrival program (don't use shell commands for that it won't work.)
+When you look at files, look at them with 'nl' so that you know the right line numbers, for example you could say 'nl repl.js'
+
+To read the API docs, use the retrieval program (don't use shell commands for that it won't work.)
 
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
 
@@ -90,8 +92,7 @@ export async function updateAssistant() {
 }
 
 export async function createThread() {
-    const thread = await openai.beta.threads.create();
-    return thread; // Return the thread object
+    return openai.beta.threads.create();
 }
 
 export async function sendMessageAndLogReply(threadId, content) {
@@ -159,3 +160,19 @@ export async function sendMessageAndLogReply(threadId, content) {
         console.log(`\n# ${message.role}:\n${content}`);
     }
 }
+
+let ctrlCPressed = false;
+
+const handleInterrupt = () => {
+    if (ctrlCPressed) {
+        console.log('Second Ctrl-C detected, exiting.');
+        process.exit();
+    } else {
+        console.log('First Ctrl-C detected. Interrupt the current operation.');
+        ctrlCPressed = true;
+        // Reset ctrlCPressed after 2 seconds
+        setTimeout(() => ctrlCPressed = false, 2000);
+    }
+};
+
+process.on('SIGINT', handleInterrupt);
