@@ -1,5 +1,5 @@
 import readline from 'readline';
-import {createThread, sendMessageAndGetReply, updateAssistant} from './assistant.js';
+import {createThread, sendMessageAndLogReply, updateAssistant} from './assistant.js';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -46,8 +46,7 @@ rl.on('line', async (line) => {
 
 async function processInput(input) {
     try {
-        const reply = await sendMessageAndGetReply(threadId, input);
-        console.log(`# Computer\n${reply}`);
+        await sendMessageAndLogReply(threadId, input);
     } catch (error) {
         console.error('oops!');
         console.error(error);

@@ -9,6 +9,7 @@ await dotenv.config();
 const workingDirectory = '/Users/chrisbest/src/gpts-testing'
 
 const openai = new OpenAI();
+let lastMessageId = null;
 
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN'; // Your specific assistant ID
 const name = 'Pewpewnix';
@@ -36,7 +37,7 @@ const exec_shell_spec = {
 };
 async function exec_shell(args) {
     const {command} = args;
-    console.log(`\n\n${new Date()} \nRunning command: ${command}`)
+    console.log(`Running command: ${command}`);
     try {
         const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
 
@@ -88,8 +89,7 @@ export async function createThread() {
     return thread; // Return the thread object
 }
 
-export async function sendMessageAndGetReply(threadId, content) {
-    console.log("CBTEST", content)
+export async function sendMessageAndLogReply(threadId, content) {
     await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: content
@@ -109,8 +109,7 @@ export async function sendMessageAndGetReply(threadId, content) {
             break;
         }
         if (run.status === "requires_action") {
-            console.log(`CBTEST action required`)
-            console.log(run.required_action.submit_tool_outputs.tool_calls)
+            //console.log(run.required_action.submit_tool_outputs.tool_calls)
 
             let tool_outputs = [];
 
@@ -119,14 +118,13 @@ export async function sendMessageAndGetReply(threadId, content) {
                     console.error('unknown tool call', call);
                     throw new Error()
                 }
-                console.log("CBTEST call", call);
                 let f = toolsDict[call.function.name];
                 let arg = JSON.parse(call.function.arguments);
 
-                console.log(`calling ${call.function.name}(${call.function.arguments})`);
+                //console.log(`calling ${call.function.name}(${call.function.arguments})`);
 
                 const result = await f(arg)
-                console.log(`result`, result)
+                //console.log(`result`, result)
                 tool_outputs.push({
                     tool_call_id: call.id,
                     output: JSON.stringify(result)
@@ -144,7 +142,15 @@ export async function sendMessageAndGetReply(threadId, content) {
         await new Promise(r => setTimeout(r, 1000));
     }
 
-    const messages = await openai.beta.threads.messages.list(threadId);
-    const orderedMessages = messages.data.sort((a, b) => a.created_at - b.created_at);
-    return orderedMessages.find(msg => msg.role === "assistant")?.content.map(c => c.text.value).join('\n') || "No response from assistant.";
+    const messages = await openai.beta.threads.messages.list(threadId, {
+        order: 'asc',
+        after: lastMessageId
+    });
+
+    lastMessageId = messages.body.last_id;
+
+    for (let message of messages.data) {
+        let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
+        console.log(`\n# ${message.role}:\n${content}`);
+    }
 }
