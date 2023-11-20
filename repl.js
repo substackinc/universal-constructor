@@ -1,6 +1,6 @@
 // repl.js
 import readline from 'readline';
-import {createThread, sendMessageAndLogReply, updateAssistant} from './assistant.js';
+import {createThread, logNewMessages, sendMessageAndLogReply, updateAssistant} from './assistant.js';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -10,16 +10,22 @@ const rl = readline.createInterface({
 
 let inputBuffer = [];
 let isNewInput = true;
-let threadId;
+let threadId = 'thread_GPUqnC19Ufur0g8gV0KcDeDq';
 
 async function initializeAssistant() {
-    const thread = await createThread();
-    threadId = thread.id;
+    if (!threadId) {
+        const thread = await createThread();
+        threadId = thread.id;
+        console.log("Created new thread, id: ", threadId);
+    } else {
+        console.log("Reusing thread id:", threadId);
+    }
+
 }
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write('\n# Human\n> ');
+        process.stdout.write('\n# user:\n> ');
         isNewInput = false;
     }
 }
@@ -62,8 +68,9 @@ async function main() {
     let a = await updateAssistant();
     console.log(a.instructions);
 
-    displayPrompt();
     initializeAssistant();
+    await logNewMessages(threadId);
+    displayPrompt();
 }
 
 main(); // Running the main function if this script is executed directly

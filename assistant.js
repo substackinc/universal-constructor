@@ -148,6 +148,10 @@ export async function sendMessageAndLogReply(threadId, content) {
         await new Promise(r => setTimeout(r, 1000));
     }
 
+    await logNewMessages(threadId);
+}
+
+export async function logNewMessages(threadId) {
     const messages = await openai.beta.threads.messages.list(threadId, {
         order: 'asc',
         after: lastMessageId
