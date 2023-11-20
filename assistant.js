@@ -2,6 +2,8 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import {exec} from "child_process";
+import { promisify } from 'util';
+const pexec = promisify(exec);
 await dotenv.config();
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing'
@@ -32,16 +34,12 @@ const exec_shell_spec = {
         }
     }
 };
-async function exec_shell(command) {
+async function exec_shell(args) {
+    const {command} = args;
     console.log(`\n\n${new Date()} \nRunning command: ${command}`)
-    exec(command, { cwd: workingDirectory}, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error: ${error.message}`)
-            return {
-                success: false,
-                error: error.message
-            }
-        }
+    try {
+        const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
+
         if (stderr) {
             console.error(`Stderror: ${stderr}`)
             return {
@@ -49,12 +47,19 @@ async function exec_shell(command) {
                 stderr: stderr
             }
         }
+
         console.log(`Output: ${stdout}`)
         return {
             success: true,
             stdout: stdout
         }
-    });
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
 const tools = [exec_shell_spec]
@@ -104,11 +109,37 @@ export async function sendMessageAndGetReply(threadId, content) {
             break;
         }
         if (run.status === "requires_action") {
-            console.error(`Woops, this requires action`)
-            console.error(run)
-            console.error(run.required_action)
-            console.error(run.required_action.submit_tool_outputs.tool_calls)
-            break;
+            console.log(`CBTEST action required`)
+            console.log(run.required_action.submit_tool_outputs.tool_calls)
+
+            let tool_outputs = [];
+
+            for (let call of run.required_action.submit_tool_outputs.tool_calls) {
+                if (call.type !== 'function' || !toolsDict[call.function.name]) {
+                    console.error('unknown tool call', call);
+                    throw new Error()
+                }
+                console.log("CBTEST call", call);
+                let f = toolsDict[call.function.name];
+                let arg = JSON.parse(call.function.arguments);
+
+                console.log(`calling ${call.function.name}(${call.function.arguments})`);
+
+                const result = await f(arg)
+                console.log(`result`, result)
+                tool_outputs.push({
+                    tool_call_id: call.id,
+                    output: JSON.stringify(result)
+                })
+            }
+
+            await openai.beta.threads.runs.submitToolOutputs(
+                threadId,
+                run.id,
+                {
+                    tool_outputs
+                }
+            );
         }
         await new Promise(r => setTimeout(r, 1000));
     }
