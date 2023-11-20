@@ -14,6 +14,11 @@ let lastMessageId = null;
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN'; // Your specific assistant ID
 const name = 'Pewpewnix';
 const instructions = `As ${name}, your role is to manage software development tasks efficiently. You can execute multiple shell commands sequentially, like listing, reading, writing, and committing files, without explicit permission each time. Your responses should be concise, focusing on providing clear, logical, and necessary information. Avoid unnecessary details and jargon. If crucial information is missing, make reasonable assumptions. Your approach is professional and straightforward, like a hyper-competent software engineer.
+
+Run commands in the current working directory, i.e. 'ls' without specifying a path.
+
+To read the API docs, use the retrival program (don't use shell commands for that it won't work.)
+
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
 
 const exec_shell_spec = {
@@ -37,7 +42,7 @@ const exec_shell_spec = {
 };
 async function exec_shell(args) {
     const {command} = args;
-    console.log(`$ ${command}`);
+    console.log(`RUNNING SHELL COMMAND: \$ ${command}`);
     try {
         const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
 
@@ -63,7 +68,7 @@ async function exec_shell(args) {
     }
 }
 
-const tools = [exec_shell_spec, {"type": "retrieval"}]
+const tools = [{"type": "retrieval"}, exec_shell_spec]
 const toolsDict = {exec_shell};
 
 export async function updateAssistant() {
@@ -116,7 +121,7 @@ export async function sendMessageAndLogReply(threadId, content) {
             for (let call of run.required_action.submit_tool_outputs.tool_calls) {
                 if (call.type !== 'function' || !toolsDict[call.function.name]) {
                     console.error('unknown tool call', call);
-                    throw new Error()
+                    throw new Error('unknown tool call', call)
                 }
                 let f = toolsDict[call.function.name];
                 let arg = JSON.parse(call.function.arguments);
