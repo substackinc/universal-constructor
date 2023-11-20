@@ -1,5 +1,5 @@
 import readline from 'readline';
-import {createThread, sendMessageAndGetReply} from './assistant.js';
+import {createThread, sendMessageAndGetReply, updateAssistant} from './assistant.js';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -22,8 +22,6 @@ function displayPrompt(force = false) {
         isNewInput = false;
     }
 }
-console.log('\n\n\n\n')
-setTimeout(displayPrompt, 200)
 
 rl.on('line', async (line) => {
     if (line.trim() === '') {
@@ -57,4 +55,16 @@ async function processInput(input) {
 
 }
 
-initializeAssistant();
+
+// The main function that you want to execute only if the file is run standalone
+async function main() {
+    console.log("Updating assistant...")
+    let a = await updateAssistant();
+    console.log(a.instructions);
+
+    displayPrompt();
+    initializeAssistant();
+}
+
+main(); // Running the main function if this script is executed directly
+
