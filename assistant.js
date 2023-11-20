@@ -13,6 +13,7 @@ export async function createThread() {
 }
 
 export async function sendMessageAndGetReply(threadId, content) {
+    console.log("CBTEST", content)
     await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: content
@@ -33,6 +34,10 @@ export async function sendMessageAndGetReply(threadId, content) {
         }
         if (run.status === "requires_action") {
             console.error(`Woops, this requires action`)
+            console.error(run)
+            console.error(run.required_action)
+            console.error(run.required_action.submit_tool_outputs.tool_calls)
+            break;
         }
         await new Promise(r => setTimeout(r, 1000));
     }

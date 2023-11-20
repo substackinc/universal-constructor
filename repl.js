@@ -22,8 +22,8 @@ function displayPrompt(force = false) {
         isNewInput = false;
     }
 }
-
-displayPrompt();
+console.log('\n\n\n\n')
+setTimeout(displayPrompt, 200)
 
 rl.on('line', async (line) => {
     if (line.trim() === '') {
