@@ -37,7 +37,7 @@ const exec_shell_spec = {
 };
 async function exec_shell(args) {
     const {command} = args;
-    console.log(`Running command: ${command}`);
+    console.log(`$ ${command}`);
     try {
         const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
 
@@ -63,7 +63,7 @@ async function exec_shell(args) {
     }
 }
 
-const tools = [exec_shell_spec]
+const tools = [exec_shell_spec, {"type": "retrieval"}]
 const toolsDict = {exec_shell};
 
 export async function updateAssistant() {
