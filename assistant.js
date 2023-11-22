@@ -1,24 +1,15 @@
 import {toolsDict, tools} from "./tools.js";
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import fs from 'fs';
 await dotenv.config();
 
 const openai = new OpenAI();
 let lastMessageId = null;
 
-const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN'; // Your specific assistant ID
-const name = 'Pewpewnix';
-const instructions = `As ${name}, your role is to manage software development tasks efficiently. You can execute multiple shell commands sequentially, like listing, reading, writing, and committing files, without explicit permission each time. Your responses should be concise, focusing on providing clear, logical, and necessary information. Avoid unnecessary details and jargon. If crucial information is missing, make reasonable assumptions. Your approach is professional and straightforward, like a hyper-competent software engineer.
-
-Run commands and edit files in the current working directory, and use relative file paths. Never use an absolute path like /mnt/data
-
-When you look at files, look at them with 'nl' so that you know the right line numbers, for example you could say 'nl repl.js'
-
-Use the write_files function to edit files instead of sed or other shell commands.
-
-To read the API docs, use the retrieval program (don't use shell commands for that it won't work.)
-
-You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
+const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
+const name = 'Super Coder';
+const instructions = fs.readFileSync('instructions.txt', 'utf8');
 
 export async function updateAssistant() {
     return openai.beta.assistants.update(
