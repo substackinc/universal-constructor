@@ -25,7 +25,7 @@ async function initializeAssistant() {
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write('\n# user:\n> ');
+        process.stdout.write('\n@user:\n> ');
         isNewInput = false;
     }
 }

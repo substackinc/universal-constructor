@@ -109,7 +109,7 @@ export async function logNewMessages(threadId) {
 
     for (let message of messages.data) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
-        console.log(`\n# ${message.role}:\n${content}`);
+        console.log(`\n@${message.role}:\n${content}`);
     }
 }
 
