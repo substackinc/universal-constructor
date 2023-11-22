@@ -14,6 +14,8 @@ Run commands and edit files in the current working directory, and use relative f
 
 When you look at files, look at them with 'nl' so that you know the right line numbers, for example you could say 'nl repl.js'
 
+Use the write_files function to edit files instead of sed or other shell commands.
+
 To read the API docs, use the retrieval program (don't use shell commands for that it won't work.)
 
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
@@ -97,16 +99,21 @@ export async function sendMessageAndLogReply(threadId, content) {
                     throw new Error('unknown tool call', call)
                 }
                 let f = toolsDict[call.function.name];
-                let arg = JSON.parse(call.function.arguments);
 
-                //console.log(`calling ${call.function.name}(${call.function.arguments})`);
+                try {
+                    let arg = JSON.parse(call.function.arguments);
+                    //console.log(`calling ${call.function.name}(${call.function.arguments})`);
+                    const result = await f(arg)
+                    //console.log(`result`, result)
+                    tool_outputs.push({
+                        tool_call_id: call.id,
+                        output: JSON.stringify(result)
+                    })
+                } catch (ex) {
+                    console.error(`Error running command ${call.function.name}(${call.function.arguments})`);
+                    console.error(ex);
+                }
 
-                const result = await f(arg)
-                //console.log(`result`, result)
-                tool_outputs.push({
-                    tool_call_id: call.id,
-                    output: JSON.stringify(result)
-                })
             }
 
             await openai.beta.threads.runs.submitToolOutputs(
