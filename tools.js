@@ -1,7 +1,7 @@
 // tools.js
 import { promisify } from "util";
 import { exec } from "child_process";
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync } from 'fs';
 import { join, resolve } from 'path';
 const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
@@ -28,10 +28,9 @@ const exec_shell_spec = {
 
 async function exec_shell(args) {
     const {command} = args;
-    console.log(`RUNNING SHELL COMMAND: \$ ${command}`);
+    console.log(`RUNNING SHELL COMMAND: $${command}`);
     try {
         const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
-
         if (stderr) {
             console.error(`Stderr: ${stderr}`);
             return {
@@ -39,7 +38,6 @@ async function exec_shell(args) {
                 stderr: stderr
             };
         }
-
         console.log(`Output: ${stdout}`);
         return {
             success: true,
@@ -55,7 +53,6 @@ async function exec_shell(args) {
 }
 
 export { exec_shell, exec_shell_spec };
-
 
 const write_file_spec = {
     "type": "function",
@@ -74,23 +71,32 @@ const write_file_spec = {
                     "description": "The content to write to the file"
                 }
             },
-            "required": ["filepath", "content"]
+            "required": [
+                "filepath", "content"
+            ]
         }
     }
 };
 
 async function write_file({ filepath, content }) {
+    let oldContent = '';
+    // Check if the file exists and reads the old content
+    const fullPath = resolve(workingDirectory, filepath);
+    if (existsSync(fullPath)) {
+        oldContent = await fs.readFile(fullPath, 'utf8');
+    }
+
     try {
         // Prevent writing files outside of the working directory
-        const fullPath = resolve(workingDirectory, filepath);
         if (!fullPath.startsWith(workingDirectory)) {
             throw new Error('Cannot write outside of the working directory');
         }
-
-        console.log(`Writing to ${filepath}`)
+        console.log(oldContent ? 'Overwriting' : 'Writing', filepath);
         await fs.writeFile(fullPath, content, 'utf8');
         return {
-            success: true
+            success: true,
+            oldContent: oldContent,
+            newContent: content
         };
     } catch (error) {
         console.error(`Error writing file: ${error}`);
@@ -101,8 +107,7 @@ async function write_file({ filepath, content }) {
     }
 }
 
-const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec]
-const toolsDict = {exec_shell, write_file};
+const tools = [{ "type": "retrieval" }, exec_shell_spec, write_file_spec];
+const toolsDict = { exec_shell, write_file };
 
 export { tools, toolsDict };
-
