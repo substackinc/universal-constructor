@@ -1,12 +1,7 @@
-// assistant.js
+import { exec_shell, exec_shell_spec } from './tools.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import {exec} from "child_process";
-import { promisify } from 'util';
-const pexec = promisify(exec);
 await dotenv.config();
-
-const workingDirectory = '/Users/chrisbest/src/gpts-testing'
 
 const openai = new OpenAI();
 let lastMessageId = null;
@@ -22,53 +17,6 @@ When you look at files, look at them with 'nl' so that you know the right line n
 To read the API docs, use the retrieval program (don't use shell commands for that it won't work.)
 
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
-
-const exec_shell_spec = {
-    "type": "function",
-    "function": {
-        "name": "exec_shell",
-        "description": "Run a command in a bash shell",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "command": {
-                    "type": "string",
-                    "description": "The zsh shell command to run"
-                }
-            },
-            "required": [
-                "location"
-            ]
-        }
-    }
-};
-async function exec_shell(args) {
-    const {command} = args;
-    console.log(`RUNNING SHELL COMMAND: \$ ${command}`);
-    try {
-        const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
-
-        if (stderr) {
-            console.error(`Stderror: ${stderr}`)
-            return {
-                success: false,
-                stderr: stderr
-            }
-        }
-
-        console.log(`Output: ${stdout}`)
-        return {
-            success: true,
-            stdout: stdout
-        }
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        return {
-            success: false,
-            error: error.message
-        };
-    }
-}
 
 const tools = [{"type": "retrieval"}, exec_shell_spec]
 const toolsDict = {exec_shell};
