@@ -1,4 +1,4 @@
-import { exec_shell, exec_shell_spec } from './tools.js';
+import {toolsDict, tools} from "./tools.js";
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 await dotenv.config();
@@ -17,9 +17,6 @@ When you look at files, look at them with 'nl' so that you know the right line n
 To read the API docs, use the retrieval program (don't use shell commands for that it won't work.)
 
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.`
-
-const tools = [{"type": "retrieval"}, exec_shell_spec]
-const toolsDict = {exec_shell};
 
 export async function updateAssistant() {
     return openai.beta.assistants.update(
@@ -43,23 +40,50 @@ export async function createThread() {
     return openai.beta.threads.create();
 }
 
+export async function cancelOustandingRuns(threadId) {
+    console.log("Cancelling outstanding runs. Ctrl-C again to exit.")
+    const runs = await openai.beta.threads.runs.list(threadId);
+    if (runs.data) {
+        for (let run of runs.data) {
+            //console.log('CBTEST', run.id, run.status);
+            if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
+                console.log(`Found outstanding run, cancelling ${run.id}}`);
+                await openai.beta.threads.runs.cancel(threadId, run.id);
+            }
+        }
+    }
+}
+
 export async function sendMessageAndLogReply(threadId, content) {
-    await openai.beta.threads.messages.create(threadId, {
+    let message = await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: content
     });
+    lastMessageId = message.id;
 
     let run = await openai.beta.threads.runs.create(threadId, { assistant_id: assistantId });
 
     // Wait for the run to be completed
     while (true) {
         run = await openai.beta.threads.runs.retrieve(threadId, run.id);
-        if (run.status === 'in_progress') {
-            process.stdout.write('.')
-        } else {
-            process.stdout.write('\n')
+        switch (run.status) {
+            case 'in_progress':
+            case 'queued':
+                process.stdout.write('.')
+                break;
+            case 'cancelling':
+                process.stdout.write('X');
+                break;
+            case 'requires_action':
+            case 'completed':
+                process.stdout.write('\n');
+                break;
+            default:
+                console.log("Unexpected status:", run.status);
+                break;
         }
-        if (run.status === "completed") {
+
+        if (!['queued', 'in_progress', 'cancelling', 'requires_action'].includes(run.status)) {
             break;
         }
         if (run.status === "requires_action") {
@@ -101,30 +125,20 @@ export async function sendMessageAndLogReply(threadId, content) {
 
 export async function logNewMessages(threadId) {
     const messages = await openai.beta.threads.messages.list(threadId, {
-        order: 'asc',
-        after: lastMessageId
+        order: 'desc',
+        before: lastMessageId,
+        limit: 5
     });
 
-    lastMessageId = messages.body.last_id;
+    lastMessageId = messages.body.first_id;
+    let messageList = messages.data.toReversed();
 
-    for (let message of messages.data) {
+    if (messages.body.has_more) {
+        console.log("\n(Previous messages not shown)");
+    }
+
+    for (let message of messageList) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
-        console.log(`\n@${message.role}:\n${content}`);
+        console.log(`\n @ ${message.role}:\n\n${content}`);
     }
 }
-
-let ctrlCPressed = false;
-
-const handleInterrupt = () => {
-    if (ctrlCPressed) {
-        console.log('Second Ctrl-C detected, exiting.');
-        process.exit();
-    } else {
-        console.log('First Ctrl-C detected. Interrupt the current operation.');
-        ctrlCPressed = true;
-        // Reset ctrlCPressed after 2 seconds
-        setTimeout(() => ctrlCPressed = false, 2000);
-    }
-};
-
-process.on('SIGINT', handleInterrupt);

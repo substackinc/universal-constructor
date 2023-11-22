@@ -1,6 +1,12 @@
 // repl.js
 import readline from 'readline';
-import {createThread, logNewMessages, sendMessageAndLogReply, updateAssistant} from './assistant.js';
+import {
+    cancelOustandingRuns,
+    createThread,
+    logNewMessages,
+    sendMessageAndLogReply,
+    updateAssistant
+} from './assistant.js';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -21,11 +27,13 @@ async function initializeAssistant() {
         console.log("Reusing thread id:", threadId);
     }
 
+    await cancelOustandingRuns(threadId);
+
 }
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write('\n@user:\n> ');
+        process.stdout.write('\n @ user:\n> ');
         isNewInput = false;
     }
 }
@@ -68,25 +76,27 @@ async function main() {
     let a = await updateAssistant();
     console.log(a.instructions);
 
-    initializeAssistant();
+    await initializeAssistant();
     await logNewMessages(threadId);
     displayPrompt();
 }
 
-main(); // Running the main function if this script is executed directly
-
 let ctrlCPressed = false;
-
 process.on('SIGINT', () => {
     if (ctrlCPressed) {
         console.log('Second Ctrl-C detected, exiting.');
         process.exit(1); // Exit immediately.
     } else {
-        console.log('Ctrl-C pressed, interrupting current operation...');
-        // Place logic here to interrupt ongoing operations, such as aborting a request
+        console.log('Ctrl-C pressed, cancelling current operation...');
+        cancelOustandingRuns(threadId);
+
         ctrlCPressed = true;
 
         // Optionally, use a timer to reset the flag after some time has passed.
         setTimeout(() => ctrlCPressed = false, 2000); // 2 seconds to press again to exit
     }
 });
+
+main(); // Running the main function if this script is executed directly
+
+
