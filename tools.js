@@ -1,7 +1,8 @@
 // tools.js
 import { promisify } from "util";
 import { exec } from "child_process";
-import fs from "fs";
+import { promises as fs } from 'fs';
+import { join, resolve } from 'path';
 const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
@@ -60,13 +61,13 @@ const write_file_spec = {
     "type": "function",
     "function": {
         "name": "write_file",
-        "description": "Writes content to a specified file, replacing its contents",
+        "description": "Writes content to a specified file, replacing its contents, within the working directory",
         "parameters": {
             "type": "object",
             "properties": {
                 "filepath": {
                     "type": "string",
-                    "description": "The path to the file"
+                    "description": "The relative path to the file within the working directory"
                 },
                 "content": {
                     "type": "string",
@@ -80,12 +81,19 @@ const write_file_spec = {
 
 async function write_file({ filepath, content }) {
     try {
-        console.log("writing to", filepath)
-        await fs.writeFile(filepath, content, 'utf8');
+        // Prevent writing files outside of the working directory
+        const fullPath = resolve(workingDirectory, filepath);
+        if (!fullPath.startsWith(workingDirectory)) {
+            throw new Error('Cannot write outside of the working directory');
+        }
+
+        console.log(`Writing to ${filepath}`)
+        await fs.writeFile(fullPath, content, 'utf8');
         return {
             success: true
         };
     } catch (error) {
+        console.error(`Error writing file: ${error}`);
         return {
             success: false,
             error: error.message
