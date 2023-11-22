@@ -6,7 +6,6 @@ await dotenv.config();
 
 const openai = new OpenAI();
 let lastMessageId = null;
-
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
 const name = 'Super Coder';
 const instructions = fs.readFileSync('instructions.txt', 'utf8');
@@ -38,9 +37,8 @@ export async function cancelOustandingRuns(threadId) {
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {
         for (let run of runs.data) {
-            //console.log('CBTEST', run.id, run.status);
             if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
-                console.log(`Found outstanding run, cancelling ${run.id}}`);
+                console.log(`Found outstanding run, cancelling ${run.id}`);
                 await openai.beta.threads.runs.cancel(threadId, run.id);
             }
         }
@@ -80,8 +78,6 @@ export async function sendMessageAndLogReply(threadId, content) {
             break;
         }
         if (run.status === "requires_action") {
-            //console.log(run.required_action.submit_tool_outputs.tool_calls)
-
             let tool_outputs = [];
 
             for (let call of run.required_action.submit_tool_outputs.tool_calls) {
@@ -90,12 +86,9 @@ export async function sendMessageAndLogReply(threadId, content) {
                     throw new Error('unknown tool call', call)
                 }
                 let f = toolsDict[call.function.name];
-
                 try {
                     let arg = JSON.parse(call.function.arguments);
-                    //console.log(`calling ${call.function.name}(${call.function.arguments})`);
                     const result = await f(arg)
-                    //console.log(`result`, result)
                     tool_outputs.push({
                         tool_call_id: call.id,
                         output: JSON.stringify(result)
@@ -111,7 +104,6 @@ export async function sendMessageAndLogReply(threadId, content) {
                         })
                     })
                 }
-
             }
 
             await openai.beta.threads.runs.submitToolOutputs(
