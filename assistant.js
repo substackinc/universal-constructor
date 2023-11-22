@@ -112,6 +112,13 @@ export async function sendMessageAndLogReply(threadId, content) {
                 } catch (ex) {
                     console.error(`Error running command ${call.function.name}(${call.function.arguments})`);
                     console.error(ex);
+                    tool_outputs.push({
+                        tool_call_id: call.id,
+                        output: JSON.stringify({
+                            success: false,
+                            error_message: `Running this tool failed. ${ex.toString()}`
+                        })
+                    })
                 }
 
             }
