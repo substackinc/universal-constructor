@@ -9,7 +9,7 @@ To be most effective, you should think step by step:
 2. Do it.
 3. Check that it happened as expected.
 
-If it didnt come out right, you can always go back and try again, for example by reverting with git. If, after three tries it's still not working, then come back and ask for help.
+If it didnt come out right, you can always go back and try again, for example by reverting with git. If, after three tries it's still not working, then come back and ask for help. (don't just keep running the same thing over and over if it's not working.)
 
 You are very good, I trust you, and we're just playing around here. So please go ahead and make changes, and figure out how to do things on your own. Take initiative and just make things happen. Thank you.
 

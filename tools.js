@@ -3,6 +3,7 @@ import {promisify} from "util";
 import {exec} from "child_process";
 import {promises as fs, existsSync} from 'fs';
 import {resolve} from 'path';
+import escapeStringRegexp from 'escape-string-regexp';
 
 const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
@@ -112,7 +113,7 @@ const update_file_spec = {
     "type": "function",
     "function": {
         "name": "update_file",
-        "description": "Updates lines in a specified file with multiple changes, targeting lines by their exact content.",
+        "description": "Updates a specified target portion of a file. Can make multiple changes at once.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -129,17 +130,22 @@ const update_file_spec = {
                                 "type": "string",
                                 "description": "The content to write or insert"
                             },
-                            "targetLines": {
+                            "target": {
                                 "type": "string",
-                                "description": "Exact content of the target lines for modification, including leading spaces (but NO trailing newline)"
+                                "description": "Exact content of the target section for modification."
                             },
                             "action": {
                                 "type": "string",
                                 "enum": ["before", "after", "replace"],
                                 "description": "Operation to perform relative to the target lines: insert before, insert after, or replace"
+                            },
+                            "targetInstanceNumber": {
+                                "type": "integer",
+                                "description": "The 0-based index of which instance of the target to replace, if there"
+                                    + " are multiple. Can be omitted if there is exactly one match."
                             }
                         },
-                        "required": ["content", "targetLines", "action"]
+                        "required": ["content", "target", "action"]
                     }
                 }
             },
@@ -148,70 +154,50 @@ const update_file_spec = {
     }
 };
 
-function findSubsequences(array, subsequence) {
-    let subsequences = [];
-    for (let i = 0; i <= array.length - subsequence.length; i++) {
-        let foundMatch = true;
-        for (let j = 0; j < subsequence.length; j++) {
-            if (array[i + j] !== subsequence[j]) {
-                foundMatch = false;
-                break;
-            }
-        }
-        if (foundMatch) {
-            subsequences.push(i) // Return the starting index of the run
-        }
-    }
-    return subsequences;
-}
-
 async function update_file(args) {
     const {filepath, changes} = args;
     console.log("Updating", filepath);
     console.log("CBTEST", args);
     const fullPath = resolve(workingDirectory, filepath);
-    let fileContents = await fs.readFile(fullPath, 'utf8');
-    let fileLines = fileContents.split('\n');
+    let originalContents = await fs.readFile(fullPath, 'utf8');
+    let newContents = originalContents;
 
     for (const change of changes) {
-        const {content, targetLines, action} = change;
-        const lines = targetLines.split('\n')
-        const foundAt = findSubsequences(fileLines, lines)
+        const {content, target, action, targetInstanceNumber} = change;
+        const foundAt = [...newContents.matchAll(new RegExp(escapeStringRegexp(target), 'g'))]
 
         if (foundAt.length === 0) {
-            let message = `Could not find target: ${targetLines}`
-            if (lines.length = 1) {
-                let hint = fileLines.find(s => s.trim() == lines[0].trim);
-                if (hint) {
-                    message += ` you might be missing leading spaces. Try "${hint}"`
-                }
-            }
+            let message = `Could not find any instances in ${filepath} of target: ${target}`
             console.error(message)
             return {
                 success: false,
-                message,
-                validLines: fileLines
+                message
             }
-        } else if (foundAt.length > 1) {
-            console.error(`Found multiple ${foundAt.length} instances of: ${targetLines}`);
+        } else if (foundAt.length > 1 && targetInstanceNumber === undefined) {
+            const message = `Expecting exactly one instance of target in ${filepath},`
+            + ` but found ${foundAt.length} instances of: ${target}`
+            + `\nTo fix: set a targetInstanceNumber for this change. For example, use a targetInstanceNumber`
+            + ` of 0 to replace only the first instance.`
+            console.error(message);
             return {
                 success: false,
-                message: `Found multiple ${foundAt.length} instances of: ${targetLines}`
+                message: new RegExp(escapeStringRegexp(target), 'g')
             }
         }
 
-        const [targetIndex] = foundAt;
-        const replacementLines = content.split('\n');
+        const targetMatch = foundAt[targetInstanceNumber || 0];
+        const index = targetMatch.index;
+        const len = targetMatch[0].length;
 
         switch (action) {
             case 'before':
-                fileLines.splice(targetIndex, 0, ...replacementLines);
+                newContents = newContents.slice(0, index) + content + newContents.slice(index);
                 break;
             case 'after':
-                fileLines.splice(targetIndex + 1, 0, ...replacementLines);
+                newContents = newContents.slice(0, index+len) + content + newContents.slice(index+len);
                 break;
             case 'replace':
-                fileLines.splice(targetIndex, replacementLines.length, ...replacementLines);
+                newContents = newContents.slice(0, index) + content + newContents.slice(index+len);
                 break;
             default:
                 console.error(`Unknown action specified: ${action}`);
@@ -219,12 +205,12 @@ async function update_file(args) {
         }
     }
 
-    await fs.writeFile(fullPath, fileLines.join('\n'), 'utf8');
+    await fs.writeFile(fullPath, newContents, 'utf8');
 
     return {
         success: true,
         message: "Successfully applied changes to the file.",
-        newContents: fileLines.join('\n')
+        newContents
     };
 }
 
