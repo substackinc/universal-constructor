@@ -131,7 +131,7 @@ const update_file_spec = {
                             },
                             "targetLines": {
                                 "type": "string",
-                                "description": "Exact content of the target lines for modification"
+                                "description": "Exact content of the target lines for modification, including leading spaces (but NO trailing newline)"
                             },
                             "action": {
                                 "type": "string",
@@ -179,10 +179,18 @@ async function update_file(args) {
         const foundAt = findSubsequences(fileLines, lines)
 
         if (foundAt.length === 0) {
-            console.error(`Could not find target: ${targetLines}`)
+            let message = `Could not find target: ${targetLines}`
+            if (lines.length = 1) {
+                let hint = fileLines.find(s => s.trim() == lines[0].trim);
+                if (hint) {
+                    message += ` you might be missing leading spaces. Try "${hint}"`
+                }
+            }
+            console.error(message)
             return {
                 success: false,
-                message: `Could not find target: ${targetLines}`
+                message,
+                validLines: fileLines
             }
         } else if (foundAt.length > 1) {
             console.error(`Found multiple ${foundAt.length} instances of: ${targetLines}`);
