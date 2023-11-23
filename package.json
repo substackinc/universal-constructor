@@ -14,7 +14,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon repl.js",
+    "start": "nodemon -w .restart repl.js",
     "start-ngrok": "ngrok start --all",
     "start-all": "concurrently \"npm run start-dev\" \"npm run start-ngrok\""
   },
