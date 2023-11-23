@@ -32,7 +32,7 @@ export async function createThread() {
     return openai.beta.threads.create();
 }
 
-export async function cancelOustandingRuns(threadId) {
+export async function cancelOutstandingRuns(threadId) {
     console.log("Cancelling outstanding runs. Ctrl-C again to exit.")
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {

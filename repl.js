@@ -1,7 +1,7 @@
 // repl.js
 import readline from 'readline';
 import {
-    cancelOustandingRuns,
+    cancelOutstandingRuns,
     createThread,
     logNewMessages,
     sendMessageAndLogReply,
@@ -28,7 +28,7 @@ async function initializeAssistant() {
         console.log("Reusing thread id:", threadId);
     }
 
-    await cancelOustandingRuns(threadId);
+    await cancelOutstandingRuns(threadId);
 
 }
 
@@ -95,7 +95,7 @@ process.on('SIGINT', () => {
         process.exit(1); // Exit immediately.
     } else {
         console.log('Ctrl-C pressed, cancelling current operation...');
-        cancelOustandingRuns(threadId);
+        cancelOutstandingRuns(threadId);
 
         ctrlCPressed = true;
 
