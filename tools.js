@@ -1,8 +1,8 @@
 // tools.js
 import { promisify } from "util";
 import { exec } from "child_process";
-import { promises as fs, existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { promises as fs, constants } from 'fs';
+import { resolve } from 'path';
 const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
@@ -69,33 +69,46 @@ const write_file_spec = {
                 "content": {
                     "type": "string",
                     "description": "The content to write to the file"
+                },
+                "placeholder": {
+                    "type": "string",
+                    "description": "A unique string or comment used as a marker where the content should be inserted"
                 }
             },
-            "required": [
-                "filepath", "content"
-            ]
+            "required": ["filepath", "content"]
         }
     }
 };
 
-async function write_file({ filepath, content }) {
-    let oldContent = '';
-    // Check if the file exists and reads the old content
-    const fullPath = resolve(workingDirectory, filepath);
-    if (existsSync(fullPath)) {
-        oldContent = await fs.readFile(fullPath, 'utf8');
-    }
-
+async function write_file({ filepath, content, placeholder = '' }) {
     try {
-        // Prevent writing files outside of the working directory
-        if (!fullPath.startsWith(workingDirectory)) {
-            throw new Error('Cannot write outside of the working directory');
+        const fullPath = resolve(workingDirectory, filepath);
+        let existingContent = '';
+
+        try {
+            await fs.access(fullPath, constants.F_OK);
+            existingContent = await fs.readFile(fullPath, 'utf8');
+        } catch (err) {
+            if (err.code !== 'ENOENT') throw err; // If the error is not file not found, throw it
         }
-        console.log(oldContent ? 'Overwriting' : 'Writing', filepath);
+
+        if (placeholder && existingContent.includes(placeholder)) {
+            content = existingContent.replace(placeholder, content);
+
+            console.log("Writing to", filepath, 'replacing:');
+            console.log(placeholder);
+            console.log("with");
+            console.log(newContent)
+        } else if (existingContent.length > 0) {
+            console.log("Writing to", filepath, 'appending:');
+            console.log("content");
+            content = existingContent + '\n' + content;
+        }
+
         await fs.writeFile(fullPath, content, 'utf8');
         return {
             success: true,
-            oldContent: oldContent,
+            oldContent: existingContent,
             newContent: content
         };
     } catch (error) {
