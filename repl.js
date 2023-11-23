@@ -17,7 +17,8 @@ const rl = readline.createInterface({
 
 let inputBuffer = [];
 let isNewInput = true;
-let threadId = 'thread_GPUqnC19Ufur0g8gV0KcDeDq';
+//let threadId = 'thread_GPUqnC19Ufur0g8gV0KcDeDq'; // Original
+let threadId = 'thread_1F38P2VUG2fOZwqlSGeekcUh'; // Nov 23
 
 async function initializeAssistant() {
     if (!threadId) {
@@ -29,12 +30,11 @@ async function initializeAssistant() {
     }
 
     await cancelOutstandingRuns(threadId);
-
 }
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write('\n @ user:\n> ');
+        process.stdout.write('\x1b[36m\n @ user:\n> \x1b[0m');
         isNewInput = false;
     }
 }
@@ -79,7 +79,7 @@ function touchRestartFile() {
 
 // The main function that you want to execute only if the file is run standalone
 async function main() {
-    console.log("Updating assistant...")
+    console.log('\x1b[32mUpdating assistant...\x1b[0m')
     let a = await updateAssistant();
     console.log(a.instructions);
 

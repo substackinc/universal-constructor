@@ -132,7 +132,7 @@ const update_file_spec = {
                             },
                             "target": {
                                 "type": "string",
-                                "description": "Exact content of the target section for modification."
+                                "description": "Exact content of the target section for modification. Can be multiple lines"
                             },
                             "action": {
                                 "type": "string",

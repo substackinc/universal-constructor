@@ -33,10 +33,11 @@ export async function createThread() {
 }
 
 export async function cancelOutstandingRuns(threadId) {
-    console.log("Cancelling outstanding runs. Ctrl-C again to exit.")
+    console.log("Cancelling outstanding runs.");
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {
         for (let run of runs.data) {
+            console.log("CBTEST", run.id, run.status);
             if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
                 console.log(`Found outstanding run, cancelling ${run.id}`);
                 await openai.beta.threads.runs.cancel(threadId, run.id);
@@ -136,6 +137,6 @@ export async function logNewMessages(threadId) {
 
     for (let message of messageList) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
-        console.log(`\n @ ${message.role}:\n\n${content}`);
+        console.log(`\x1b[32m\n @ ${message.role}:\x1b[0m\n\n${content}`);
     }
 }
