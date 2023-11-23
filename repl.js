@@ -8,6 +8,12 @@ import {
     updateAssistant
 } from './assistant.js';
 import fs from "fs";
+import { messageEventEmitter } from './assistant.js';
+
+// Event Listener for messages
+messageEventEmitter.on('message', ({ role, content }) => {
+    console.log(`\x1b[32m\n @ ${role}:\x1b[0m\n\n${content}`);
+});
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -84,7 +90,7 @@ async function main() {
     console.log(a.instructions);
 
     await initializeAssistant();
-    await logNewMessages(threadId);
+    
     displayPrompt();
 }
 

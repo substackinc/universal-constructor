@@ -2,6 +2,9 @@ import {toolsDict, tools} from "./tools.js";
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import EventEmitter from 'events';
+const messageEventEmitter = new EventEmitter();
+export { messageEventEmitter };
 await dotenv.config();
 
 const openai = new OpenAI();
@@ -137,6 +140,6 @@ export async function logNewMessages(threadId) {
 
     for (let message of messageList) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
-        console.log(`\x1b[32m\n @ ${message.role}:\x1b[0m\n\n${content}`);
+        emitMessageEvent({ role: message.role, content });
     }
 }
