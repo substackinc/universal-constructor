@@ -76,8 +76,8 @@ const write_file_spec = {
 };
 
 async function write_file(args) {
-    console.log("CBTEST write file", args)
     let {filepath, content} = args;
+    console.log("CBTEST write file", args)
     let oldContent = '';
     // Check if the file exists and reads the old content
     const fullPath = resolve(workingDirectory, filepath);
@@ -166,9 +166,9 @@ function findSubsequences(array, subsequence) {
 }
 
 async function update_file(args) {
+    const {filepath, changes} = args;
     console.log("Updating", filepath);
     console.log("CBTEST", args);
-    const {filepath, changes} = args;
     const fullPath = resolve(workingDirectory, filepath);
     let fileContents = await fs.readFile(fullPath, 'utf8');
     let fileLines = fileContents.split('\n');
