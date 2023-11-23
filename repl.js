@@ -7,6 +7,7 @@ import {
     sendMessageAndLogReply,
     updateAssistant
 } from './assistant.js';
+import fs from "fs";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -50,6 +51,8 @@ rl.on('line', async (line) => {
         } else {
             displayPrompt(true); // User pressed enter on an empty line twice, redisplay prompt
         }
+    } else if (line === 'rs' || line === 'restart') {
+        touchRestartFile();
     } else {
         // Add non-empty line to the buffer
         inputBuffer.push(line);
@@ -67,6 +70,10 @@ async function processInput(input) {
         console.error(error);
     }
 
+}
+
+function touchRestartFile() {
+    fs.writeFileSync('.restart', `${new Date()}`);
 }
 
 
