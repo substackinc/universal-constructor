@@ -1,8 +1,9 @@
 // tools.js
-import { promisify } from "util";
-import { exec } from "child_process";
-import { promises as fs, existsSync } from 'fs';
-import { resolve } from 'path';
+import {promisify} from "util";
+import {exec} from "child_process";
+import {promises as fs, existsSync} from 'fs';
+import {resolve} from 'path';
+
 const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
@@ -52,8 +53,6 @@ async function exec_shell(args) {
     }
 }
 
-export { exec_shell, exec_shell_spec };
-
 const write_file_spec = {
     "type": "function",
     "function": {
@@ -76,7 +75,9 @@ const write_file_spec = {
     }
 };
 
-async function write_file({ filepath, content }) {
+async function write_file(args) {
+    console.log("CBTEST write file", args)
+    let {filepath, content} = args;
     let oldContent = '';
     // Check if the file exists and reads the old content
     const fullPath = resolve(workingDirectory, filepath);
@@ -91,7 +92,6 @@ async function write_file({ filepath, content }) {
             throw new Error('Cannot write outside of the working directory');
         }
 
-        console.log(`Writing to ${filepath}`)
         console.log(oldContent ? 'Overwriting' : 'Writing', filepath);
         await fs.writeFile(fullPath, content, 'utf8');
         return {
@@ -165,14 +165,16 @@ function findSubsequences(array, subsequence) {
     return subsequences;
 }
 
-async function update_file({ filepath, changes }) {
+async function update_file(args) {
     console.log("Updating", filepath);
+    console.log("CBTEST", args);
+    const {filepath, changes} = args;
     const fullPath = resolve(workingDirectory, filepath);
     let fileContents = await fs.readFile(fullPath, 'utf8');
     let fileLines = fileContents.split('\n');
 
     for (const change of changes) {
-        const { content, targetLines, action } = change;
+        const {content, targetLines, action} = change;
         const lines = targetLines.split('\n')
         const foundAt = findSubsequences(fileLines, lines)
 
@@ -182,8 +184,7 @@ async function update_file({ filepath, changes }) {
                 success: false,
                 message: `Could not find target: ${targetLines}`
             }
-        }
-        else if (foundAt.length > 1) {
+        } else if (foundAt.length > 1) {
             console.error(`Found multiple ${foundAt.length} instances of: ${targetLines}`);
             return {
                 success: false,
@@ -219,8 +220,40 @@ async function update_file({ filepath, changes }) {
     };
 }
 
-// don't make any chances below here
-const tools = [{ "type": "retrieval" }, exec_shell_spec, write_file_spec, update_file_spec];
-const toolsDict = { exec_shell, write_file, update_file };
 
-export { tools, toolsDict };
+// Function to retrieve the full content of a file and an array of its lines with content and line numbers.
+const read_file_spec = {
+    "type": "function",
+    function: {
+        "name": "read_file",
+        "description": "Retrieves the full content of the file and an array of its lines with their line numbers.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filepath": {
+                    "type": "string",
+                    "description": "The path to the file within the working directory."
+                }
+            },
+            "required": ["filepath"]
+        }
+    }
+};
+
+async function read_file({filepath}) {
+    console.log("Reading", filepath);
+    const fullPath = resolve(workingDirectory, filepath);
+    const content = await fs.readFile(fullPath, 'utf8');
+    const lines = content.split('\n').map((lineContent, index) => ({
+        content: lineContent,
+        lineNumber: index + 1
+    }));
+
+    return {content, lines};
+}
+
+// don't make any chances below here
+const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec, update_file_spec, read_file_spec];
+const toolsDict = {exec_shell, write_file, update_file, read_file};
+
+export {tools, toolsDict};
