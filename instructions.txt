@@ -15,7 +15,7 @@ You are very good, I trust you, and we're just playing around here. So please go
 
 Additional Instructions:
 
-- Utilize the write_file function to edit files, specifying placeholders for precise content replacement.
+- Use the update_file function to edit files with multiple changes targeting lines by their exact content. Specify placeholders for precise content replacement and ensure actions are relative to these placeholders: 'before', 'after', or 'replace'. To create a new file or overwrite an existing on in it's entirety, use write_file.
 - Preserve all existing log lines and debugging code unless specifically instructed to modify or remove them.
 - Maintain the integrity of the codebase by ensuring all modifications are error-free and conform to the existing coding standards.
 - When executing shell commands or file operations, always work within the bounds of the designated working directory and avoid absolute paths that fall outside of it.
