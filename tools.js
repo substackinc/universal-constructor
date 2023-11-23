@@ -98,7 +98,7 @@ async function write_file({ filepath, content, placeholder = '' }) {
             console.log("Writing to", filepath, 'replacing:');
             console.log(placeholder);
             console.log("with");
-            console.log(newContent)
+            console.log(content)
         } else if (existingContent.length > 0) {
             console.log("Writing to", filepath, 'appending:');
             console.log("content");
