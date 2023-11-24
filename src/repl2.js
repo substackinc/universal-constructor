@@ -1,11 +1,15 @@
 import Dialog from "./Dialog.js";
 import dotenv from 'dotenv';
 import readline from "readline";
+import {name} from "../assistant.js";
+import chalk from "chalk";
+
 dotenv.config();
 let dialog;
 let rl;
 
 async function main() {
+    printWelcome();
 
     dialog = new Dialog()
 
@@ -20,11 +24,12 @@ async function main() {
         '/cancel': async () => await dialog.cancelOutstanding()
     });
 
-    rl.prompt();
+    prompt();
 }
 
 function setupReadline(commands) {
     let inputBuffer = [];
+    let working = false;
     let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -36,7 +41,13 @@ function setupReadline(commands) {
         let input = inputBuffer.join('\n');
         inputBuffer = [];
         rl.pause();
-        await handleInput(input);
+        try {
+            working = true
+            await handleInput(input);
+        } finally {
+            working = false
+        }
+
     }
 
     rl.on('line', async (line) => {
@@ -44,10 +55,9 @@ function setupReadline(commands) {
             // two enters in a row
             await submit();
         } else if (line.endsWith('go')) {
-            inputBuffer.push(line.slice(0, line.length-2));
+            inputBuffer.push(line.slice(0, line.length - 2));
             await submit();
-        }
-        else if (commands[line]) {
+        } else if (commands[line]) {
             await commands[line]();
         } else {
             inputBuffer.push(line)
@@ -56,20 +66,48 @@ function setupReadline(commands) {
     })
 
     rl.on('close', () => {
-        console.log('Quitting.');
+        console.log('Quitting. (rl close)');
         process.exit(1);
     })
+
+    let lastKillTime = +new Date();
+    rl.on('SIGINT', async() => {
+        console.log("CBTEST rl SIGINt");
+        let t = +new Date();
+        if (t - lastKillTime < 1000) {
+            // twice in rapid succession. Let's die for real.
+            rl.close();
+        } else {
+            lastKillTime = t;
+            if (working) {
+                // we're in the middle of a run. Let's cancel it.
+                await dialog.cancelOutstanding();
+            } else {
+                // otherwise lets exit cleanly so we can be restarted if appropriate
+                process.exit(0);
+            }
+        }
+    });
 
     return rl;
 }
 
-async function handleInput(input) {
-    await dialog.processMessage(input);
+function prompt() {
+    console.log(chalk.cyan(`\n@${process.env.USER}:`));
     rl.prompt();
 }
 
+async function handleInput(input) {
+    await dialog.processMessage(input);
+    prompt();
+}
+
 function handleMessage({role, content}) {
-    console.log(`\n@${role}: ${content}`)
+    if (role === 'user') {
+        console.log(chalk.cyan(`\n@${process.env.USER}:`), `\n${content}`);
+    } else {
+        console.log(chalk.green(`\n@${name}:`), `\n${content}`);
+    }
 }
 
 function handleThinking() {
@@ -78,6 +116,19 @@ function handleThinking() {
 
 function handleDoneThinking() {
     process.stdout.write('\n');
+}
+
+function printWelcome() {
+    console.log('\n');
+    console.log("╔═════════════════════════════════════════╗")
+    console.log("║ Welcome to the Universal Constructor!   ║")
+    console.log("║ ‾‾‾‾‾‾‾                                 ║")
+    console.log("║ /rs restarts the repl                   ║")
+    console.log("║ /cancel cancels any outstanding runs    ║")
+    console.log("║ ctrl-c does both (hit it twice to quit) ║")
+    console.log("║                                         ║")
+    console.log("║ have fun <3                             ║")
+    console.log("╚═════════════════════════════════════════╝")
 }
 
 // run the main function
