@@ -78,7 +78,7 @@ const write_file_spec = {
 
 async function write_file(args) {
     let {filepath, content} = args;
-    console.log("CBTEST write file", args)
+    // console.log("CBTEST write file", args)
     let oldContent = '';
     // Check if the file exists and reads the old content
     const fullPath = resolve(workingDirectory, filepath);
@@ -157,7 +157,7 @@ const update_file_spec = {
 async function update_file(args) {
     const {filepath, changes} = args;
     console.log("Updating", filepath);
-    console.log("CBTEST", args);
+    // console.log("CBTEST", args);
     const fullPath = resolve(workingDirectory, filepath);
     let originalContents = await fs.readFile(fullPath, 'utf8');
     let newContents = originalContents;
