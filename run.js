@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 
 function start() {
-  const process = spawn('node', ['src/repl2.js'], { stdio: 'inherit' });
+  const process = spawn('node', ['src/repl.js'], { stdio: 'inherit' });
 
   process.on('exit', (code) => {
     if (code === 0) {
