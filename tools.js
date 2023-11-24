@@ -183,7 +183,7 @@ async function update_file(args) {
                 success: false,
                 message: new RegExp(escapeStringRegexp(target), 'g')
             }
-        } else if (targetInstanceNumber > foundAt.length) {
+        } else if (targetInstanceNumber >= foundAt.length) {
             const message = `You specified targetInstanceNumber ${targetInstanceNumber}, but there are only`
             + ` ${foundAt.length} matches, so it must be between 0 and ${foundAt.length-1}`;
             console.error(message);
