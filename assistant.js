@@ -23,12 +23,6 @@ export async function updateAssistant() {
             description,
             tools,
             model: "gpt-4-1106-preview"
-            /*
-            file_ids: [
-                "file-abc123",
-                "file-abc456",
-            ],
-            */
         }
     );
 }
