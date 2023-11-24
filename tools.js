@@ -1,11 +1,9 @@
 // tools.js
-import {promisify} from "util";
 import {exec} from "child_process";
 import {promises as fs, existsSync} from 'fs';
 import {resolve} from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
 
-const pexec = promisify(exec);
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
 const exec_shell_spec = {
@@ -31,27 +29,25 @@ const exec_shell_spec = {
 async function exec_shell(args) {
     const {command} = args;
     console.log(`RUNNING SHELL COMMAND: $ ${command}`);
-    try {
-        const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
-        if (stderr) {
-            console.error(`Stderr: ${stderr}`);
-            return {
-                success: false,
-                stderr: stderr
-            };
-        }
-        console.log(`Output: ${stdout}`);
-        return {
-            success: true,
-            stdout: stdout
-        };
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        return {
-            success: false,
-            error: error.message
-        };
-    }
+
+    return new Promise((resolve) => {
+        let exitCode;
+        exec(command, (error, stdout, stderr) => {
+            if (exitCode !== 0) {
+                console.log(`Error, exit code: ${exitCode}`)
+            }
+            if (stdout) console.log(stdout);
+            if (stderr) console.log(stderr);
+            resolve({
+                success: exitCode === 0,
+                exitCode,
+                stdout,
+                stderr
+            })
+        }).on('exit', (code) => {
+            exitCode = code;
+        })
+    });
 }
 
 const write_file_spec = {
