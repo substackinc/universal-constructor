@@ -16,7 +16,7 @@ const exec_shell_spec = {
             "properties": {
                 "command": {
                     "type": "string",
-                    "description": "The zsh shell command to run"
+                    "description": "The shell command to run"
                 }
             },
             "required": [
