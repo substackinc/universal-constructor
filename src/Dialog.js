@@ -147,7 +147,14 @@ class Dialog extends EventEmitter {
         for (let call of run.required_action.submit_tool_outputs.tool_calls) {
             if (call.type !== 'function' || !toolsDict[call.function.name]) {
                 console.error('unknown tool call', call);
-                throw new Error('unknown tool call', call)
+                tool_outputs.push({
+                    tool_call_id: call.id,
+                    output: JSON.stringify({
+                        success: false,
+                        error_message: `No tool found with type ${call.type} and name ${call.function.name}`
+                    })
+                })
+                continue;
             }
             let f = toolsDict[call.function.name];
             try {
