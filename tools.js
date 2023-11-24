@@ -157,12 +157,12 @@ const update_file_spec = {
 async function update_file(args) {
     const {filepath, changes} = args;
     console.log("Updating", filepath);
-    // console.log("CBTEST", args);
     const fullPath = resolve(workingDirectory, filepath);
     let originalContents = await fs.readFile(fullPath, 'utf8');
     let newContents = originalContents;
 
     for (const change of changes) {
+        console.log(change);
         const {content, target, action, targetInstanceNumber} = change;
         const foundAt = [...newContents.matchAll(new RegExp(escapeStringRegexp(target), 'g'))]
 
