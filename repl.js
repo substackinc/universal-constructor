@@ -2,8 +2,7 @@
 import readline from 'readline';
 import {
     cancelOutstandingRuns,
-    createThread,
-    logNewMessages,
+    createThread, fetchMessages,
     sendMessageAndLogReply,
     updateAssistant
 } from './assistant.js';
@@ -36,6 +35,7 @@ async function initializeAssistant() {
     }
 
     await cancelOutstandingRuns(threadId);
+    await fetchMessages(threadId);
 }
 
 function displayPrompt(force = false) {
@@ -111,5 +111,3 @@ process.on('SIGINT', () => {
 });
 
 main(); // Running the main function if this script is executed directly
-
-

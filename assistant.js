@@ -40,7 +40,7 @@ export async function cancelOutstandingRuns(threadId) {
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {
         for (let run of runs.data) {
-            console.log("CBTEST", run.id, run.status);
+            //console.log("CBTEST", run.id, run.status);
             if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
                 console.log(`Found outstanding run, cancelling ${run.id}`);
                 await openai.beta.threads.runs.cancel(threadId, run.id);
@@ -121,10 +121,10 @@ export async function sendMessageAndLogReply(threadId, content) {
         await new Promise(r => setTimeout(r, 1000));
     }
 
-    await logNewMessages(threadId);
+    await fetchMessages(threadId);
 }
 
-export async function logNewMessages(threadId) {
+export async function fetchMessages(threadId) {
     const messages = await openai.beta.threads.messages.list(threadId, {
         order: 'desc',
         before: lastMessageId,
@@ -140,6 +140,6 @@ export async function logNewMessages(threadId) {
 
     for (let message of messageList) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";
-        emitMessageEvent({ role: message.role, content });
+        messageEventEmitter.emit("message", { role: message.role, content })
     }
 }
