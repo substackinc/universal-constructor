@@ -38,7 +38,7 @@ export async function createThread() {
 }
 
 export async function cancelOutstandingRuns(threadId) {
-    console.log("Cancelling outstanding runs.");
+    //console.log("Cancelling outstanding runs.");
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {
         for (let run of runs.data) {
@@ -127,19 +127,15 @@ export async function sendMessageAndLogReply(threadId, content) {
     await fetchMessages(threadId);
 }
 
-export async function fetchMessages(threadId) {
+export async function fetchMessages(threadId, limit=10) {
     const messages = await openai.beta.threads.messages.list(threadId, {
         order: 'desc',
         before: lastMessageId,
-        limit: 5
+        limit
     });
 
     lastMessageId = messages.body.first_id;
     let messageList = messages.data.toReversed();
-
-    if (messages.body.has_more) {
-        console.log("\n(Previous messages not shown)");
-    }
 
     for (let message of messageList) {
         let content = message.content.map(c=>c.text.value).join('\n') || "NO RESPONSE";

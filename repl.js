@@ -12,7 +12,11 @@ import { messageEventEmitter, name } from './assistant.js';
 
 // Event Listener for messages
 messageEventEmitter.on('message', ({ role, content }) => {
-    console.log(`${chalk.green(`\n @ ${role === 'user' ? process.env.USER : name}:`)}\n\n${content}`);
+    if (role === 'user') {
+        console.log(chalk.cyan(`\n@ ${process.env.USER}:`), `\n${content}`);
+    } else {
+        console.log(chalk.green(`\n@ ${name}:`), `\n${content}`);
+    }
 });
 
 const rl = readline.createInterface({
@@ -23,29 +27,49 @@ const rl = readline.createInterface({
 
 let inputBuffer = [];
 let isNewInput = true;
-//let threadId = 'thread_GPUqnC19Ufur0g8gV0KcDeDq'; // Original
-let threadId = 'thread_1F38P2VUG2fOZwqlSGeekcUh'; // Nov 23
+let threadId;
+
 let processingInput = false;
 let lastKillTime = +new Date();
 
 async function initializeAssistant() {
+    try {
+        threadId = fs.readFileSync('.thread', 'utf8').trim();
+    } catch (error) {
+        if (error.code === 'ENOENT') console.log('.thread file does not exist.'); // File not found
+        else console.error('Error reading .thread file:', error);
+    }
     if (!threadId) {
         const thread = await createThread();
         threadId = thread.id;
-        console.log("Created new thread, id: ", threadId);
+        fs.writeFileSync('.thread', threadId);
+        console.log("\nThis is the start of a brand new thread!")
     } else {
-        console.log("Reusing thread id:", threadId);
+        console.log("\n...continuing from previous thread")
     }
 
     await cancelOutstandingRuns(threadId);
-    await fetchMessages(threadId);
+    await fetchMessages(threadId, 2);
 }
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write(`${chalk.cyan(`\n @ ${process.env.USER}:\n> `)}`);
+        process.stdout.write(chalk.cyan(`\n@ ${process.env.USER}:`) + `\n> `);
         isNewInput = false;
     }
+}
+
+function printWelcome() {
+    console.log('\n');
+    console.log("╔═════════════════════════════════════════╗")
+    console.log("║ Welcome to the Universal Constructor!   ║")
+    console.log("║ ‾‾‾‾‾‾‾                                 ║")
+    console.log("║ /rs restarts the repl                   ║")
+    console.log("║ /cancel cancels any outstanding runs    ║")
+    console.log("║ ctrl-c does both (hit it twice to quit) ║")
+    console.log("║                                         ║")
+    console.log("║ have fun <3                             ║")
+    console.log("╚═════════════════════════════════════════╝")
 }
 
 rl.on('line', async (line) => {
@@ -84,17 +108,14 @@ async function processInput(input) {
     } finally {
         processingInput = false;
     }
-
 }
 
 // The main function that you want to execute only if the file is run standalone
 async function main() {
-    console.log('\x1b[32mUpdating assistant...\x1b[0m')
-    let a = await updateAssistant();
-    console.log(a.instructions);
-
+    printWelcome();
+    console.log('Updating assistant...')
+    await updateAssistant();
     await initializeAssistant();
-    
     displayPrompt();
 }
 
