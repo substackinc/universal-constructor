@@ -10,7 +10,7 @@ const openai = new OpenAI();
 let lastMessageId = null;
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
 const name = 'UC';
-const instructions = fs.readFileSync('instructions.txt', 'utf8');
+const instructions = fs.readFileSync('instructions.md', 'utf8');
 const description = 'UC, the Universal Constructor assistant, is your companion for coding and problem-solving.';
 export { messageEventEmitter, name, description };
 
