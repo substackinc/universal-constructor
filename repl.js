@@ -25,6 +25,8 @@ let inputBuffer = [];
 let isNewInput = true;
 //let threadId = 'thread_GPUqnC19Ufur0g8gV0KcDeDq'; // Original
 let threadId = 'thread_1F38P2VUG2fOZwqlSGeekcUh'; // Nov 23
+let processingInput = false;
+let lastKillTime = +new Date();
 
 async function initializeAssistant() {
     if (!threadId) {
@@ -71,10 +73,13 @@ rl.on('line', async (line) => {
 
 async function processInput(input) {
     try {
+        processingInput = true;
         await sendMessageAndLogReply(threadId, input);
     } catch (error) {
         console.error('oops!');
         console.error(error);
+    } finally {
+        processingInput = false;
     }
 
 }
@@ -95,19 +100,20 @@ async function main() {
     displayPrompt();
 }
 
-let ctrlCPressed = false;
-process.on('SIGINT', () => {
-    if (ctrlCPressed) {
-        console.log('Second Ctrl-C detected, exiting.');
-        process.exit(1); // Exit immediately.
+process.on('SIGINT', async () => {
+    let t = +new Date();
+    if (t-lastKillTime < 1500) {
+        // twice in rapid succession. Let's die for real.
+        console.log("Quitting");
+        process.exit(1);
+    }
+    lastKillTime = t;
+    if (processingInput) {
+        // we're in the middle of a run. Let's cancel it.
+        await cancelOutstandingRuns(threadId);
     } else {
-        console.log('Ctrl-C pressed, cancelling current operation...');
-        cancelOutstandingRuns(threadId);
-
-        ctrlCPressed = true;
-
-        // Optionally, use a timer to reset the flag after some time has passed.
-        setTimeout(() => ctrlCPressed = false, 2000); // 2 seconds to press again to exit
+        // otherwise lets exit cleanly so we can be restarted if appropriate
+        process.exit(0);
     }
 });
 

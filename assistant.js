@@ -44,7 +44,7 @@ export async function cancelOutstandingRuns(threadId) {
         for (let run of runs.data) {
             // console.log("CBTEST", run.id, run.status);
             if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
-                console.log(`Found outstanding run, cancelling ${run.id}`);
+                console.log(`Cancelling ${run.id}`);
                 await openai.beta.threads.runs.cancel(threadId, run.id);
             }
         }
@@ -69,7 +69,8 @@ export async function sendMessageAndLogReply(threadId, content) {
                 process.stdout.write('.')
                 break;
             case 'cancelling':
-                process.stdout.write('X');
+            case 'cancelled':
+                process.stdout.write('\n');
                 break;
             case 'requires_action':
             case 'completed':
