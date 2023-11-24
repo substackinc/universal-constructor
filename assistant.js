@@ -4,15 +4,15 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import EventEmitter from 'events';
 const messageEventEmitter = new EventEmitter();
-export { messageEventEmitter };
 await dotenv.config();
 
 const openai = new OpenAI();
 let lastMessageId = null;
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
 const name = 'UC';
-export { name };
 const instructions = fs.readFileSync('instructions.txt', 'utf8');
+const description = 'UC, the Universal Constructor assistant, is your companion for coding and problem-solving.';
+export { messageEventEmitter, name, description };
 
 export async function updateAssistant() {
     return openai.beta.assistants.update(
@@ -20,6 +20,7 @@ export async function updateAssistant() {
         {
             instructions,
             name,
+            description,
             tools,
             model: "gpt-4-1106-preview"
             /*
