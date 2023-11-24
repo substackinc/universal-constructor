@@ -11,6 +11,7 @@ const openai = new OpenAI();
 let lastMessageId = null;
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
 const name = 'Super Coder';
+export { name };
 const instructions = fs.readFileSync('instructions.txt', 'utf8');
 
 export async function updateAssistant() {
@@ -40,7 +41,7 @@ export async function cancelOutstandingRuns(threadId) {
     const runs = await openai.beta.threads.runs.list(threadId);
     if (runs.data) {
         for (let run of runs.data) {
-            //console.log("CBTEST", run.id, run.status);
+            // console.log("CBTEST", run.id, run.status);
             if (['queued', 'in_progress', 'requires_action'].includes(run.status)) {
                 console.log(`Found outstanding run, cancelling ${run.id}`);
                 await openai.beta.threads.runs.cancel(threadId, run.id);
