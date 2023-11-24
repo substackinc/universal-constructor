@@ -10,7 +10,7 @@ await dotenv.config();
 const openai = new OpenAI();
 let lastMessageId = null;
 const assistantId = 'asst_UuYztVsuHatsvpFOcZK43kLN';
-const name = 'Super Coder';
+const name = 'UC';
 export { name };
 const instructions = fs.readFileSync('instructions.txt', 'utf8');
 

@@ -7,7 +7,7 @@
     "yamljs": "^0.3.0",
     "chalk": "^4.1.0"
   },
-  "name": "gpts-testing",
+  "name": "universal-constructor",
   "version": "1.0.0",
   "main": "app.js",
   "devDependencies": {
