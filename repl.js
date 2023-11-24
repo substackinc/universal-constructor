@@ -13,9 +13,9 @@ import { messageEventEmitter, name } from './assistant.js';
 // Event Listener for messages
 messageEventEmitter.on('message', ({ role, content }) => {
     if (role === 'user') {
-        console.log(chalk.cyan(`\n@ ${process.env.USER}:`), `\n${content}`);
+        console.log(chalk.cyan(`\n@${process.env.USER}:`), `\n${content}`);
     } else {
-        console.log(chalk.green(`\n@ ${name}:`), `\n${content}`);
+        console.log(chalk.green(`\n@${name}:`), `\n${content}`);
     }
 });
 
@@ -54,7 +54,7 @@ async function initializeAssistant() {
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write(chalk.cyan(`\n@ ${process.env.USER}:`) + `\n> `);
+        process.stdout.write(chalk.cyan(`\n@${process.env.USER}:`) + `\n> `);
         isNewInput = false;
     }
 }

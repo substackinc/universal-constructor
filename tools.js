@@ -30,7 +30,7 @@ const exec_shell_spec = {
 
 async function exec_shell(args) {
     const {command} = args;
-    console.log(`RUNNING SHELL COMMAND: $${command}`);
+    console.log(`RUNNING SHELL COMMAND: $ ${command}`);
     try {
         const {stdout, stderr} = await pexec(command, {cwd: workingDirectory});
         if (stderr) {
