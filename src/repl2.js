@@ -1,7 +1,6 @@
 import Dialog from "./Dialog.js";
 import dotenv from 'dotenv';
 import readline from "readline";
-import {name} from "../assistant.js";
 import chalk from "chalk";
 
 dotenv.config();
@@ -106,7 +105,7 @@ function handleMessage({role, content}) {
     if (role === 'user') {
         console.log(chalk.cyan(`\n@${process.env.USER}:`), `\n${content}`);
     } else {
-        console.log(chalk.green(`\n@${name}:`), `\n${content}`);
+        console.log(chalk.green(`\n@${dialog.assistant.name}:`), `\n${content}`);
     }
 }
 

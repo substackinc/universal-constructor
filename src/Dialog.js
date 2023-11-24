@@ -84,7 +84,12 @@ class Dialog extends EventEmitter {
         if (data.length > 0) {
             this.lastMessageId = data[0].id;
             for (let message of data.toReversed()) {
-                let content = message.content.map(c => c.text.value).join('\n') || "NO RESPONSE";
+                let content = message.content.map(c => c.text.value).join('\n');
+                if (!content) {
+                    console.error('missing content for message', message)
+                    console.error(message.content)
+                    content = '<missing>';
+                }
                 this.emit('message', {
                     role: message.role,
                     content,
@@ -115,11 +120,16 @@ class Dialog extends EventEmitter {
                 this.emit('thinking', {run});
             } else if (run.status === "requires_action") {
                 try {
+                    // fetch messages before and after so we don't have to wait to see them
+                    await this._fetchMessages();
                     run = await this._takeAction(run);
+                    await this._fetchMessages();
                 } catch (error) {
+                    console.error("Run failed, cancelling");
                     run = await this.beta.threads.runs.cancel(this.thread.id, run.id);
                     break;
                 }
+
             } else {
                 break;
             }
