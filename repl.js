@@ -94,8 +94,8 @@ rl.on('line', async (line) => {
         inputBuffer.push(line);
     }
 }).on('close', () => {
-    console.log('REPL closed.');
-    process.exit(0);
+    console.log('Quitting.');
+    process.exit(1);
 });
 
 async function processInput(input) {
