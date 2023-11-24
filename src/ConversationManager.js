@@ -4,7 +4,14 @@ import OpenAI from "openai";
 import {toolsDict, tools} from "../tools.js";
 
 function readFile(file) {
-    return readFileSync(file, 'utf8');
+    try {
+        return readFileSync(file, 'utf8');
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return null;
+        }
+        throw error;
+    }
 }
 
 function writeFile(file, content) {
@@ -30,7 +37,7 @@ class ConversationManager extends EventEmitter {
                 } = {}) {
 
         // setup assistant
-        let assistantId = assistantId = readFile(assistantFile);
+        let assistantId = readFile(assistantFile);
         const assistantConfig = {
             name: 'UC',
             description: `${process.env.user}'s Universal Constructor coding companion.`,
@@ -55,6 +62,7 @@ class ConversationManager extends EventEmitter {
             writeFile(threadFile, this.thread.id);
             console.log("\nThis is the start of a brand new thread!")
         } else {
+            this.thread = await this.beta.threads.retrieve(threadId);
             console.log('\n...continuing from previous thread')
         }
 
@@ -73,14 +81,16 @@ class ConversationManager extends EventEmitter {
             before: this.lastMessageId,
             limit
         });
-        this.lastMessageId = data[0].id;
-        for (let message of data.toReversed()) {
-            let content = message.content.map(c => c.text.value).join('\n') || "NO RESPONSE";
-            this.emit('message', {
-                role: message.role,
-                content,
-                message
-            })
+        if (data.length > 0) {
+            this.lastMessageId = data[0].id;
+            for (let message of data.toReversed()) {
+                let content = message.content.map(c => c.text.value).join('\n') || "NO RESPONSE";
+                this.emit('message', {
+                    role: message.role,
+                    content,
+                    message
+                })
+            }
         }
     }
 
