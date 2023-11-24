@@ -1,13 +1,10 @@
 import { spawn } from 'child_process';
 
-let restart = true;
-let lastSigint = 0;
-
 function start() {
   const process = spawn('node', ['repl.js'], { stdio: 'inherit' });
 
   process.on('exit', (code) => {
-    if (code === 0 && restart) {
+    if (code === 0) {
       console.log('Restarting. (Press ctrl-c twice to exit)');
       start();
     } else {

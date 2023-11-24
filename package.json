@@ -9,7 +9,7 @@
   },
   "name": "universal-constructor",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "run.js",
   "devDependencies": {
     "concurrently": "^8.2.2",
     "dotenv": "^16.3.1"
