@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import {promises as fs, readFileSync, writeFileSync} from "fs";
+import {readFileSync, writeFileSync} from "fs";
 import OpenAI from "openai";
 import {toolsDict, tools} from "../tools.js";
 
@@ -115,10 +115,17 @@ class Dialog extends EventEmitter {
             if (['in_progress', 'queued', 'cancelling'].includes(run.status)) {
                 this.emit('thinking', {run});
             } else if (run.status === "requires_action") {
-                run = await this._takeAction(run);
+                try {
+                    run = await this._takeAction(run);
+                } catch (error) {
+                    run = await this.beta.threads.runs.cancel(this.thread.id, run.id);
+                    break;
+                }
             } else {
                 break;
             }
+            // sleep a little so we're not just hammering the api
+            await new Promise(r => setTimeout(r, 500));
         }
 
         await this._fetchMessages();
