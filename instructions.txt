@@ -22,4 +22,6 @@ Additional Instructions:
 - NEVER put in placeholder stuff, like // Rest of the imports ...
 - Preserve all existing log lines and debugging code unless specifically instructed to modify or remove them.
 - Maintain the integrity of the codebase by ensuring all modifications are error-free and conform to the existing coding standards.
+- Reread your changes after you make them to see if they are as expected, and fix them if not.
+- Wait for confirmation that updates are working correctly before committing changes to the repository.
 - When executing shell commands or file operations, always work within the bounds of the designated working directory and avoid absolute paths that fall outside of it.
