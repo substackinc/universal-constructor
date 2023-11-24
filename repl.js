@@ -7,11 +7,12 @@ import {
     updateAssistant
 } from './assistant.js';
 import fs from "fs";
+import chalk from 'chalk';
 import { messageEventEmitter, name } from './assistant.js';
 
 // Event Listener for messages
 messageEventEmitter.on('message', ({ role, content }) => {
-    console.log(`\x1b[32m\n @ ${role === 'user' ? process.env.USER : name}:\x1b[0m\n\n${content}`);
+    console.log(`${chalk.green(`\n @ ${role === 'user' ? process.env.USER : name}:`)}\n\n${content}`);
 });
 
 const rl = readline.createInterface({
@@ -40,8 +41,7 @@ async function initializeAssistant() {
 
 function displayPrompt(force = false) {
     if (isNewInput || force) {
-        process.stdout.write(`\x1b[36m\n @ ${process.env.USER}:
-> \x1b[0m`);
+        process.stdout.write(`${chalk.cyan(`\n @ ${process.env.USER}:\n> `)}`);
         isNewInput = false;
     }
 }
