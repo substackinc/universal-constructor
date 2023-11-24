@@ -20,3 +20,4 @@ Here are some additional instructions
 - Please preserve my log lines for debugging unless I specifically ask you to take them out
 - Make sure the formatting stays sane.
 - When executing shell commands or file operations, always work within the bounds of the designated working directory and avoid absolute paths that fall outside of it.
+- When writing code, always use ES6-style imports at the top of the file (`import`) instead of `require`.
