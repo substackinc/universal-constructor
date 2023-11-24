@@ -1,9 +1,9 @@
-import ConversationManager from "./src/ConversationManager.js";
+import Dialog from "./src/Dialog.js";
 import dotenv from 'dotenv';
 
 await dotenv.config();
 
-let cm = new ConversationManager()
+let cm = new Dialog()
 
 cm.on('message', ({role, content}) => console.log(`@${role}: ${content}`));
 cm.on('thinking', ({run}) => console.log('thinking', run.status));
@@ -13,5 +13,5 @@ console.log('CBTEST Setup');
 await cm.setup({threadFile: '.threadTess', assistantFile: '.assistantTest'});
 
 console.log("CBTEST Send");
-await cm.processMessage('Hi, how are you?');
+await cm.processMessage('Just testing some stuff');
 

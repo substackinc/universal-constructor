@@ -18,7 +18,7 @@ function writeFile(file, content) {
     return writeFileSync(file, content);
 }
 
-class ConversationManager extends EventEmitter {
+class Dialog extends EventEmitter {
 
     constructor(openAIConfig) {
         super();
@@ -173,4 +173,4 @@ class ConversationManager extends EventEmitter {
     }
 }
 
-export default ConversationManager;
+export default Dialog;
