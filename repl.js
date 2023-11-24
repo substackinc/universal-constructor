@@ -60,8 +60,11 @@ rl.on('line', async (line) => {
         } else {
             displayPrompt(true); // User pressed enter on an empty line twice, redisplay prompt
         }
-    } else if (line === 'rs' || line === 'restart') {
-        touchRestartFile();
+    } else if (line === '/rs' || line === '/restart') {
+        process.exit(0);
+    } else if (line === '/cancel') {
+        await cancelOutstandingRuns(threadId);
+        displayPrompt();
     } else {
         // Add non-empty line to the buffer
         inputBuffer.push(line);
@@ -83,11 +86,6 @@ async function processInput(input) {
     }
 
 }
-
-function touchRestartFile() {
-    fs.writeFileSync('.restart', `${new Date()}`);
-}
-
 
 // The main function that you want to execute only if the file is run standalone
 async function main() {
