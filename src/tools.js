@@ -148,15 +148,21 @@ const get_summary_spec = {
 // The get_summary tool function
 async function get_summary() {
     log('\n Getting summary...');
-    return exec_multi(
-        'echo "This project is YOU. It is the code I am using to talk to you, and the functions you run."',
-        'echo "You have the openAI docs in your myfiles_browser"',
-        'git ls-files',
-        'git status',
-        'git log -n 5',
-        'cat package.json',
-        'prettier -c .'
-    );
+    return {
+        advice: [
+            'This project is YOU. It is the code I am using to talk to you, and the functions you run.',
+            'You have the openAI docs in your myfiles_browser',
+            'You should usually replaceInFile to make changes.',
+        ],
+        available_tools: Object.keys(toolsDict),
+        shell_results: await exec_multi(
+            'git ls-files',
+            'git status',
+            'git log -n 5',
+            'cat package.json',
+            'prettier -c .'
+        ),
+    };
 }
 
 function log(...args) {
