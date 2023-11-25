@@ -5,11 +5,12 @@ import chalk from 'chalk';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
+import cliSpinners from 'cli-spinners';
 
 marked.use(markedTerminal());
 
 const chalk1 = chalk.cyan.bold;
-const chalk2 = chalk.cyan.bold;
+const chalk2 = chalk.hex('#fcad01').bold;
 
 dotenv.config();
 let dialog;
@@ -21,7 +22,7 @@ async function main() {
     dialog = new Dialog();
 
     dialog.on('message', handleMessage);
-    dialog.on('thinking', handleThinking);
+    dialog.on('start_thinking', handleStartThinking);
     dialog.on('done_thinking', handleDoneThinking);
 
     await dialog.setup();
@@ -125,12 +126,26 @@ function handleMessage({ role, content }) {
     console.log(roleString + markedContent);
 }
 
-function handleThinking() {
-    process.stdout.write(chalk.grey('.'));
+let cancelSpinner;
+
+function handleStartThinking() {
+    let s = cliSpinners.dots3;
+    let i = 0;
+    let spinnerStart = +new Date();
+    process.stdout.write('\n');
+    let interval = setInterval(() => {
+        process.stdout.write(chalk2(`\r ${s.frames[i++ % s.frames.length]} `));
+    }, s.interval);
+
+    cancelSpinner = () => {
+        clearInterval(interval);
+        let t = ((+new Date() - spinnerStart) / 1000).toFixed(0);
+        process.stdout.write(`\r ${s.frames[i++ % s.frames.length]} ${t}s\n`);
+    };
 }
 
 function handleDoneThinking() {
-    process.stdout.write('\n');
+    cancelSpinner && cancelSpinner();
 }
 
 function printWelcome() {

@@ -107,6 +107,7 @@ class Dialog extends EventEmitter {
         });
         this.lastMessageId = message.id;
 
+        this.emit('start_thinking')
         let run = await this.beta.threads.runs.create(this.thread.id, {
             assistant_id: this.assistant.id,
         });
@@ -133,9 +134,8 @@ class Dialog extends EventEmitter {
             // sleep a little so we're not just hammering the api
             await new Promise((r) => setTimeout(r, 500));
         }
-
-        await this._fetchMessages();
         this.emit('done_thinking', { run });
+        await this._fetchMessages();
         return { run };
     }
 
