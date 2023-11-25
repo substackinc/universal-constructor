@@ -156,6 +156,7 @@ async function get_summary() {
         ],
         available_tools: Object.keys(toolsDict),
         shell_results: await exec_multi(
+            `cat priorities.md`,
             'git ls-files',
             'git status',
             'git log -n 5',
