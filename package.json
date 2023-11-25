@@ -1,27 +1,9 @@
 {
-    "dependencies": {
-        "chalk": "^4.1.0",
-        "cli-spinners": "^2.9.2",
-        "escape-string-regexp": "^5.0.0",
-        "express": "^4.18.2",
-        "inquirer": "^9.2.12",
-        "marked": "^10.0.0",
-        "marked-terminal": "^6.1.0",
-        "openai": "^4.19.0"
-    },
-    "name": "universal-constructor",
-    "version": "1.0.0",
-    "main": "run.js",
-    "devDependencies": {
-        "dotenv": "^16.3.1"
-    },
-    "scripts": {
-        "format": "prettier --write .",
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "echo \"please use 'node run.js' instead.\" && exit 1"
-    },
-    "author": "",
-    "license": "ISC",
-    "description": "",
-    "type": "module"
+  "type": "module",
+  "scripts": {
+    "test": "ava"
+  },
+  "devDependencies": {
+    "ava": "^4.0.0"
+  }
 }
