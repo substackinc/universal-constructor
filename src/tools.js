@@ -73,7 +73,6 @@ const write_file_spec = {
 
 async function write_file(args) {
     let { filepath, content } = args;
-    // console.log("CBTEST write file", args)
     let oldContent = '';
     // Check if the file exists and reads the old content
     const fullPath = resolve(workingDirectory, filepath);
@@ -148,7 +147,7 @@ const update_file_spec = {
 
 async function update_file(args) {
     const { filepath, changes } = args;
-    console.log('Updating', filepath);
+    log('Updating', filepath);
     const fullPath = resolve(workingDirectory, filepath);
     let newContents = await fs.readFile(fullPath, 'utf8');
     let errors = [];
@@ -185,27 +184,27 @@ async function update_file(args) {
                 message,
                 change,
             });
-        }
+        } else {
+            const targetMatch = foundAt[targetInstanceNumber || 0];
+            const index = targetMatch.index;
+            const len = targetMatch[0].length;
 
-        const targetMatch = foundAt[targetInstanceNumber || 0];
-        const index = targetMatch.index;
-        const len = targetMatch[0].length;
-
-        switch (action) {
-            case 'before':
-                newContents = newContents.slice(0, index) + content + newContents.slice(index);
-                break;
-            case 'after':
-                newContents = newContents.slice(0, index + len) + content + newContents.slice(index + len);
-                break;
-            case 'replace':
-                newContents = newContents.slice(0, index) + content + newContents.slice(index + len);
-                break;
-            default:
-                log(`Unknown action specified: ${action}`);
-                throw new Error(`Action not supported: ${action}`);
+            switch (action) {
+                case 'before':
+                    newContents = newContents.slice(0, index) + content + newContents.slice(index);
+                    break;
+                case 'after':
+                    newContents = newContents.slice(0, index + len) + content + newContents.slice(index + len);
+                    break;
+                case 'replace':
+                    newContents = newContents.slice(0, index) + content + newContents.slice(index + len);
+                    break;
+                default:
+                    log(`Unknown action specified: ${action}`);
+                    throw new Error(`Action not supported: ${action}`);
+            }
+            successes.push({ change });
         }
-        successes.push({ change });
     }
 
     await fs.writeFile(fullPath, newContents, 'utf8');
@@ -282,7 +281,7 @@ async function get_summary() {
 }
 
 function log(...args) {
-    console.log(...args.map(a => chalk.gray(a)));
+    console.log(...args.map((a) => chalk.gray(a)));
 }
 
 // don't make any chances below here
@@ -293,7 +292,7 @@ const tools = [
     update_file_spec,
     show_file_spec,
     get_summary_spec,
-    { name: 'log', function: log }
+    { name: 'log', function: log },
 ];
 const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary, log };
 
