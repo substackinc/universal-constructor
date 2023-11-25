@@ -45,7 +45,6 @@ function setupReadline(commands) {
     async function submit() {
         let input = inputBuffer.join('\n');
         inputBuffer = [];
-        rl.pause();
         try {
             working = true
             await handleInput(input);
@@ -77,7 +76,6 @@ function setupReadline(commands) {
 
     let lastKillTime = +new Date();
     rl.on('SIGINT', async() => {
-        console.log("CBTEST rl SIGINt");
         let t = +new Date();
         if (t - lastKillTime < 1000) {
             // twice in rapid succession. Let's die for real.
@@ -86,9 +84,11 @@ function setupReadline(commands) {
             lastKillTime = t;
             if (working) {
                 // we're in the middle of a run. Let's cancel it.
+                console.log("\nCancelling... (ctrl-d quits)")
                 await dialog.cancelOutstanding();
             } else {
                 // otherwise lets exit cleanly so we can be restarted if appropriate
+                console.log("\nRestarting... (ctrl-d quits)")
                 process.exit(0);
             }
         }
@@ -99,7 +99,7 @@ function setupReadline(commands) {
 
 function prompt() {
     console.log(chalk.cyan(`\n@${process.env.USER}:`));
-    rl.prompt();
+    rl.prompt(true);
 }
 
 async function handleInput(input) {
@@ -109,9 +109,9 @@ async function handleInput(input) {
 
 function handleMessage({role, content}) {
     if (role === 'user') {
-        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content));
+        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content).trim());
     } else {
-        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content));
+        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content).trim());
     }
 }
 
