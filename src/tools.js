@@ -282,7 +282,7 @@ async function get_summary() {
 }
 
 function log(...args) {
-    console.log(...args.map((a) => chalk.gray(util.inspect(a))));
+    console.log(...args.map((a) => chalk.gray(typeof a === 'object' ? util.inspect(a) : a)));
 }
 
 // Tool for searching within a file and providing matches with context
