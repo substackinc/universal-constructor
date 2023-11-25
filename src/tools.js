@@ -3,7 +3,6 @@ import { exec } from 'child_process';
 import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
-import chalk from 'chalk';
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -230,7 +229,9 @@ const replaceInFile_spec = {
 
 async function replaceInFile({ filepath, searchContext, targetSubstring, replacement }) {
     log(`Replacing in "${filepath}`);
-    log({searchContext, targetSubstring, replacement})
+    log('searchContext\n', searchContext);
+    log('targetSubstring\n', targetSubstring);
+    log('replacement\n', replacement);
     const fullPath = resolve(workingDirectory, filepath);
     const fileContents = await fs.readFile(fullPath, 'utf8');
 
