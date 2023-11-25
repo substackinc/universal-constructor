@@ -1,3 +1,7 @@
+**WARNING**: This software can execute shell commands, potentially modifying system files or state. It should **not** be run on any system with production access or any system with sensitive data.
+
+---
+
 # Universal Constructor Assistant
 
 The Universal Constructor Assistant, nicknamed UC, is an AI-powered coding assistant and problem-solver designed to intelligently interact with developers, streamline workflows, and automate tasks. UC leverages OpenAI's models to provide real-time assistance.

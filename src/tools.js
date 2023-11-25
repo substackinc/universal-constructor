@@ -172,8 +172,7 @@ async function update_file(args) {
         } else if (foundAt.length > 1 && targetInstanceNumber === undefined) {
             const message = `Expecting exactly one instance of target in ${filepath},`
             + ` but found ${foundAt.length} instances of: ${target}`
-            + `\nTo fix: set a targetInstanceNumber for this change. For example, use a targetInstanceNumber`
-            + ` of 0 to replace only the first instance.`
+            + `\nSpecify a targetInstanceNumber, or, use more context in the target parameter`
             console.error(message);
             return {
                 success: false,
