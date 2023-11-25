@@ -189,27 +189,24 @@ const search_file_spec = {
 async function search_file({ filepath, search }) {
     log(`search_file: Searching for '${search}' in file ${filepath}`);
     const fileContent = await fs.readFile(filepath, 'utf8');
-    const searchRegex = new RegExp(
-        `(?:.*\\n){0,5}(.*${escapeStringRegexp(search)}.*)(?:\\n.*){0,5}`,
-        'gi'
-    );
+    const searchRegex = new RegExp(`(?:.*\\n){0,5}(.*${escapeStringRegexp(search)}.*)(?:\\n.*){0,5}`, 'gi');
 
     let matches = [];
     let match;
     while ((match = searchRegex.exec(fileContent)) !== null) {
         let [context, line] = match;
         // this is goofy but it helps it.
-        line = line.replace(search, `**${search}**`)
-        log('CBTEST MATCH', {line, context});
-        matches.push({line, context});
+        line = line.replace(search, `**${search}**`);
+        log('CBTEST MATCH', { line, context });
+        matches.push({ line, context });
     }
 
     log(`search_file: Found ${matches.length} matches for '${search}'`);
     return {
-        success:true,
+        success: true,
         filepath,
         search,
-        matches
+        matches,
     };
 }
 
@@ -254,8 +251,8 @@ async function replaceInFile({ filepath, searchContext, targetSubstring, replace
         success: true,
         filepath,
         searchContext,
-        updatedContext
-    }
+        updatedContext,
+    };
 }
 
 // Exported tools and their corresponding functions

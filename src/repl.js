@@ -15,7 +15,7 @@ marked.use(
     })
 );
 
-const chalk1 = chalk.cyan.bold
+const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
 
 dotenv.config();
