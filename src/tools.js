@@ -27,7 +27,7 @@ const exec_shell_spec = {
 
 async function exec_shell(args, logOutput) {
     const { command } = args;
-    log(chalk.gray(`RUNNING SHELL COMMAND: $ ${command}`));
+    log(chalk.gray(`\nRUNNING SHELL COMMAND: $ ${command}`));
 
     return new Promise((resolve) => {
         let exitCode;
