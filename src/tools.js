@@ -127,7 +127,7 @@ async function show_file({ filepath }) {
     log('\nReading', filepath);
     return {
         content: await fs.readFile(filepath, 'utf8'),
-        info: await exec_multi(`sh file_info.sh ${filepath}`, `prettier -c ${filepath}`),
+        info: await exec_multi(`git diff ${filepath}`, `git log -n 5 ${filepath}`, `prettier -c ${filepath}`),
     };
 }
 
