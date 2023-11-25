@@ -4,7 +4,7 @@ import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
 import chalk from 'chalk';
-import * as util from "util";
+import * as util from 'util';
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -285,7 +285,49 @@ function log(...args) {
     console.log(...args.map((a) => chalk.gray(util.inspect(a))));
 }
 
-// don't make any chances below here
+// Tool for searching within a file and providing matches with context
+const search_file_spec = {
+    type: 'function',
+    function: {
+        name: 'search_file',
+        description: 'Searches for a string in a file and returns all matches with context.',
+        parameters: {
+            type: 'object',
+            properties: {
+                filepath: {
+                    type: 'string',
+                    description: 'The path to the file within the working directory.',
+                },
+                search: {
+                    type: 'string',
+                    description: 'The search string to find in the file.',
+                },
+            },
+            required: ['filepath', 'search'],
+        },
+    },
+};
+
+async function search_file({ filepath, search }) {
+    log(`Searching for ${search}`);
+    const fileContent = await fs.readFile(filepath, 'utf8');
+    const matches = [];
+    const searchRegex = new RegExp(`(?:^|\n)([^\n]*${escapeStringRegexp(search)}[^\n]*\n[^\n]*)`, 'gi');
+    let match;
+    while ((match = searchRegex.exec(fileContent)) !== null) {
+        const contextStartIndex = Math.max(match.index - 1, 0);
+        const contextEndIndex = searchRegex.lastIndex;
+        const range = `${match.index}-${searchRegex.lastIndex - 1}`;
+        matches.push({
+            range,
+            context: fileContent.substring(contextStartIndex, contextEndIndex),
+        });
+    }
+    log(matches);
+    return matches;
+}
+
+// Exported tools and their corresponding functions
 const tools = [
     { type: 'retrieval' },
     exec_shell_spec,
@@ -293,8 +335,10 @@ const tools = [
     update_file_spec,
     show_file_spec,
     get_summary_spec,
+    search_file_spec,
     { name: 'log', function: log },
 ];
-const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary };
+
+const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary, search_file };
 
 export { tools, toolsDict };
