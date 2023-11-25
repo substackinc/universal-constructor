@@ -4,6 +4,7 @@ import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
 import chalk from 'chalk';
+import * as util from "util";
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -27,16 +28,16 @@ const exec_shell_spec = {
 
 async function exec_shell(args, logOutput) {
     const { command } = args;
-    log(chalk.gray(`\nRUNNING SHELL COMMAND: $ ${command}`));
+    log(`\nRUNNING SHELL COMMAND: $ ${command}`);
 
     return new Promise((resolve) => {
         let exitCode;
         exec(command, (error, stdout, stderr) => {
             if (exitCode !== 0) {
-                log(chalk.gray(`Error, exit code: ${exitCode}`));
+                log(`Error, exit code: ${exitCode}`);
             }
-            if (logOutput && stdout) log(chalk.gray(stdout));
-            if (logOutput && stderr) log(chalk.gray(stderr));
+            if (logOutput && stdout) log(stdout);
+            if (logOutput && stderr) log(stderr);
             resolve({
                 success: exitCode === 0,
                 exitCode,
@@ -281,7 +282,7 @@ async function get_summary() {
 }
 
 function log(...args) {
-    console.log(...args.map((a) => chalk.gray(a)));
+    console.log(...args.map((a) => chalk.gray(util.inspect(a))));
 }
 
 // don't make any chances below here
@@ -294,6 +295,6 @@ const tools = [
     get_summary_spec,
     { name: 'log', function: log },
 ];
-const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary, log };
+const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary };
 
 export { tools, toolsDict };
