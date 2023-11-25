@@ -3,6 +3,8 @@ import {exec} from "child_process";
 import {promises as fs, existsSync} from 'fs';
 import {resolve} from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
+import {promisify} from 'util';
+const execp = promisify(exec);
 
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
@@ -154,8 +156,7 @@ async function update_file(args) {
     const {filepath, changes} = args;
     console.log("Updating", filepath);
     const fullPath = resolve(workingDirectory, filepath);
-    let originalContents = await fs.readFile(fullPath, 'utf8');
-    let newContents = originalContents;
+    let newContents = await fs.readFile(fullPath, 'utf8');
 
     for (const change of changes) {
         console.log(change);
@@ -238,15 +239,13 @@ const read_file_spec = {
 };
 
 async function read_file({filepath}) {
-    console.log("Reading", filepath);
+    console.log("\nReading", filepath);
     const fullPath = resolve(workingDirectory, filepath);
     const content = await fs.readFile(fullPath, 'utf8');
-    const lines = content.split('\n').map((lineContent, index) => ({
-        content: lineContent,
-        lineNumber: index + 1
-    }));
+    const {stdout} = await execp(`sh file_info.sh ${filepath}`);
 
-    return {content, lines};
+    console.log({content, info: stdout});
+    return {content, info: stdout};
 }
 
 // don't make any chances below here
