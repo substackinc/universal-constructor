@@ -25,6 +25,13 @@ async function main() {
     await dialog.setup();
 
     rl = await setupReadline({
+        '/quit': () => process.exit(0),
+        '/reset': async () => {
+            console.log('Resetting the session...');
+            dialog = new Dialog();
+            await dialog.setup();
+            prompt();
+        },
         '/rs': () => process.exit(0),
         '/cancel': async () => await dialog.cancelOutstanding()
     });
