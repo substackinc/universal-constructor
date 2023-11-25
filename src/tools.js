@@ -157,6 +157,8 @@ async function update_file(args) {
     console.log("Updating", filepath);
     const fullPath = resolve(workingDirectory, filepath);
     let newContents = await fs.readFile(fullPath, 'utf8');
+    let errors = [];
+    let successes = [];
 
     for (const change of changes) {
         console.log(change);
@@ -166,27 +168,27 @@ async function update_file(args) {
         if (foundAt.length === 0) {
             let message = `Could not find any instances in ${filepath} of target: ${target}`
             console.error(message)
-            return {
-                success: false,
-                message
-            }
+            errors.push({
+                message,
+                change
+            })
         } else if (foundAt.length > 1 && targetInstanceNumber === undefined) {
             const message = `Expecting exactly one instance of target in ${filepath},`
             + ` but found ${foundAt.length} instances of: ${target}`
             + `\nSpecify a targetInstanceNumber, or, use more context in the target parameter`
             console.error(message);
-            return {
-                success: false,
-                message: new RegExp(escapeStringRegexp(target), 'g')
-            }
+            errors.push({
+                message,
+                change
+            })
         } else if (targetInstanceNumber >= foundAt.length) {
             const message = `You specified targetInstanceNumber ${targetInstanceNumber}, but there are only`
             + ` ${foundAt.length} matches, so it must be between 0 and ${foundAt.length-1}`;
             console.error(message);
-            return {
-                success: false,
-                message
-            }
+            errors.push({
+                message,
+                change
+            })
         }
 
         const targetMatch = foundAt[targetInstanceNumber || 0];
@@ -207,24 +209,26 @@ async function update_file(args) {
                 console.error(`Unknown action specified: ${action}`);
                 throw new Error(`Action not supported: ${action}`);
         }
+        successes.push({change})
     }
 
     await fs.writeFile(fullPath, newContents, 'utf8');
 
     return {
-        success: true,
-        message: "Successfully applied changes to the file.",
+        success: errors.length === 0,
+        errors,
+        successes,
         newContents
     };
 }
 
 
 // Function to retrieve the full content of a file and an array of its lines with content and line numbers.
-const read_file_spec = {
+const show_file_spec = {
     "type": "function",
     function: {
-        "name": "read_file",
-        "description": "Retrieves the full content of the file and an array of its lines with their line numbers.",
+        "name": "show_file",
+        "description": "Retrieves the full content of the file and some relevent info.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -238,18 +242,17 @@ const read_file_spec = {
     }
 };
 
-async function read_file({filepath}) {
+async function show_file({filepath}) {
     console.log("\nReading", filepath);
     const fullPath = resolve(workingDirectory, filepath);
     const content = await fs.readFile(fullPath, 'utf8');
     const {stdout} = await execp(`sh file_info.sh ${filepath}`);
 
-    console.log({content, info: stdout});
     return {content, info: stdout};
 }
 
 // don't make any chances below here
-const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec, update_file_spec, read_file_spec];
-const toolsDict = {exec_shell, write_file, update_file, read_file};
+const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec, update_file_spec, show_file_spec];
+const toolsDict = {exec_shell, write_file, update_file, show_file};
 
 export {tools, toolsDict};
