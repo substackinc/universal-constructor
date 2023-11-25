@@ -4,7 +4,6 @@ import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
 import chalk from 'chalk';
-import * as util from 'util';
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -162,10 +161,10 @@ async function get_summary() {
 }
 
 function log(...args) {
-    console.log(...args.map((a) => chalk.gray(typeof a === 'object' ? util.inspect(a) : a)));
+    console.log(...args);
 }
 
-// Tool for searching within a file and providing matches with context
+// Tool for searching within a file and providing matches with contexyest
 const search_file_spec = {
     type: 'function',
     function: {
@@ -189,20 +188,30 @@ const search_file_spec = {
 };
 
 async function search_file({ filepath, search }) {
-    log(`Searching for ${search}`);
+    log(`search_file: Searching for '${search}' in file ${filepath}`);
     const fileContent = await fs.readFile(filepath, 'utf8');
-    const matches = [];
-    const searchRegex = new RegExp(`(?:^|\n)([^\n]*${escapeStringRegexp(search)}[^\n]*\n[^\n]*)`, 'gi');
+    const searchRegex = new RegExp(
+        `(?:.*\\n){0,5}(.*${escapeStringRegexp(search)}.*)(?:\\n.*){0,5}`,
+        'gi'
+    );
+
+    let matches = [];
     let match;
     while ((match = searchRegex.exec(fileContent)) !== null) {
-        const contextStartIndex = Math.max(match.index - 1, 0);
-        const contextEndIndex = searchRegex.lastIndex;
-        matches.push({
-            context: fileContent.substring(contextStartIndex, contextEndIndex),
-        });
+        let [context, line] = match;
+        // this is goofy but it helps it.
+        line = line.replace(search, `**${search}**`)
+        log('CBTEST MATCH', {line, context});
+        matches.push({line, context});
     }
-    log(matches);
-    return matches;
+
+    log(`search_file: Found ${matches.length} matches for '${search}'`);
+    return {
+        success:true,
+        filepath,
+        search,
+        matches
+    };
 }
 
 const replaceInFile_spec = {
@@ -257,7 +266,6 @@ const tools = [
     get_summary_spec,
     search_file_spec,
     replaceInFile_spec,
-    { name: 'log', function: log },
 ];
 
 const toolsDict = { exec_shell, write_file, replaceInFile, show_file, get_summary, search_file };

@@ -148,7 +148,7 @@ class Dialog extends EventEmitter {
                     tool_call_id: call.id,
                     output: JSON.stringify({
                         success: false,
-                        error_message: `No tool found with type ${call.type} and name ${call.function.name}`,
+                        error: `FAILED! No such ${call.type} as ${call.function.name}`,
                     }),
                 });
                 continue;
