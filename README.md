@@ -9,10 +9,12 @@ The Universal Constructor Assistant, nicknamed UC, is an AI-powered coding assis
 ## Getting Started
 
 ### Prerequisites
-- Node.js
-- npm (Node Package Manager)
+
+-   Node.js
+-   npm (Node Package Manager)
 
 ### Installation and Setup
+
 1. Clone the repository to your local machine.
 2. Install the required npm packages:
 
@@ -29,6 +31,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 Replace `your_openai_api_key_here` with your actual OpenAI API key.
 
 ### Running the Assistant
+
 To start the assistant, run:
 
 ```bash

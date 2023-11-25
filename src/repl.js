@@ -1,13 +1,13 @@
-import Dialog from "./Dialog.js";
+import Dialog from './Dialog.js';
 import dotenv from 'dotenv';
-import readline from "readline";
-import chalk from "chalk";
-import {marked} from 'marked';
+import readline from 'readline';
+import chalk from 'chalk';
+import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
-import {unlinkSync} from 'fs';
+import { unlinkSync } from 'fs';
 
 marked.setOptions({
-  renderer: new TerminalRenderer()
+    renderer: new TerminalRenderer(),
 });
 
 dotenv.config();
@@ -17,7 +17,7 @@ let rl;
 async function main() {
     printWelcome();
 
-    dialog = new Dialog()
+    dialog = new Dialog();
 
     dialog.on('message', handleMessage);
     dialog.on('thinking', handleThinking);
@@ -28,12 +28,12 @@ async function main() {
     rl = await setupReadline({
         '/quit': () => process.exit(1),
         '/reset': async () => {
-            console.log('Resetting')
+            console.log('Resetting');
             unlinkSync('.thread');
             process.exit(0);
         },
         '/rs': () => process.exit(0),
-        '/cancel': async () => await dialog.cancelOutstanding()
+        '/cancel': async () => await dialog.cancelOutstanding(),
     });
 
     prompt();
@@ -45,20 +45,19 @@ function setupReadline(commands) {
     let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
-        prompt: "> ",
-        terminal: true
-    })
+        prompt: '> ',
+        terminal: true,
+    });
 
     async function submit() {
         let input = inputBuffer.join('\n');
         inputBuffer = [];
         try {
-            working = true
+            working = true;
             await handleInput(input);
         } finally {
-            working = false
+            working = false;
         }
-
     }
 
     rl.on('line', async (line) => {
@@ -71,18 +70,18 @@ function setupReadline(commands) {
         } else if (commands[line]) {
             await commands[line]();
         } else {
-            inputBuffer.push(line)
+            inputBuffer.push(line);
             rl.prompt();
         }
-    })
+    });
 
     rl.on('close', () => {
         console.log('Quitting. (rl close)');
         process.exit(1);
-    })
+    });
 
     let lastKillTime = +new Date();
-    rl.on('SIGINT', async() => {
+    rl.on('SIGINT', async () => {
         let t = +new Date();
         if (t - lastKillTime < 1000) {
             // twice in rapid succession. Let's die for real.
@@ -91,11 +90,11 @@ function setupReadline(commands) {
             lastKillTime = t;
             if (working) {
                 // we're in the middle of a run. Let's cancel it.
-                console.log("\nCancelling... (ctrl-d quits)")
+                console.log('\nCancelling... (ctrl-d quits)');
                 await dialog.cancelOutstanding();
             } else {
                 // otherwise lets exit cleanly so we can be restarted if appropriate
-                console.log("\nRestarting... (ctrl-d quits)")
+                console.log('\nRestarting... (ctrl-d quits)');
                 process.exit(0);
             }
         }
@@ -114,7 +113,7 @@ async function handleInput(input) {
     prompt();
 }
 
-function handleMessage({role, content}) {
+function handleMessage({ role, content }) {
     if (role === 'user') {
         console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content));
     } else {
@@ -132,15 +131,15 @@ function handleDoneThinking() {
 
 function printWelcome() {
     console.log('\n');
-    console.log("╔═════════════════════════════════════════╗")
-    console.log("║ Welcome to the Universal Constructor!   ║")
-    console.log("║ ‾‾‾‾‾‾‾                                 ║")
-    console.log("║ /rs restarts the repl                   ║")
-    console.log("║ /cancel cancels any outstanding runs    ║")
-    console.log("║ ctrl-c does both (hit it twice to quit) ║")
-    console.log("║                                         ║")
-    console.log("║ have fun <3                             ║")
-    console.log("╚═════════════════════════════════════════╝")
+    console.log('╔═════════════════════════════════════════╗');
+    console.log('║ Welcome to the Universal Constructor!   ║');
+    console.log('║ ‾‾‾‾‾‾‾                                 ║');
+    console.log('║ /rs restarts the repl                   ║');
+    console.log('║ /cancel cancels any outstanding runs    ║');
+    console.log('║ ctrl-c does both (hit it twice to quit) ║');
+    console.log('║                                         ║');
+    console.log('║ have fun <3                             ║');
+    console.log('╚═════════════════════════════════════════╝');
 }
 
 // run the main function
