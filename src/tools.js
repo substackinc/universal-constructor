@@ -27,16 +27,16 @@ const exec_shell_spec = {
 
 async function exec_shell(args, logOutput) {
     const { command } = args;
-    console.log(chalk.gray(`RUNNING SHELL COMMAND: $ ${command}`));
+    log(chalk.gray(`RUNNING SHELL COMMAND: $ ${command}`));
 
     return new Promise((resolve) => {
         let exitCode;
         exec(command, (error, stdout, stderr) => {
             if (exitCode !== 0) {
-                console.log(chalk.gray(`Error, exit code: ${exitCode}`));
+                log(chalk.gray(`Error, exit code: ${exitCode}`));
             }
-            if (logOutput && stdout) console.log(chalk.gray(stdout));
-            if (logOutput && stderr) console.log(chalk.gray(stderr));
+            if (logOutput && stdout) log(chalk.gray(stdout));
+            if (logOutput && stderr) log(chalk.gray(stderr));
             resolve({
                 success: exitCode === 0,
                 exitCode,
@@ -82,7 +82,7 @@ async function write_file(args) {
     }
 
     try {
-        console.log(oldContent ? 'Overwriting' : 'Writing', filepath);
+        log(oldContent ? 'Overwriting' : 'Writing', filepath);
         await fs.writeFile(fullPath, content, 'utf8');
         return {
             success: true,
@@ -90,7 +90,7 @@ async function write_file(args) {
             newContent: content,
         };
     } catch (error) {
-        console.error(`Error writing file: ${error}`);
+        log(`Error writing file: ${error}`);
         return {
             success: false,
             error: error.message,
@@ -155,13 +155,13 @@ async function update_file(args) {
     let successes = [];
 
     for (const change of changes) {
-        console.log(change);
+        log(change);
         const { content, target, action, targetInstanceNumber } = change;
         const foundAt = [...newContents.matchAll(new RegExp(escapeStringRegexp(target), 'g'))];
 
         if (foundAt.length === 0) {
             let message = `Could not find any instances in ${filepath} of target: ${target}`;
-            console.error(message);
+            log(message);
             errors.push({
                 message,
                 change,
@@ -171,7 +171,7 @@ async function update_file(args) {
                 `Expecting exactly one instance of target in ${filepath},` +
                 ` but found ${foundAt.length} instances of: ${target}` +
                 `\nSpecify a targetInstanceNumber, or, use more context in the target parameter`;
-            console.error(message);
+            log(message);
             errors.push({
                 message,
                 change,
@@ -180,7 +180,7 @@ async function update_file(args) {
             const message =
                 `You specified targetInstanceNumber ${targetInstanceNumber}, but there are only` +
                 ` ${foundAt.length} matches, so it must be between 0 and ${foundAt.length - 1}`;
-            console.error(message);
+            log(message);
             errors.push({
                 message,
                 change,
@@ -202,7 +202,7 @@ async function update_file(args) {
                 newContents = newContents.slice(0, index) + content + newContents.slice(index + len);
                 break;
             default:
-                console.error(`Unknown action specified: ${action}`);
+                log(`Unknown action specified: ${action}`);
                 throw new Error(`Action not supported: ${action}`);
         }
         successes.push({ change });
@@ -218,7 +218,7 @@ async function update_file(args) {
     };
 }
 
-// Function to retrieve the full content of a file and an array of its lines with content and line numbers.
+// Function to retrieve the full content of a file and some relevant info.
 const show_file_spec = {
     type: 'function',
     function: {
@@ -246,7 +246,7 @@ async function exec_multi(...commands) {
 }
 
 async function show_file({ filepath }) {
-    console.log('\nReading', filepath);
+    log('\nReading', filepath);
     return {
         content: await fs.readFile(filepath, 'utf8'),
         info: await exec_multi(`sh file_info.sh ${filepath}`, `prettier -c ${filepath}`),
@@ -269,7 +269,7 @@ const get_summary_spec = {
 
 // The get_summary tool function
 async function get_summary() {
-    console.log('\n Getting summary...');
+    log('\n Getting summary...');
     return exec_multi(
         'echo "This project is YOU. It is the code I am using to talk to you, and the functions you run."',
         'echo "You have the openAI docs in your myfiles_browser"',
@@ -281,6 +281,10 @@ async function get_summary() {
     );
 }
 
+function log(...args) {
+    console.log(...args.map(a => chalk.gray(a)));
+}
+
 // don't make any chances below here
 const tools = [
     { type: 'retrieval' },
@@ -289,7 +293,8 @@ const tools = [
     update_file_spec,
     show_file_spec,
     get_summary_spec,
+    { name: 'log', function: log }
 ];
-const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary };
+const toolsDict = { exec_shell, write_file, update_file, show_file, get_summary, log };
 
 export { tools, toolsDict };
