@@ -217,17 +217,32 @@ async function search_file({ filepath, search }) {
 }
 
 const replaceInFile_spec = {
-    name: 'replaceInFile',
-    description:
-        'Replaces a specific substring within a given search context in a file, ensuring that the context appears only once.',
-    parameters: {
-        filepath: 'The relative path to the file where the replacement should occur.',
-        searchContext:
-            'The surrounding context where the target substring is located. This should appear exactly once in the file.',
-        targetSubstring: 'The exact substring within the search context that needs to be replaced.',
-        replacement: 'The text that should replace the target substring.',
+    type: 'function',
+    function: {
+        name: 'replaceInFile',
+        description:
+            'Replaces a specific substring within a given search context in a file, ensuring that the context appears only once.',
+        parameters: {
+            type: 'object',
+            properties: {
+                filepath: {
+                    type: 'string',
+                    description: 'The relative path to the file where the replacement should occur.',
+                },
+                searchContext: {
+                    type: 'string',
+                    description:
+                        'The surrounding context where the target substring is located. This should appear exactly once in the file.',
+                },
+                targetSubstring: {
+                    type: 'string',
+                    description: 'The exact substring within the search context that needs to be replaced.',
+                },
+                replacement: { type: 'string', description: 'The text that should replace the target substring.' },
+            },
+            required: ['filepath', 'searchContext', 'targetSubstring', 'replacement'],
+        },
     },
-    required: ['filepath', 'searchContext', 'targetSubstring', 'replacement'],
 };
 
 async function replaceInFile({ filepath, searchContext, targetSubstring, replacement }) {
@@ -262,6 +277,24 @@ async function replaceInFile({ filepath, searchContext, targetSubstring, replace
     };
 }
 
+const restart_interface_spec = {
+    type: 'function',
+    function: {
+        name: 'restart_interface',
+        description: 'Restarts the interface, using the current state of tools and configurations.',
+        parameters: {
+            type: 'object',
+            properties: {},
+            required: [],
+        },
+    },
+};
+
+async function restart_interface() {
+    console.log('UC called restart_interface()');
+    process.exit(0);
+}
+
 // Exported tools and their corresponding functions
 const tools = [
     { type: 'retrieval' },
@@ -271,8 +304,9 @@ const tools = [
     get_summary_spec,
     search_file_spec,
     replaceInFile_spec,
+    restart_interface_spec,
 ];
 
-const toolsDict = { exec_shell, write_file, replaceInFile, show_file, get_summary, search_file };
+const toolsDict = { exec_shell, write_file, replaceInFile, show_file, get_summary, search_file, restart_interface };
 
 export { tools, toolsDict };
