@@ -107,7 +107,7 @@ class Dialog extends EventEmitter {
         });
         this.lastMessageId = message.id;
 
-        this.emit('start_thinking')
+        this.emit('start_thinking');
         let run = await this.beta.threads.runs.create(this.thread.id, {
             assistant_id: this.assistant.id,
         });

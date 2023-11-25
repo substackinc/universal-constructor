@@ -7,9 +7,15 @@ import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
 import cliSpinners from 'cli-spinners';
 
-marked.use(markedTerminal());
+marked.use(
+    markedTerminal({
+        width: process.stdout.columns - 1,
+        reflowText: true,
+        tab: 2,
+    })
+);
 
-const chalk1 = chalk.cyan.bold;
+const chalk1 = chalk.cyan.bold
 const chalk2 = chalk.hex('#fcad01').bold;
 
 dotenv.config();
