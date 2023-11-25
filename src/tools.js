@@ -258,6 +258,7 @@ async function replaceInFile({ filepath, searchContext, targetSubstring, replace
         filepath,
         searchContext,
         updatedContext,
+        advice: `Check the updatedContext carefully and make sure it's exactly what we want, including formatting`,
     };
 }
 
