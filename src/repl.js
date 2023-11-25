@@ -2,6 +2,12 @@ import Dialog from "./Dialog.js";
 import dotenv from 'dotenv';
 import readline from "readline";
 import chalk from "chalk";
+import {marked} from 'marked';
+import TerminalRenderer from 'marked-terminal';
+
+marked.setOptions({
+  renderer: new TerminalRenderer()
+});
 
 dotenv.config();
 let dialog;
@@ -103,9 +109,9 @@ async function handleInput(input) {
 
 function handleMessage({role, content}) {
     if (role === 'user') {
-        console.log(chalk.cyan(`\n@${process.env.USER}:`), `\n${content}`);
+        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content));
     } else {
-        console.log(chalk.green(`\n@${dialog.assistant.name}:`), `\n${content}`);
+        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content));
     }
 }
 
