@@ -251,8 +251,41 @@ async function show_file({filepath}) {
     return {content, info: stdout};
 }
 
+// Tool specification for get_summary
+const get_summary_spec = {
+    "type": "function",
+    "function": {
+        "name": "get_summary",
+        "description": "Gives an overall summary of the current situation",
+        "parameters": {
+            "type": "object",
+            properties: {},
+            required: []
+        }
+    }
+};
+
+// The get_summary tool function
+async function get_summary() {
+    const summaryCommands = [
+        "ls",
+        "ls src",
+        "git status",
+        "git log -n 5",
+        "cat package.json"
+    ];
+
+    let summary = {};
+    for (const cmd of summaryCommands) {
+        console.log(`Running $ ${cmd}`);
+        const {stdout} = await execp(cmd);
+        summary[cmd] = stdout;
+    }
+    return summary;
+}
+
 // don't make any chances below here
-const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec, update_file_spec, show_file_spec];
-const toolsDict = {exec_shell, write_file, update_file, show_file};
+const tools = [{"type": "retrieval"}, exec_shell_spec, write_file_spec, update_file_spec, show_file_spec, get_summary_spec];
+const toolsDict = {exec_shell, write_file, update_file, show_file, get_summary};
 
 export {tools, toolsDict};
