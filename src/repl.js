@@ -4,6 +4,7 @@ import readline from "readline";
 import chalk from "chalk";
 import {marked} from 'marked';
 import TerminalRenderer from 'marked-terminal';
+import {unlinkSync} from 'fs';
 
 marked.setOptions({
   renderer: new TerminalRenderer()
@@ -25,12 +26,11 @@ async function main() {
     await dialog.setup();
 
     rl = await setupReadline({
-        '/quit': () => process.exit(0),
+        '/quit': () => process.exit(1),
         '/reset': async () => {
-            console.log('Resetting the session...');
-            dialog = new Dialog();
-            await dialog.setup();
-            prompt();
+            console.log('Resetting')
+            unlinkSync('.thread');
+            process.exit(0);
         },
         '/rs': () => process.exit(0),
         '/cancel': async () => await dialog.cancelOutstanding()
