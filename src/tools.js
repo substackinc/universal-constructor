@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
-import chalk from "chalk";
+import chalk from 'chalk';
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -25,7 +25,7 @@ const exec_shell_spec = {
     },
 };
 
-async function exec_shell(args) {
+async function exec_shell(args, logOutput) {
     const { command } = args;
     console.log(chalk.gray(`RUNNING SHELL COMMAND: $ ${command}`));
 
@@ -35,8 +35,8 @@ async function exec_shell(args) {
             if (exitCode !== 0) {
                 console.log(chalk.gray(`Error, exit code: ${exitCode}`));
             }
-            if (stdout) console.log(chalk.gray(stdout));
-            if (stderr) console.log(chalk.gray(stderr));
+            if (logOutput && stdout) console.log(chalk.gray(stdout));
+            if (logOutput && stderr) console.log(chalk.gray(stderr));
             resolve({
                 success: exitCode === 0,
                 exitCode,
@@ -240,7 +240,7 @@ const show_file_spec = {
 async function exec_multi(...commands) {
     let results = {};
     for (const command of commands) {
-        results[command] = await exec_shell({ command });
+        results[command] = await exec_shell({ command }, false);
     }
     return results;
 }
