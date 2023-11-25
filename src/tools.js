@@ -267,12 +267,14 @@ const get_summary_spec = {
 
 // The get_summary tool function
 async function get_summary() {
+    console.log('\n Getting summary...');
     const summaryCommands = [
         "ls",
         "ls src",
         "git status",
         "git log -n 5",
-        "cat package.json"
+        "cat package.json",
+        "prettier -c ."
     ];
 
     let summary = {};

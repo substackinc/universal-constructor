@@ -109,9 +109,9 @@ async function handleInput(input) {
 
 function handleMessage({role, content}) {
     if (role === 'user') {
-        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content).trim());
+        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content));
     } else {
-        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content).trim());
+        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content));
     }
 }
 
