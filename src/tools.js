@@ -33,7 +33,7 @@ async function exec_shell(args) {
         let exitCode;
         exec(command, (error, stdout, stderr) => {
             if (exitCode !== 0) {
-                console.log(chalk.red(`Error, exit code: ${exitCode}`));
+                console.log(chalk.gray(`Error, exit code: ${exitCode}`));
             }
             if (stdout) console.log(chalk.gray(stdout));
             if (stderr) console.log(chalk.gray(stderr));
@@ -274,7 +274,7 @@ async function get_summary() {
         'echo "This project is YOU. It is the code I am using to talk to you, and the functions you run."',
         'echo "You have the openAI docs in your myfiles_browser"',
         'git ls-files',
-        'git-status',
+        'git status',
         'git log -n 5',
         'cat package.json',
         'prettier -c .'

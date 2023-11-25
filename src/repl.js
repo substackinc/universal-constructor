@@ -1,4 +1,4 @@
-import Dialog from './Dialog.js';
+import Dialog from './dialog.js';
 import dotenv from 'dotenv';
 import readline from 'readline';
 import chalk from 'chalk';
