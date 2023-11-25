@@ -41,7 +41,7 @@ class Dialog extends EventEmitter {
         const assistantConfig = {
             name: 'UC',
             description: `${process.env.user}'s Universal Constructor coding companion.`,
-            instructions: readFile(instructionsFile),
+            instructions: readFile(instructionsFile).replaceAll(":user", process.env.USER),
             tools,
             model: 'gpt-4-1106-preview'
         }
