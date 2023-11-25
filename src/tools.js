@@ -102,7 +102,8 @@ const update_file_spec = {
     type: 'function',
     function: {
         name: 'update_file',
-        description: 'Updates a specified target portion of a file. Can make multiple changes at once.',
+        description:
+            'Updates a specified target portion of a file. Can handle direct character range updates or target-based updates with an optional index for multiple matches.',
         parameters: {
             type: 'object',
             properties: {
@@ -119,25 +120,31 @@ const update_file_spec = {
                                 type: 'string',
                                 description: 'The content to write or insert',
                             },
+                            range: {
+                                type: 'string',
+                                description:
+                                    'The character range to replace, expressed as "start:end". Exclusive of the end index.',
+                                pattern: '^[0-9]+:[0-9]+$',
+                            },
                             target: {
                                 type: 'string',
                                 description:
-                                    'Exact content of the target section for modification. Can be multiple lines',
+                                    'Exact content of the target section for modification when not using range. Can be multiple lines.',
                             },
                             action: {
                                 type: 'string',
                                 enum: ['before', 'after', 'replace'],
                                 description:
-                                    'Operation to perform relative to the target lines: insert before, insert after, or replace',
+                                    'Operation to perform relative to the target or range: insert before, insert after, or replace',
                             },
                             targetInstanceNumber: {
                                 type: 'integer',
                                 description:
-                                    'The 0-based index of which instance of the target to replace, if there' +
-                                    ' are multiple. Can be omitted if there is exactly one match.',
+                                    'The 0-based index of the target instance to replace when there are multiple matches. Omit if only one match exists or when using range.',
                             },
                         },
-                        required: ['content', 'target', 'action'],
+                        required: ['content', 'action'],
+                        additionalProperties: false,
                     },
                 },
             },
@@ -146,76 +153,69 @@ const update_file_spec = {
     },
 };
 
-async function update_file(args) {
-    const { filepath, changes } = args;
-    log('Updating', filepath);
+async function update_file({ filepath, changes }) {
+    log(`Updating ${filepath}`)
     const fullPath = resolve(workingDirectory, filepath);
-    let newContents = await fs.readFile(fullPath, 'utf8');
-    let errors = [];
-    let successes = [];
+    let fileContents = await fs.readFile(fullPath, 'utf8');
 
     for (const change of changes) {
         log(change);
-        const { content, target, action, targetInstanceNumber } = change;
-        const foundAt = [...newContents.matchAll(new RegExp(escapeStringRegexp(target), 'g'))];
+        const { content, range, target, action, targetInstanceNumber } = change;
 
-        if (foundAt.length === 0) {
-            let message = `Could not find any instances in ${filepath} of target: ${target}`;
-            log(message);
-            errors.push({
-                message,
-                change,
-            });
-        } else if (foundAt.length > 1 && targetInstanceNumber === undefined) {
-            const message =
-                `Expecting exactly one instance of target in ${filepath},` +
-                ` but found ${foundAt.length} instances of: ${target}` +
-                `\nSpecify a targetInstanceNumber, or, use more context in the target parameter`;
-            log(message);
-            errors.push({
-                message,
-                change,
-            });
-        } else if (targetInstanceNumber >= foundAt.length) {
-            const message =
-                `You specified targetInstanceNumber ${targetInstanceNumber}, but there are only` +
-                ` ${foundAt.length} matches, so it must be between 0 and ${foundAt.length - 1}`;
-            log(message);
-            errors.push({
-                message,
-                change,
-            });
-        } else {
-            const targetMatch = foundAt[targetInstanceNumber || 0];
-            const index = targetMatch.index;
-            const len = targetMatch[0].length;
-
+        if (range) {
+            // If a range is specified, use it directly for string manipulation
+            const [start, end] = range.split(':').map(Number);
             switch (action) {
                 case 'before':
-                    newContents = newContents.slice(0, index) + content + newContents.slice(index);
+                    fileContents = fileContents.substring(0, start) + content + fileContents.substring(start);
                     break;
                 case 'after':
-                    newContents = newContents.slice(0, index + len) + content + newContents.slice(index + len);
+                    fileContents = fileContents.substring(0, end) + content + fileContents.substring(end);
                     break;
                 case 'replace':
-                    newContents = newContents.slice(0, index) + content + newContents.slice(index + len);
+                    fileContents = fileContents.substring(0, start) + content + fileContents.substring(end);
                     break;
                 default:
-                    log(`Unknown action specified: ${action}`);
-                    throw new Error(`Action not supported: ${action}`);
+                    throw new Error(`Unsupported action: ${action}`);
             }
-            successes.push({ change });
+        } else if (target !== undefined) {
+            // If a target is specified, find it in the file to determine the range
+            let startIndex = fileContents.indexOf(target);
+            if (startIndex === -1) {
+                throw new Error(`Target not found: ${target}`);
+            }
+            if (targetInstanceNumber) {
+                // Skip the specified number of occurrences to find the nth instance
+                for (let i = 0; i < targetInstanceNumber; i++) {
+                    startIndex = fileContents.indexOf(target, startIndex + 1);
+                    if (startIndex === -1) {
+                        throw new Error(
+                            `Target instance number ${targetInstanceNumber} not found for target: ${target}`
+                        );
+                    }
+                }
+            }
+            const endIndex = startIndex + target.length;
+            switch (action) {
+                case 'before':
+                    fileContents = fileContents.substring(0, startIndex) + content + fileContents.substring(startIndex);
+                    break;
+                case 'after':
+                    fileContents = fileContents.substring(0, endIndex) + content + fileContents.substring(endIndex);
+                    break;
+                case 'replace':
+                    fileContents = fileContents.substring(0, startIndex) + content + fileContents.substring(endIndex);
+                    break;
+                default:
+                    throw new Error(`Unsupported action: ${action}`);
+            }
+        } else {
+            throw new Error('Update change requires either a range or a target.');
         }
     }
 
-    await fs.writeFile(fullPath, newContents, 'utf8');
-
-    return {
-        success: errors.length === 0,
-        errors,
-        successes,
-        newContents,
-    };
+    await fs.writeFile(fullPath, fileContents);
+    return { success: true, newContents: fileContents };
 }
 
 // Function to retrieve the full content of a file and some relevant info.
