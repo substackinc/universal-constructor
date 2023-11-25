@@ -242,12 +242,19 @@ const show_file_spec = {
     },
 };
 
+async function exec_multi(...commands) {
+    let results = {};
+    for (const command of commands) {
+        results[command] = await exec_shell({ command });
+    }
+    return results;
+}
+
 async function show_file({ filepath }) {
     console.log('\nReading', filepath);
-    const fullPath = resolve(workingDirectory, filepath);
     return {
         content: await fs.readFile(filepath, 'utf8'),
-        info: await exec_shell({ command: `sh file_info.sh ${filepath}` }),
+        info: await exec_multi(`sh file_info.sh ${filepath}`, `prettier -c ${filepath}`),
     };
 }
 
@@ -268,13 +275,7 @@ const get_summary_spec = {
 // The get_summary tool function
 async function get_summary() {
     console.log('\n Getting summary...');
-    const summaryCommands = ['git ls-files', 'git status', 'git log -n 5', 'cat package.json', 'prettier -c .'];
-
-    let summary = {};
-    for (const cmd of summaryCommands) {
-        summary[cmd] = await exec_shell({ command: cmd });
-    }
-    return summary;
+    return exec_multi('git ls-files', 'git-status', 'git log -n 5', 'cat package.json', 'prettier -c .');
 }
 
 // don't make any chances below here
