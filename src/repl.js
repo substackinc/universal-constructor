@@ -3,12 +3,20 @@ import dotenv from 'dotenv';
 import readline from 'readline';
 import chalk from 'chalk';
 import { marked } from 'marked';
-import TerminalRenderer from 'marked-terminal';
+import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
 
-marked.setOptions({
-    renderer: new TerminalRenderer(),
-});
+marked.use(
+    markedTerminal(
+        {},
+        {
+            theme: 'tomorrow-night',
+        }
+    )
+);
+
+const chalk1 = chalk.cyan.bold;
+const chalk2 = chalk.cyan.bold;
 
 dotenv.config();
 let dialog;
@@ -104,7 +112,7 @@ function setupReadline(commands) {
 }
 
 function prompt() {
-    console.log(chalk.cyan(`\n@${process.env.USER}:`));
+    console.log(chalk1(`\n@${process.env.USER}:`));
     rl.prompt(true);
 }
 
@@ -114,11 +122,13 @@ async function handleInput(input) {
 }
 
 function handleMessage({ role, content }) {
+    let roleString;
     if (role === 'user') {
-        console.log(chalk.cyan(`\n@${process.env.USER}:`), '\n' + marked(content));
+        roleString = chalk1(`\n@${process.env.USER}:`) + '\n';
     } else {
-        console.log(chalk.green(`\n@${dialog.assistant.name}:`), '\n' + marked(content));
+        roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     }
+    console.log(roleString + marked(content.trim()));
 }
 
 function handleThinking() {
