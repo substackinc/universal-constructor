@@ -6,14 +6,7 @@ import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
 
-marked.use(
-    markedTerminal(
-        {},
-        {
-            theme: 'tomorrow-night',
-        }
-    )
-);
+marked.use(markedTerminal());
 
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.cyan.bold;
@@ -128,11 +121,12 @@ function handleMessage({ role, content }) {
     } else {
         roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     }
-    console.log(roleString + marked(content.trim()));
+    let markedContent = marked(content).trimEnd();
+    console.log(roleString + markedContent);
 }
 
 function handleThinking() {
-    process.stdout.write('.');
+    process.stdout.write(chalk.grey('.'));
 }
 
 function handleDoneThinking() {
@@ -146,7 +140,8 @@ function printWelcome() {
     console.log('║ ‾‾‾‾‾‾‾                                 ║');
     console.log('║ /rs restarts the repl                   ║');
     console.log('║ /cancel cancels any outstanding runs    ║');
-    console.log('║ ctrl-c does both (hit it twice to quit) ║');
+    console.log('║ /reset gets you a fresh thread          ║');
+    console.log('║ you gotta hit enter twice               ║');
     console.log('║                                         ║');
     console.log('║ have fun <3                             ║');
     console.log('╚═════════════════════════════════════════╝');
