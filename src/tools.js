@@ -3,8 +3,6 @@ import {exec} from "child_process";
 import {promises as fs, existsSync} from 'fs';
 import {resolve} from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
-import {promisify} from 'util';
-const execp = promisify(exec);
 
 const workingDirectory = "/Users/chrisbest/src/gpts-testing";
 
@@ -245,10 +243,10 @@ const show_file_spec = {
 async function show_file({filepath}) {
     console.log("\nReading", filepath);
     const fullPath = resolve(workingDirectory, filepath);
-    const content = await fs.readFile(fullPath, 'utf8');
-    const {stdout} = await execp(`sh file_info.sh ${filepath}`);
-
-    return {content, info: stdout};
+    return {
+        content: await fs.readFile(filepath, 'utf8'),
+        info: await exec_shell({command: `sh file_info.sh ${filepath}`})
+    };
 }
 
 // Tool specification for get_summary
@@ -279,9 +277,7 @@ async function get_summary() {
 
     let summary = {};
     for (const cmd of summaryCommands) {
-        console.log(`Running $ ${cmd}`);
-        const {stdout} = await execp(cmd);
-        summary[cmd] = stdout;
+        summary[cmd] = await exec_shell({command: cmd});
     }
     return summary;
 }
