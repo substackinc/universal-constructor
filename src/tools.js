@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promises as fs, existsSync } from 'fs';
 import { resolve } from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
+import chalk from 'chalk';
 
 const workingDirectory = '/Users/chrisbest/src/gpts-testing';
 
@@ -185,7 +186,15 @@ const search_file_spec = {
                 },
                 search: {
                     type: 'string',
-                    description: 'The search string to find in the file.',
+                    description: 'The search string to find in the file. Can be multiple lines.',
+                },
+                contextBefore: {
+                    type: 'integer',
+                    description: 'Lines of context to return before the match. (Default 5)',
+                },
+                contextAfter: {
+                    type: 'integer',
+                    description: 'Lines of context to return after the match. (Default 5)',
                 },
             },
             required: ['filepath', 'search'],
@@ -193,17 +202,21 @@ const search_file_spec = {
     },
 };
 
-async function search_file({ filepath, search }) {
+async function search_file({ filepath, search, contextBefore = 5, contextAfter = 5 }) {
     log(`search_file: Searching for '${search}' in file ${filepath}`);
     const fileContent = await fs.readFile(filepath, 'utf8');
-    const searchRegex = new RegExp(`(?:.*\\n){0,5}(.*${escapeStringRegexp(search)}.*)(?:\\n.*){0,5}`, 'gi');
+    const searchRegex = new RegExp(
+        `(?:.*\\n){0,${contextBefore}}(.*${escapeStringRegexp(search)}.*)(?:\\n.*){0,${contextAfter}}`,
+        'gi'
+    );
+    console.log('CBTEST REGEX', searchRegex);
 
     let matches = [];
     let match;
     while ((match = searchRegex.exec(fileContent)) !== null) {
         let [context, line] = match;
         // this is goofy but it helps it.
-        line = line.replace(search, `**${search}**`);
+        line = line.replace(search, chalk.bold(search));
         log('CBTEST MATCH', { line, context });
         matches.push({ line, context });
     }
