@@ -1,7 +1,8 @@
 import { spawn } from 'child_process';
 
 function start() {
-    const process = spawn('node', ['src/repl.js'], { stdio: 'inherit' });
+    // use --no-deprecation until openai fixes their fetch/punycode shit
+    const process = spawn('node', ['--no-deprecation', 'src/repl.js'], { stdio: 'inherit' });
 
     process.on('exit', (code) => {
         if (code === 0) {
