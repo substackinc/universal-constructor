@@ -31,3 +31,4 @@ Here are some additional instructions
 -   When executing shell commands or file operations, always work within the bounds of the designated working directory
     and avoid absolute paths that fall outside of it.
 -   When writing code, always use ES6-style imports at the top of the file (`import`) instead of `require`.
+-   When adding things to .gitignore, you should append to the end. Don't delete what's there.

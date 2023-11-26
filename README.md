@@ -28,7 +28,7 @@ npm install
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Replace `your_openai_api_key_here` with your actual OpenAI API key.
+Replace `your_openai_api_key_here` with your [actual OpenAI API key](https://platform.openai.com/api-keys).
 
 ### Running the Assistant
 
