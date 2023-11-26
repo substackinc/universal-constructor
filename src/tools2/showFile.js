@@ -1,4 +1,7 @@
 // src/tools2/showFile.js
+import fs from 'fs/promises';
+import path from 'path';
+import execMulti from './execShell.js';
 
 showFile.spec = {
     name: 'show_file',
@@ -12,17 +15,12 @@ showFile.spec = {
 };
 
 export default async function showFile({ filepath }) {
-    const fs = require('fs').promises;
-    const path = require('path');
-    // Tool implementation
-    const fullPath = path.resolve(workingDirectory, filepath);
+    const fullPath = path.resolve(filepath);
     try {
         const content = await fs.readFile(fullPath, 'utf8');
-        return {
-            content: content,
-            // Relevant info would go here
-        };
+        const info = await execMulti(`git diff ${filepath}`, `git log -n 5 ${filepath}`, `prettier -c ${filepath}`);
+        return { content, info };
     } catch (error) {
-        return { error };
+        throw error; // Rethrow the error to be handled by the caller
     }
 }
