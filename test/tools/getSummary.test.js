@@ -1,5 +1,5 @@
 import test from 'ava';
-import getSummary from '../../src/tools2/getSummary.js';
+import getSummary from '../../src/tools/getSummary.js';
 
 // This test relies on the actual environment and the commands to be present
 

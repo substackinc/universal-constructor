@@ -1,5 +1,5 @@
 import test from 'ava';
-import writeFile from '../../src/tools2/writeFile.js';
+import writeFile from '../../src/tools/writeFile.js';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';

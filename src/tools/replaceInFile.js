@@ -1,4 +1,4 @@
-// src/tools2/replaceInFile.js
+// src/tools/replaceInFile.js
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -39,14 +39,14 @@ export default async function replaceInFile({ filepath, searchContext, targetSub
         console.log('CBCTEST context', searchContext);
         console.log('CBCTEST fileContent', fileContents);
         throw new Error('searchContext not found in file');
-    } else if (searchContextIndex != fileContents.lastIndexOf(searchContext)) {
+    } else if (searchContextIndex !== fileContents.lastIndexOf(searchContext)) {
         throw new Error('searchContext found more than once in the file');
     }
 
     const targetSubstringIndex = searchContext.indexOf(targetSubstring);
     if (targetSubstringIndex === -1) {
         throw new Error('targetSubstring does not appear in the searchContext');
-    } else if (targetSubstringIndex != searchContext.lastIndexOf(targetSubstring)) {
+    } else if (targetSubstringIndex !== searchContext.lastIndexOf(targetSubstring)) {
         throw new Error('targetSubstring appears more than once in the searchContext');
     }
 

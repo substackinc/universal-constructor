@@ -1,5 +1,5 @@
 import test from 'ava';
-import execShell from '../../src/tools2/execShell.js';
+import execShell from '../../src/tools/execShell.js';
 
 test('execShell executes a command successfully', async (t) => {
     const result = await execShell({ command: 'echo "hello world"' });

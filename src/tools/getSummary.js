@@ -1,4 +1,4 @@
-// src/tools2/getSummary.js
+// src/tools/getSummary.js
 import { execMulti } from './execShell.js';
 
 getSummary.spec = {

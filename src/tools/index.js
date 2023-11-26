@@ -1,4 +1,4 @@
-// src/tools2/index.js
+// src/tools/index.js
 import { readdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

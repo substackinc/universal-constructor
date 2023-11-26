@@ -1,5 +1,5 @@
 import test from 'ava';
-import searchFile from '../../src/tools2/searchFile.js';
+import searchFile from '../../src/tools/searchFile.js';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';

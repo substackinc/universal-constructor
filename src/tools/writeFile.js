@@ -1,4 +1,4 @@
-// src/tools2/writeFile.js
+// src/tools/writeFile.js
 import fs from 'fs/promises';
 import path from 'path';
 

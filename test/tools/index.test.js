@@ -1,12 +1,8 @@
 import test from 'ava';
-import importAllTools from '../../src/tools2/index.js';
+import importAllTools from '../../src/tools/index.js';
 import Ajv from 'ajv';
 
 const ajv = new Ajv();
-
-function getValidator(t, spec) {
-    return ajv.compile(spec.parameters);
-}
 
 test(`importAllTools finds execShell`, async (t) => {
     const toolsByName = await importAllTools();

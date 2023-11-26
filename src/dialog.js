@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { readFileSync, writeFileSync } from 'fs';
 import OpenAI from 'openai';
-import importAllTools from './tools2/index.js';
+import importAllTools from './tools/index.js';
 
 function readFile(file) {
     try {

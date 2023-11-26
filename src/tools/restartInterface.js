@@ -1,4 +1,4 @@
-// src/tools2/restartInterface.js
+// src/tools/restartInterface.js
 
 restartInterface.spec = {
     name: restartInterface.name,

@@ -1,4 +1,4 @@
-// src/tools2/showFile.js
+// src/tools/showFile.js
 import fs from 'fs/promises';
 import path from 'path';
 import execMulti from './execShell.js';

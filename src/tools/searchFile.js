@@ -1,4 +1,4 @@
-// src/tools2/searchFile.js
+// src/tools/searchFile.js
 import fs from 'fs/promises';
 import path from 'path';
 

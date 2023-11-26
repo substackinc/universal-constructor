@@ -1,5 +1,5 @@
 import test from 'ava';
-import replaceInFile from '../../src/tools2/replaceInFile.js';
+import replaceInFile from '../../src/tools/replaceInFile.js';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
@@ -26,7 +26,6 @@ test.after.always(async () => {
 test('replaceInFile replaces a string within a file', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
-    let contents = await fs.readFile(testFile, 'utf8');
     await replaceInFile({
         filepath: testFile,
         searchContext: 'Hello World, Hello Universe',
