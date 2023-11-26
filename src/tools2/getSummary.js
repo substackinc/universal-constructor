@@ -6,6 +6,7 @@ getSummary.spec = {
     description: 'Gives an overall summary of the current situation',
     parameters: {
         type: 'object',
+        properties: {},
     },
 };
 

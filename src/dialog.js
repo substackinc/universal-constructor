@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { readFileSync, writeFileSync } from 'fs';
 import OpenAI from 'openai';
-import { toolsDict, tools } from './tools.js';
+import importAllTools from './tools2/index.js';
 
 function readFile(file) {
     try {
@@ -26,6 +26,7 @@ class Dialog extends EventEmitter {
         this.assistant = null;
         this.thread = null;
         this.lastMessageId = null;
+        this.toolsByName = null;
     }
 
     async setup({
@@ -36,6 +37,12 @@ class Dialog extends EventEmitter {
     } = {}) {
         // setup assistant
         let assistantId = readFile(assistantFile);
+        this.toolsByName = await importAllTools();
+        const tools = Object.values(this.toolsByName).map((t) => ({
+            type: 'function',
+            function: t.spec,
+        }));
+
         const assistantConfig = {
             name: 'UC',
             description: `${process.env.user}'s Universal Constructor coding companion.`,
@@ -142,7 +149,7 @@ class Dialog extends EventEmitter {
     async _takeAction(run) {
         let tool_outputs = [];
         for (let call of run.required_action.submit_tool_outputs.tool_calls) {
-            if (call.type !== 'function' || !toolsDict[call.function.name]) {
+            if (call.type !== 'function' || !this.toolsByName[call.function.name]) {
                 console.error('unknown tool call', call);
                 tool_outputs.push({
                     tool_call_id: call.id,
@@ -153,7 +160,7 @@ class Dialog extends EventEmitter {
                 });
                 continue;
             }
-            let f = toolsDict[call.function.name];
+            let f = this.toolsByName[call.function.name];
             try {
                 let arg = JSON.parse(call.function.arguments);
                 const result = await f(arg);

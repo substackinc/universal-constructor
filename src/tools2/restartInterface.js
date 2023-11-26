@@ -5,6 +5,7 @@ restartInterface.spec = {
     description: 'Restarts the interface, using the current state of tools and configurations.',
     parameters: {
         type: 'object',
+        properties: {},
     },
 };
 
