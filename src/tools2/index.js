@@ -3,6 +3,9 @@ import { readdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+// load all the tools from this directory, and return them as an object keyed on their names.
+// this will load from execShell.js etc
+// if you trace a problem back to here, look at the relevant tool file.
 export default async function importAllTools(directory = dirname(fileURLToPath(import.meta.url))) {
     const files = await readdir(directory);
     const toolsByName = {};

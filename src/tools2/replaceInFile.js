@@ -7,22 +7,25 @@ replaceInFile.spec = {
     description:
         'Replaces a specific substring within a given search context in a file, ensuring that the context appears only once.',
     parameters: {
-        filepath: {
-            type: 'string',
-            description: 'The relative path to the file where the replacement should occur.',
-        },
-        searchContext: {
-            type: 'string',
-            description:
-                'The surrounding context where the target substring is located. This should appear exactly once in the file.',
-        },
-        targetSubstring: {
-            type: 'string',
-            description: 'The exact substring within the search context that needs to be replaced.',
-        },
-        replacement: {
-            type: 'string',
-            description: 'The text that should replace the target substring.',
+        type: 'object',
+        properties: {
+            filepath: {
+                type: 'string',
+                description: 'The relative path to the file where the replacement should occur.',
+            },
+            searchContext: {
+                type: 'string',
+                description:
+                    'The surrounding context where the target substring is located. This should appear exactly once in the file.',
+            },
+            targetSubstring: {
+                type: 'string',
+                description: 'The exact substring within the search context that needs to be replaced.',
+            },
+            replacement: {
+                type: 'string',
+                description: 'The text that should replace the target substring.',
+            },
         },
     },
 };

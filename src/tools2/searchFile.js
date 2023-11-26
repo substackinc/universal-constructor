@@ -3,16 +3,19 @@ import fs from 'fs/promises';
 import path from 'path';
 
 searchFile.spec = {
-    name: 'search_file',
+    name: searchFile.name,
     description: 'Searches for a string in a file and returns all matches.',
     parameters: {
-        filepath: {
-            type: 'string',
-            description: 'The path to the file within the working directory.',
-        },
-        search: {
-            type: 'string',
-            description: 'The search string to find in the file.',
+        type: 'object',
+        properties: {
+            filepath: {
+                type: 'string',
+                description: 'The path to the file within the working directory.',
+            },
+            search: {
+                type: 'string',
+                description: 'The search string to find in the file.',
+            },
         },
     },
 };

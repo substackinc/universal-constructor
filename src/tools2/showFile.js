@@ -4,12 +4,15 @@ import path from 'path';
 import execMulti from './execShell.js';
 
 showFile.spec = {
-    name: 'show_file',
+    name: showFile.name,
     description: 'Retrieves the full content of the file and some relevant info.',
     parameters: {
-        filepath: {
-            type: 'string',
-            description: 'The path to the file within the working directory.',
+        type: 'object',
+        properties: {
+            filepath: {
+                type: 'string',
+                description: 'The path to the file within the working directory.',
+            },
         },
     },
 };

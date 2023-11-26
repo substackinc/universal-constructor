@@ -9,12 +9,12 @@ function getValidator(t, spec) {
 }
 
 test(`importAllTools finds execShell`, async (t) => {
-    const { toolsByName } = await importAllTools();
+    const toolsByName = await importAllTools();
     t.truthy(toolsByName.execShell, 'The toolsDict should have execShell');
 });
 
 test('execShell spec looks good', async (t) => {
-    const { toolsByName } = await importAllTools();
+    const toolsByName = await importAllTools();
     const { execShell } = toolsByName;
     const { spec } = execShell;
 
@@ -38,8 +38,8 @@ test('all specs look basically good', async (t) => {
     for (let tool of Object.values(toolsByName)) {
         let { spec } = tool;
         t.is(spec.name, tool.name, `the spec for ${tool.name} has the correct name`);
-        t.is(typeof spec.description, 'string');
-        t.is(typeof spec.parameters, 'object');
+        t.is(typeof spec.description, 'string', `description defined for ${tool.name} spec`);
+        t.is(typeof spec.parameters, 'object', `parameters defined for ${tool.name} spec`);
         t.notThrows(() => ajv.compile(spec.parameters), `${tool.name} JSON Schema for parameters compiles`);
     }
 });

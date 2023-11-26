@@ -2,8 +2,11 @@
 import { execMulti } from './execShell.js';
 
 getSummary.spec = {
-    name: 'get_summary',
+    name: 'getSummary',
     description: 'Gives an overall summary of the current situation',
+    parameters: {
+        type: 'object',
+    },
 };
 
 export default async function getSummary() {

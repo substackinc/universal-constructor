@@ -3,16 +3,19 @@ import fs from 'fs/promises';
 import path from 'path';
 
 writeFile.spec = {
-    name: 'write_file',
+    name: writeFile.name,
     description: 'Writes content to a specified file, replacing its contents, within the working directory',
     parameters: {
-        filepath: {
-            type: 'string',
-            description: 'The relative path to the file within the working directory',
-        },
-        content: {
-            type: 'string',
-            description: 'The content to write to the file',
+        type: 'object',
+        properties: {
+            filepath: {
+                type: 'string',
+                description: 'The relative path to the file within the working directory',
+            },
+            content: {
+                type: 'string',
+                description: 'The content to write to the file',
+            },
         },
     },
 };
