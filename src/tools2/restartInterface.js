@@ -1,12 +1,11 @@
 // src/tools2/restartInterface.js
 
 restartInterface.spec = {
-    name: 'restart_interface',
-    description: 'Restarts the interface, using the current state of tools and configurations.',
-    // No parameters needed for restartInterface
+  name: 'restart_interface',
+  description: 'Restarts the interface, using the current state of tools and configurations.',
 };
 
-export default async function restartInterface() {
-    // Tool implementation
-    process.exit(0);
+export default function restartInterface() {
+  // This will exit the process in a real scenario
+  process.exit(0);
 }

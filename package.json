@@ -14,7 +14,8 @@
     "main": "run.js",
     "devDependencies": {
         "ava": "^5.3.1",
-        "dotenv": "^16.3.1"
+        "dotenv": "^16.3.1",
+        "sinon": "^17.0.1"
     },
     "scripts": {
         "format": "prettier --write .",
