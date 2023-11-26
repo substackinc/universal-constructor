@@ -25,6 +25,7 @@ function sliceLines(str, lines) {
 }
 
 export default async function searchFile({ filepath, search }) {
+    console.log(`Searching ${filepath} for ${search}`);
     const fullPath = path.resolve(filepath);
     const fileContent = await fs.readFile(fullPath, 'utf8');
     const splitContent = fileContent.split(search);

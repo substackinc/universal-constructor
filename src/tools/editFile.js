@@ -31,6 +31,10 @@ editFile.spec = {
 };
 
 export default async function editFile({filepath, editContext, targetSubstring, replacement}) {
+    console.log('Editing', filepath);
+    // console.log('CBTEST ctx', editContext)
+    // console.log('CBTEST sbstr', targetSubstring)
+    // console.log('CBTEST repl', replacement)
     const fullPath = path.resolve(filepath);
     const fileContents = await fs.readFile(fullPath, 'utf8');
     const searchContextIndex = fileContents.indexOf(editContext);
