@@ -1,28 +1,24 @@
 // src/tools2/index.js
-import execShell from './execShell.js';
-import writeFile from './writeFile.js';
-import showFile from './showFile.js';
-import getSummary from './getSummary.js';
-import searchFile from './searchFile.js';
-import replaceInFile from './replaceInFile.js';
-import restartInterface from './restartInterface.js';
+import { readdir } from 'fs/promises';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-export const toolsDict = {
-    execShell,
-    writeFile,
-    showFile,
-    getSummary,
-    searchFile,
-    replaceInFile,
-    restartInterface,
-};
+export default async function importAllTools(directory = dirname(fileURLToPath(import.meta.url))) {
+    const files = await readdir(directory);
+    const toolsByName = {};
+    const toolSpecs = [];
 
-export const tools = [
-    { execShell: execShell.spec },
-    { writeFile: writeFile.spec },
-    { showFile: showFile.spec },
-    { getSummary: getSummary.spec },
-    { searchFile: searchFile.spec },
-    { replaceInFile: replaceInFile.spec },
-    { restartInterface: restartInterface.spec },
-];
+    for (const file of files) {
+        if (file.endsWith('.js') && file !== 'index.js') {
+            const filePath = join(directory, file);
+            const module = await import(filePath);
+            if (typeof module.default !== 'function' || !module.default.spec) {
+                console.error('Skipping invalid tool', module);
+            } else {
+                toolsByName[module.default.name] = module.default;
+                toolSpecs.push(module.default.spec);
+            }
+        }
+    }
+    return { toolsByName, toolSpecs };
+}

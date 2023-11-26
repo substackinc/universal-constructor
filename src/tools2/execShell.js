@@ -5,13 +5,17 @@ import { promisify } from 'util';
 const execPromise = promisify(exec);
 
 execShell.spec = {
-    name: 'exec_shell',
+    name: execShell.name,
     description: 'Run a command in a bash shell',
     parameters: {
-        command: {
-            type: 'string',
-            description: 'The shell command to run',
+        type: 'object',
+        properties: {
+            command: {
+                type: 'string',
+                description: 'The shell command to run',
+            },
         },
+        required: ['command'],
     },
 };
 

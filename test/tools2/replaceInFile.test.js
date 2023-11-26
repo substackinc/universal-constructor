@@ -27,7 +27,6 @@ test('replaceInFile replaces a string within a file', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
     let contents = await fs.readFile(testFile, 'utf8');
-    console.log('CBTEST', testFile, contents);
     await replaceInFile({
         filepath: testFile,
         searchContext: 'Hello World, Hello Universe',
