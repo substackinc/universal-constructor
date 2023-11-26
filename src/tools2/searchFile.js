@@ -3,42 +3,50 @@ import fs from 'fs/promises';
 import path from 'path';
 
 searchFile.spec = {
-  name: 'search_file',
-  description: 'Searches for a string in a file and returns all matches.',
-  parameters: {
-    filepath: {
-      type: 'string',
-      description: 'The path to the file within the working directory.',
+    name: 'search_file',
+    description: 'Searches for a string in a file and returns all matches.',
+    parameters: {
+        filepath: {
+            type: 'string',
+            description: 'The path to the file within the working directory.',
+        },
+        search: {
+            type: 'string',
+            description: 'The search string to find in the file.',
+        },
     },
-    search: {
-      type: 'string',
-      description: 'The search string to find in the file.',
-    }
-  }
 };
 
+function leftContext(str, lines) {
+    return str.split('\n').slice(-lines).join('\n');
+}
+
+function rightContext(str, lines) {
+    return str.split('\n').slice(lines).join('\n');
+}
+
 export default async function searchFile({ filepath, search }) {
-  const fullPath = path.resolve(filepath);
-  const fileContent = await fs.readFile(fullPath, 'utf8');
-  const splitContent = fileContent.split(search);
-  let matches = [];
+    const fullPath = path.resolve(filepath);
+    const fileContent = await fs.readFile(fullPath, 'utf8');
+    const splitContent = fileContent.split(search);
+    let matches = [];
 
-  splitContent.forEach((content, index) => {
-    if (index < splitContent.length - 1) { // Ignore the last split part as it won't be followed by the search term
-      const startContext = content.length > 30 ? content.slice(-30) : content;
-      const endContextIndex = splitContent[index + 1].length > 30 ? 30 : splitContent[index + 1].length;
-      const endContext = splitContent[index + 1].slice(0, endContextIndex);
-      matches.push({
-        found: `${startContext}\u001b[1m${search}\u001b[22m${endContext}`, // Include search term in bold
-        context: `${content.slice(-100)}${search}${splitContent[index + 1].slice(0, 100)}` // Provide 100 chars of context
-      });
-    }
-  });
+    splitContent.forEach((left, index) => {
+        if (index + 1 < splitContent.length) {
+            const right = splitContent[index + 1];
+            matches.push({
+                // Include search term in bold
+                found: `${leftContext(left, 1)}\u001b[1m${search}\u001b[22m${rightContext(right, 1)}`,
+                context: `${leftContext(left, 5)}${search}${rightContext(right, 5)}`,
+            });
+        }
+    });
 
-  return {
-    success: true,
-    filepath,
-    search,
-    matches,
-  };
+    return {
+        success: true,
+        filepath,
+        search,
+        matchCount: matches.length,
+        matches,
+    };
 }
