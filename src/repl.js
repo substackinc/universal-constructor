@@ -69,11 +69,8 @@ function setupReadline(commands) {
     }
 
     rl.on('line', async (line) => {
-        if (line === '') {
-            // two enters in a row
-            await submit();
-        } else if (line.endsWith('go')) {
-            inputBuffer.push(line.slice(0, line.length - 2));
+        if (line === '' && inputBuffer.join('').trim() !== '') {
+            // enter on a blank line submits
             await submit();
         } else if (commands[line]) {
             await commands[line]();
