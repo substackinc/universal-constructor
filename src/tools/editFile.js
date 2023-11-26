@@ -30,6 +30,15 @@ editFile.spec = {
     },
 };
 
+/*
+ * If you're wondering what the heck is goign on with this API:
+ * it was actually fairly tricky to get this to be ergonomic for UC
+ * it really struggles with line numbers or any type of counting
+ *
+ * This thing is basically: give me a literal window of context, and
+ * replace within it. The context has to be unique, so it prevents the
+ * a lot of common pitfalls.
+ */
 export default async function editFile({filepath, editContext, targetSubstring, replacement}) {
     console.log('Editing', filepath);
     // console.log('CBTEST ctx', editContext)
