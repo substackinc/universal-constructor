@@ -10,6 +10,6 @@ restartInterface.spec = {
 };
 
 export default function restartInterface() {
-    // This will exit the process in a real scenario
-    process.exit(0);
+    console.log('Restarting interface')
+    process.exit(0); // run.js knows to restart
 }
