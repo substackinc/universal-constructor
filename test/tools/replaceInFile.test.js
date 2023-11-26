@@ -1,5 +1,5 @@
 import test from 'ava';
-import replaceInFile from '../../src/tools/replaceInFile.js';
+import editFile from '../../src/tools/editFile.js';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
@@ -23,10 +23,10 @@ test.after.always(async () => {
     await fs.rm(testDir, { force: true, recursive: true });
 });
 
-test('replaceInFile replaces a string within a file', async (t) => {
+test('editFile replaces a string within a file', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
-    await replaceInFile({
+    await editFile({
         filepath: testFile,
         searchContext: 'Hello World, Hello Universe',
         targetSubstring: 'Universe',
@@ -36,18 +36,18 @@ test('replaceInFile replaces a string within a file', async (t) => {
     t.is(content, 'Hello World, Hello AVA', 'Content should be replaced correctly');
 });
 
-test('replaceInFile fails with multiple instances of the search context', async (t) => {
+test('editFile fails with multiple instances of the search context', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World. Hello World.', 'utf8');
     try {
-        await replaceInFile({
+        await editFile({
             filepath: testFile,
             searchContext: 'Hello World',
             targetSubstring: 'World',
             replacement: 'AVA',
         });
-        t.fail('replaceInFile should throw an error if the search context appears more than once.');
+        t.fail('editFile should throw an error if the search context appears more than once.');
     } catch (error) {
-        t.pass('replaceInFile should throw an error if the search context appears more than once.');
+        t.pass('editFile should throw an error if the search context appears more than once.');
     }
 });

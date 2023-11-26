@@ -23,6 +23,7 @@ writeFile.spec = {
 export default async function writeFile({ filepath, content }) {
     const fullPath = path.resolve(filepath);
     let oldContent = '';
+    console.log(oldContent ? 'Overwriting': 'Writing to', filepath)
     try {
         oldContent = await fs.readFile(fullPath, 'utf8');
     } catch (error) {

@@ -44,7 +44,7 @@ This file outlines the current priorities for the Universal Constructor project.
 
 ## Ideas for next small tasks:
 
--   Rename replaceInFile to edit_file, and iterate to 95%+ reliable for small code changes
+-   Rename editFile to edit_file, and iterate to 95%+ reliable for small code changes
 -   Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
 -   Unit tests & the ability to work with them
 -   re-write tools.js to be cleaner & tested so UC can make meaningful tool improvements end-to-end
