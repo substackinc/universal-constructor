@@ -34,14 +34,12 @@ test('execShell spec looks good', async (t) => {
 });
 
 test('all specs look basically good', async (t) => {
-    const { toolsByName, toolSpecs } = await importAllTools();
-    for (let spec of toolSpecs) {
-        let tool = toolsByName[spec.name];
-        t.truthy(tool, 'tool found for ' + spec.name);
+    const toolsByName = await importAllTools();
+    for (let tool of Object.values(toolsByName)) {
+        let { spec } = tool;
+        t.is(spec.name, tool.name, `the spec for ${tool.name} has the correct name`);
         t.is(typeof spec.description, 'string');
         t.is(typeof spec.parameters, 'object');
-
-        let v;
-        t.notThrows(() => (v = ajv.compile(spec.parameters)), `${tool.name} JSON Schema for parameters compiles`);
+        t.notThrows(() => ajv.compile(spec.parameters), `${tool.name} JSON Schema for parameters compiles`);
     }
 });
