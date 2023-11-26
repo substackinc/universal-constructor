@@ -17,11 +17,7 @@ searchFile.spec = {
     },
 };
 
-function leftContext(str, lines) {
-    return str.split('\n').slice(-lines).join('\n');
-}
-
-function rightContext(str, lines) {
+function sliceLines(str, lines) {
     return str.split('\n').slice(lines).join('\n');
 }
 
@@ -36,8 +32,8 @@ export default async function searchFile({ filepath, search }) {
             const right = splitContent[index + 1];
             matches.push({
                 // Include search term in bold
-                found: `${leftContext(left, 1)}\u001b[1m${search}\u001b[22m${rightContext(right, 1)}`,
-                context: `${leftContext(left, 5)}${search}${rightContext(right, 5)}`,
+                found: `${sliceLines(left, -1)}\u001b[1m${search}\u001b[22m${sliceLines(right, 1)}`,
+                context: `${sliceLines(left, -5)}${search}${sliceLines(right, 5)}`,
             });
         }
     });
