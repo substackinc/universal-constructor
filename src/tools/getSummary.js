@@ -11,10 +11,12 @@ getSummary.spec = {
 };
 
 export default async function getSummary() {
+    console.log('getting summary');
     return {
         advice: [
             'This project is YOU. It is the code I am using to talk to you, and the functions you run.',
             'You should usually replaceInFile to make changes.',
+            `You can run tests with 'npm test' or 'npm test [file]'`,
         ],
         shell_results: await execMulti(
             ...[
