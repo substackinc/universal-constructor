@@ -59,13 +59,15 @@ Updating assistant...
 This is the start of a brand new thread!
 
 @chrisbest:
-> Hi! Can you take a look around and give me a very brief description of what we're up to here, and then try to show off for me by accomplishing the first challenge?
+> Hi! Can you take a look around and give me a very brief description of what we're 
+> up to here, and then try to show off for me by accomplishing the first challenge?
 > 
 
 @UC:
-Hey there! We're working on the Universal Constructor project, which is basically the code for me, your
-AI-powered coding assistant. The project's priorities right now include making the edit functionality more
-robust, simplifying the tools code, and eventually letting me make changes end-to-end, from description to
+Hey there! We're working on the Universal Constructor project, which is basically 
+the code for me, your AI-powered coding assistant. The project's priorities right 
+now include making the edit functionality morerobust, simplifying the tools code, 
+and eventually letting me make changes end-to-end, from description to
 tested and merged pull requests.
 
 @chrisbest:
@@ -73,9 +75,10 @@ tested and merged pull requests.
 > 
 
 @UC:
-Sure thing! How about we do something coding related, like writing a tiny JavaScript utility function, write
-tests for it, and then run the tests to demonstrate that it works correctly? Let's create a simple function
-that adds two numbers and then test it. I'll handle it all right now.
+Sure thing! How about we do something coding related, like writing a tiny JavaScript 
+utility function, writetests for it, and then run the tests to demonstrate that it 
+works correctly? Let's create a simple functionthat adds two numbers and then test 
+it. I'll handle it all right now.
 
 Writing to src/utils/addNumbers.js
 Writing to test/utils/addNumbers.test.js
@@ -86,14 +89,16 @@ Executing shell command $  npm test test/utils/addNumbers.test.js
 24s
 
 @UC:
-I created a simple utility function addNumbers that adds two numbers together, along with a few tests to verify
-its correctness. The tests pass, confirming the function works as intended:
+I created a simple utility function addNumbers that adds two numbers together, along 
+with a few tests to verify its correctness. The tests pass, confirming the 
+function works as intended:
 
    ✔ adds two numbers
     ─
   
     1 test passed
 
-That's our impressive little demo! Function written, tested, and verified. Ready for the next task!
+That's our impressive little demo! Function written, tested, and verified. Ready for 
+the next task!
 
 ```
