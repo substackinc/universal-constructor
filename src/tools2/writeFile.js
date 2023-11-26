@@ -1,4 +1,6 @@
 // src/tools2/writeFile.js
+import fs from 'fs/promises';
+import path from 'path';
 
 writeFile.spec = {
     name: 'write_file',
@@ -16,21 +18,17 @@ writeFile.spec = {
 };
 
 export default async function writeFile({ filepath, content }) {
-    const fs = require('fs').promises;
-    const path = require('path');
-    // Tool implementation
-    const fullPath = path.resolve(workingDirectory, filepath);
+    const fullPath = path.resolve(filepath);
     let oldContent = '';
     try {
         oldContent = await fs.readFile(fullPath, 'utf8');
     } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
-        // File doesn't exist which is fine
+        if (error.code !== 'ENOENT') throw error; // If the error is not file not found, rethrow it
     }
     await fs.writeFile(fullPath, content, 'utf8');
     return {
         success: true,
-        oldContent: oldContent,
+        oldContent,
         newContent: content,
     };
 }
