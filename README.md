@@ -43,7 +43,7 @@ The `run.js` script will manage the spawning of the assistant and its threading 
 ## Usage
 
 ```
-$ npm run
+$ node run.js
 
 ╔═════════════════════════════════════════╗
 ║ Welcome to the Universal Constructor!   ║
