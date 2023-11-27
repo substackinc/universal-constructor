@@ -60,7 +60,7 @@ This is the start of a brand new thread!
 
 @chrisbest:
 > Hi! Can you take a look around and give me a very brief description of what we're 
-> up to here, and then try to show off for me by accomplishing the first challenge?
+> up to here?
 > 
 
 @UC:
