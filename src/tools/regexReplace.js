@@ -2,27 +2,31 @@ import fs from 'fs';
 import path from 'path';
 
 regexReplace.spec = {
-    name: 'regexReplace',
+    name: regexReplace.name,
     description: 'Replaces content in a file matching a regex pattern.',
     parameters: {
-        regex: {
-            type: 'string',
-            description: 'The regex pattern to use for matching, including flags, like /foo/gi.',
-            pattern: '^/(.*?)/([gimsuvy]*)$'
+        type: 'object',
+        properties: {
+            regex: {
+                type: 'string',
+                description: 'The regex pattern to use for matching, including flags, like /foo/gi.',
+                pattern: '^/(.*?)/([gimsuvy]*)$', // A regex pattern to validate the regex parameter itself
+            },
+            filepath: {
+                type: 'string',
+                description: 'The relative path to the file where the replacement should occur.',
+            },
+            replacement: {
+                type: 'string',
+                description: 'The string to replace with (can be multiple lines).',
+            },
+            dryRun: {
+                type: 'boolean',
+                description: 'If true, return the would-be changes but do not actually change the file.',
+                default: false,
+            },
         },
-        filepath: {
-            type: 'string',
-            description: 'The relative path to the file where the replacement should occur.'
-        },
-        replacement: {
-            type: 'string',
-            description: 'The string to replace with (can be multiple lines).'
-        },
-        dryRun: {
-            type: 'boolean',
-            description: 'If true, return the would-be changes but do not actually change the file.',
-            default: false
-        }
+        required: ['filepath', 'regex', 'replacement'],
     },
     required: ['regex', 'filepath', 'replacement']
 };
