@@ -51,3 +51,31 @@ test('editFile fails with multiple instances of the search context', async (t) =
         t.pass('editFile should throw an error if the search context appears more than once.');
     }
 });
+
+test('editFile works on a file with many lines', async (t) => {
+    const { testFile } = setup();
+    const multilineContent = `First line\nSecond line target\nThird line`;
+    await fs.writeFile(testFile, multilineContent);
+    await editFile({
+        filepath: testFile,
+        uniqueContext: '\nSecond line target\n',
+        exactTarget: 'target',
+        replacement: 'replacement',
+    });
+    const content = await fs.readFile(testFile, 'utf8');
+    t.is(content, `First line\nSecond line replacement\nThird line`, 'Content should be replaced correctly in a multi-line file.');
+});
+
+test('editFile uniqueContext lets you specify a given replacement among many', async (t) => {
+    const { testFile } = setup();
+    const multiTargetContent = `Target line one\nUseless line\nTarget line two\nTarget line one`;
+    await fs.writeFile(testFile, multiTargetContent);
+    await editFile({
+        filepath: testFile,
+        uniqueContext: 'Target line two',
+        exactTarget: 'Target',
+        replacement: 'Selected',
+    });
+    const content = await fs.readFile(testFile, 'utf8');
+    t.is(content, `Target line one\nUseless line\nSelected line two\nTarget line one`, 'Only the target within the specified unique context should be replaced.');
+});
