@@ -88,7 +88,7 @@ class Dialog extends EventEmitter {
         });
         if (data.length > 0) {
             this.lastMessageId = data[0].id;
-            for (let message of data.toReversed()) {
+            for (let message of data.reverse()) {
                 let content = message.content.map((c) => c.text.value).join('\n');
                 if (!content) {
                     console.error('missing content for message', message);
