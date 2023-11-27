@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const testDir = path.join(os.tmpdir(), 'replaceInFileTests');
+const testDir = path.join(os.tmpdir(), 'editFileTests');
 let i = 1;
 
 function setup() {
@@ -28,7 +28,7 @@ test('editFile replaces a string within a file', async (t) => {
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
     await editFile({
         filepath: testFile,
-        searchContext: 'Hello World, Hello Universe',
+        editContext: 'Hello World, Hello Universe',
         targetSubstring: 'Universe',
         replacement: 'AVA',
     });
