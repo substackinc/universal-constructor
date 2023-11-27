@@ -16,11 +16,11 @@ editFile.spec = {
             editContext: {
                 type: 'string',
                 description:
-                    'The surrounding context where the target substring is located. This should literally appear exaclty once in the file.',
+                    'The surrounding context where the target substring is located. Must appear only once in the file. Must match exactly.',
             },
             targetSubstring: {
                 type: 'string',
-                description: 'The exact substring within the search context that needs to be replaced. Can be multiple lines.',
+                description: 'The exact substring within the search context that needs to be replaced. Can be multiple lines. Must match once.',
             },
             replacement: {
                 type: 'string',
