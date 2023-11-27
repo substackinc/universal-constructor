@@ -34,6 +34,7 @@ regexReplace.spec = {
 };
 
 export default async function regexReplace({ regex, filepath, replacement, dryRun = false }) {
+    console.log("Regex replace in", filepath, regex)
     try {
         const absolutePath = path.resolve(filepath);
         let fileContent = fs.readFileSync(absolutePath, 'utf-8');

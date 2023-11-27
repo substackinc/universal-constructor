@@ -5,7 +5,7 @@ import path from 'path';
 editFile.spec = {
     name: editFile.name,
     description:
-        'Replaces a specific substring within a given search context in a file, ensuring that the context appears only once.',
+        'Replaces a specific substring within a file. Will replace the first instance after the start of the specified unique search context.',
     parameters: {
         type: 'object',
         properties: {
@@ -13,20 +13,21 @@ editFile.spec = {
                 type: 'string',
                 description: 'The relative path to the file where the replacement should occur.',
             },
-            editContext: {
+            uniqueContext: {
                 type: 'string',
                 description:
-                    'The surrounding context where the target substring is located. Must appear only once in the file. Must match exactly.',
+                    'The context that shows where in the file to start looking',
             },
-            targetSubstring: {
+            exactTarget: {
                 type: 'string',
-                description: 'The exact substring within the search context that needs to be replaced. Can be multiple lines. Must match once.',
+                description: 'The exact substring to be replaced. Can be multiple lines.',
             },
             replacement: {
                 type: 'string',
                 description: 'The text that should replace the target substring.',
             },
         },
+        required: ['filepath', 'uniqueContext', 'exactTarget', 'replacements'],
     },
 };
 
@@ -35,37 +36,39 @@ editFile.spec = {
  * it was actually fairly tricky to get this to be ergonomic for UC
  * it really struggles with line numbers or any type of counting
  *
- * This thing is basically: give me a literal window of context, and
- * replace within it. The context has to be unique, so it prevents the
- * a lot of common pitfalls.
+ * This thing tries to make this ergonomic for UC
  */
-export default async function editFile({filepath, editContext, targetSubstring, replacement}) {
+export default async function editFile({
+                                           filepath,
+                                           uniqueContext,
+                                           exactTarget,
+                                           replacement,
+                                       }) {
     console.log('Editing', filepath);
-    // console.log('CBTEST ctx', editContext)
-    // console.log('CBTEST sbstr', targetSubstring)
+    // console.log('CBTEST ctx', uniqueContext)
+    // console.log('CBTEST sbstr', exactTarget)
     // console.log('CBTEST repl', replacement)
     const fullPath = path.resolve(filepath);
     const fileContents = await fs.readFile(fullPath, 'utf8');
-    const searchContextIndex = fileContents.indexOf(editContext);
-    if (searchContextIndex === -1) {
-        throw new Error('editContext not found in file');
-    } else if (searchContextIndex !== fileContents.lastIndexOf(editContext)) {
-        throw new Error('editContext found more than once in the file');
+
+    const chunks = fileContents.split(uniqueContext);
+    if (chunks.length !== 2) {
+        throw new Error('uniqueContext should appear exactly once in file, but found ' + (chunks.length - 1));
     }
 
-    const targetSubstringIndex = editContext.indexOf(targetSubstring);
-    if (targetSubstringIndex === -1) {
-        throw new Error('targetSubstring does not appear in the editContext');
-    } else if (targetSubstringIndex !== editContext.lastIndexOf(targetSubstring)) {
-        throw new Error('targetSubstring appears more than once in the editContext');
+    let left = chunks[0];
+    let right = uniqueContext + chunks[1];
+
+    if (right.indexOf(exactTarget) === -1) {
+        throw new Error('exactTarget found 0 times within or after the context');
     }
 
-    let editedContext = editContext.replace(targetSubstring, replacement);
-    let updatedFileContents = fileContents.replace(editContext, editedContext);
+    let updatedFileContents = left + right.replace(exactTarget, replacement);
 
     await fs.writeFile(fullPath, updatedFileContents, 'utf8');
     return {
         success: true,
+        previousContent: fileContents,
         updatedContent: updatedFileContents,
     };
 }

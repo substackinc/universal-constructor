@@ -28,8 +28,8 @@ test('editFile replaces a string within a file', async (t) => {
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
     await editFile({
         filepath: testFile,
-        editContext: 'Hello World, Hello Universe',
-        targetSubstring: 'Universe',
+        uniqueContext: 'Hello World, Hello Universe',
+        exactTarget: 'Universe',
         replacement: 'AVA',
     });
     const content = await fs.readFile(testFile, 'utf8');
@@ -42,8 +42,8 @@ test('editFile fails with multiple instances of the search context', async (t) =
     try {
         await editFile({
             filepath: testFile,
-            searchContext: 'Hello World',
-            targetSubstring: 'World',
+            uniqueContext: 'Hello World',
+            exactTarget: 'World',
             replacement: 'AVA',
         });
         t.fail('editFile should throw an error if the search context appears more than once.');
