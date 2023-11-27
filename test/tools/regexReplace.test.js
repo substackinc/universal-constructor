@@ -61,3 +61,63 @@ test('regexReplace - dryRun should not change the file content', async (t) => {
     t.is(result.updatedContent, 'Hi World! Hi People! Hi Universe!', 'dry run lets me see what it would have done');
     t.falsy(result.fileUpdated);
 });
+
+test('regexReplace - case sensitivity with replacement', async (t) => {
+    const { testFile } = await setup();
+    await regexReplace({
+        regex: '/hello/g',
+        filepath: testFile,
+        replacement: 'Hi',
+    });
+
+    const caseSensitiveContent = await readFile(testFile, 'utf-8');
+    t.is(caseSensitiveContent, content, 'lowercase hello should not replace anything');
+
+    await regexReplace({
+        regex: '/Hello/gi',
+        filepath: testFile,
+        replacement: 'Hi',
+    });
+
+    const caseInsensitiveContent = await readFile(testFile, 'utf-8');
+    t.is(caseInsensitiveContent, 'Hi World! Hi People! Hi Universe!', 'case insensitive replacement should succeed');
+});
+
+test('regexReplace - special characters in regex pattern', async (t) => {
+    const { testFile } = await setup();
+    await regexReplace({
+        regex: '/o Wo(.*)!/g',
+        filepath: testFile,
+        replacement: 'o Earth!',
+    });
+
+    const specialCharactersContent = await readFile(testFile, 'utf-8');
+    t.is(specialCharactersContent, 'Hello Earth!', 'special characters should be interpreted correctly, matching from first "o World!" to the last "!", due to greedy matching');
+});
+
+test('regexReplace - multiline replacement', async (t) => {
+    const multiLineContent = 'Hello World!\nHello People!\nHello Universe!';
+    const testFile = path.join(testDir, `test_multiline.tmp${i++}.txt`);
+    await writeFile(testFile, multiLineContent);
+
+    await regexReplace({
+        regex: '/Hello/gm',
+        filepath: testFile,
+        replacement: 'Hi',
+    });
+
+    const updatedMultiLineContent = await readFile(testFile, 'utf-8');
+    t.is(updatedMultiLineContent, 'Hi World!\nHi People!\nHi Universe!', 'multiline flag should allow for replacement on multiple lines');
+});
+
+test('regexReplace - no matches found', async (t) => {
+    const { testFile } = await setup();
+    const result = await regexReplace({
+        regex: '/Goodbye/g',
+        filepath: testFile,
+        replacement: 'Farewell',
+    });
+
+    t.true(result.success);
+    t.is(result.matchCount, 0, 'should not find any matches for Goodbye');
+});
