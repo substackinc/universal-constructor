@@ -29,7 +29,7 @@ test.after.always(async () => {
 test('regexReplace - replaces content matching a regex pattern without dryRun', async (t) => {
   const {testFile} = await setup();
   const result = await regexReplace({
-    regex: /Hello/g,
+    regex: '/Hello/g',
     filepath: testFile,
     replacement: 'Hi',
     dryRun: false
@@ -45,7 +45,7 @@ test('regexReplace - replaces content matching a regex pattern without dryRun', 
 test('regexReplace - dryRun should not change the file content', async (t) => {
   const {testFile} = await setup();
   const result = await regexReplace({
-    regex: /Hello/g,
+    regex: '/Hello/g',
     filepath: testFile,
     replacement: 'Hi',
     dryRun: true
@@ -57,5 +57,6 @@ test('regexReplace - dryRun should not change the file content', async (t) => {
   t.is(result.matchCount, 3);
   t.is(result.originalContent, content);
   t.is(unchangedContent, content);
-  t.is(result.updatedContent, null);
+  t.is(result.updatedContent, 'Hi World! Hi People! Hi Universe!', 'dry run lets me see what it would have done');
+  t.falsy(result.fileUpdated)
 });
