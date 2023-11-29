@@ -30,11 +30,11 @@ class Dialog extends EventEmitter {
     }
 
     async setup({
-        pastMessagesToRetrieve = 2,
-        threadFile = '.thread',
-        assistantFile = '.assistant',
-        instructionsFile = 'instructions.md',
-    } = {}) {
+                    pastMessagesToRetrieve = 2,
+                    threadFile = '.thread',
+                    assistantFile = '.assistant',
+                    instructionsFile = 'instructions.md',
+                } = {}) {
         // setup assistant
         let assistantId = readFile(assistantFile);
         this.toolsByName = await importAllTools();
@@ -42,6 +42,10 @@ class Dialog extends EventEmitter {
             type: 'function',
             function: t.spec,
         }));
+        tools.push(
+            { type: 'retrieval' },
+            { type: 'code_interpreter' },
+        );
 
         const assistantConfig = {
             name: 'UC',
