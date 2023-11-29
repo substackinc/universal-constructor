@@ -24,7 +24,7 @@ readFile.spec = {
 };
 
 export default async function readFile({filepath, range}) {
-    console.log(`Showing file ${filepath}${range ? ` Lines: ${range}` : ''}`)
+    console.log(`Reading ${filepath}${range ? ` Lines: ${range}` : ''}`)
     const fullPath = path.resolve(filepath);
     try {
         let content = await fs.readFile(fullPath, 'utf8');
