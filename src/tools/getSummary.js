@@ -22,7 +22,7 @@ export default async function getSummary() {
             ...[
                 'cat priorities.md',
                 'git ls-files',
-                'git status',
+                'git status -u',
                 'git log -n 5',
                 'cat package.json',
             ],
