@@ -44,7 +44,7 @@ class Dialog extends EventEmitter {
         }));
         tools.push(
             { type: 'retrieval' },
-            { type: 'code_interpreter' },
+            //{ type: 'code_interpreter' },
         );
 
         const assistantConfig = {
