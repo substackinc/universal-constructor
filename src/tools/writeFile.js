@@ -20,10 +20,14 @@ writeFile.spec = {
     },
 };
 
-export default async function writeFile({filepath, content}) {
+export default async function writeFile({ filepath, content }) {
+    const dir = path.dirname(filepath);
+    // Ensure the directory exists before attempting to write the file
+    await fs.mkdir(dir, { recursive: true });
+
     const fullPath = path.resolve(filepath);
     let oldContent = '';
-    console.log(oldContent ? 'Overwriting' : 'Writing to', filepath)
+    console.log(oldContent ? 'Overwriting' : 'Writing to', filepath);
     try {
         oldContent = await fs.readFile(fullPath, 'utf8');
     } catch (error) {
