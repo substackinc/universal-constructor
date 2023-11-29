@@ -5,7 +5,7 @@ export { default as getSummary } from './getSummary.js';
 export { default as regexReplace } from './regexReplace.js';
 export { default as restartInterface } from './restartInterface.js';
 export { default as searchFile } from './searchFile.js';
-export { default as showFile } from './showFile.js';
+export { default as readFile } from './readFile.js';
 export { default as writeFile } from './writeFile.js';
 import { readdir } from 'fs/promises';
 import { join, dirname } from 'path';
