@@ -63,7 +63,11 @@ test('editFile works on a file with many lines', async (t) => {
         replacement: 'replacement',
     });
     const content = await fs.readFile(testFile, 'utf8');
-    t.is(content, `First line\nSecond line replacement\nThird line`, 'Content should be replaced correctly in a multi-line file.');
+    t.is(
+        content,
+        `First line\nSecond line replacement\nThird line`,
+        'Content should be replaced correctly in a multi-line file.'
+    );
 });
 
 test('editFile uniqueContext lets you specify a given replacement among many', async (t) => {
@@ -77,5 +81,9 @@ test('editFile uniqueContext lets you specify a given replacement among many', a
         replacement: 'Selected',
     });
     const content = await fs.readFile(testFile, 'utf8');
-    t.is(content, `Target line one\nUseless line\nSelected line two\nTarget line one`, 'Only the target within the specified unique context should be replaced.');
+    t.is(
+        content,
+        `Target line one\nUseless line\nSelected line two\nTarget line one`,
+        'Only the target within the specified unique context should be replaced.'
+    );
 });

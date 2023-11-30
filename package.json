@@ -26,5 +26,9 @@
         "openai": "^4.19.0",
         "sinon": "^17.0.1"
     },
-    "devDependencies": {}
+    "devDependencies": {
+        "engines": {
+            "node": ">=16.18.1"
+        }
+    }
 }

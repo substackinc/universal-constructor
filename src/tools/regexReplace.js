@@ -28,7 +28,7 @@ regexReplace.spec = {
         },
         required: ['filepath', 'regex', 'replacement'],
     },
-    required: ['regex', 'filepath', 'replacement']
+    required: ['regex', 'filepath', 'replacement'],
 };
 
 export default async function regexReplace({ regex, filepath, replacement, dryRun = false }) {
@@ -60,7 +60,7 @@ export default async function regexReplace({ regex, filepath, replacement, dryRu
             updatedContent: newContent,
             fileUpdated: !dryRun,
             matchCount: matches.length,
-            matches: matches.map(match => ({ found: match })),
+            matches: matches.map((match) => ({ found: match })),
         };
     } catch (error) {
         return { success: false, error_message: 'Regex replace error: ' + error.message };

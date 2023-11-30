@@ -43,8 +43,14 @@ test('writeFile creates directories recursively', async (t) => {
     const testFileInSubDir = path.join(subDir, 'file.txt');
     await writeFile({ filepath: testFileInSubDir, content: 'Content in subdirectory' });
 
-    const directoryExists = await fs.stat(subDir).then(() => true).catch(() => false);
-    const fileExists = await fs.readFile(testFileInSubDir, 'utf8').then(() => true).catch(() => false);
+    const directoryExists = await fs
+        .stat(subDir)
+        .then(() => true)
+        .catch(() => false);
+    const fileExists = await fs
+        .readFile(testFileInSubDir, 'utf8')
+        .then(() => true)
+        .catch(() => false);
 
     await fs.rm(subDir, { recursive: true, force: true });
 

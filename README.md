@@ -48,7 +48,7 @@ $ node run.js
 ╔═════════════════════════════════════════╗
 ║ Welcome to the Universal Constructor!   ║
 ║ ‾‾‾‾‾‾‾                                 ║
-║ /rs restarts the repl                   ║
+║ ctrl+c to cancel/restart                ║
 ║ /reset gets you a fresh thread          ║
 ║ you gotta hit enter twice               ║
 ║                                         ║
@@ -59,25 +59,25 @@ Updating assistant...
 This is the start of a brand new thread!
 
 @chrisbest:
-> Hi! Can you take a look around and give me a very brief description of what we're 
+> Hi! Can you take a look around and give me a very brief description of what we're
 > up to here?
-> 
+>
 
 @UC:
-Hey there! We're working on the Universal Constructor project, which is basically 
-the code for me, your AI-powered coding assistant. The project's priorities right 
-now include making the edit functionality morerobust, simplifying the tools code, 
+Hey there! We're working on the Universal Constructor project, which is basically
+the code for me, your AI-powered coding assistant. The project's priorities right
+now include making the edit functionality morerobust, simplifying the tools code,
 and eventually letting me make changes end-to-end, from description to
 tested and merged pull requests.
 
 @chrisbest:
 > Great! Can you do an impressive little demo for me?
-> 
+>
 
 @UC:
-Sure thing! How about we do something coding related, like writing a tiny JavaScript 
-utility function, writetests for it, and then run the tests to demonstrate that it 
-works correctly? Let's create a simple functionthat adds two numbers and then test 
+Sure thing! How about we do something coding related, like writing a tiny JavaScript
+utility function, writetests for it, and then run the tests to demonstrate that it
+works correctly? Let's create a simple functionthat adds two numbers and then test
 it. I'll handle it all right now.
 
 Writing to src/utils/addNumbers.js
@@ -89,16 +89,16 @@ Executing shell command $  npm test test/utils/addNumbers.test.js
 24s
 
 @UC:
-I created a simple utility function addNumbers that adds two numbers together, along 
-with a few tests to verify its correctness. The tests pass, confirming the 
+I created a simple utility function addNumbers that adds two numbers together, along
+with a few tests to verify its correctness. The tests pass, confirming the
 function works as intended:
 
    ✔ adds two numbers
     ─
-  
+
     1 test passed
 
-That's our impressive little demo! Function written, tested, and verified. Ready for 
+That's our impressive little demo! Function written, tested, and verified. Ready for
 the next task!
 
 ```

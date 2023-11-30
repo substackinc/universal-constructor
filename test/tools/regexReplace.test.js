@@ -92,7 +92,11 @@ test('regexReplace - special characters in regex pattern', async (t) => {
     });
 
     const specialCharactersContent = await readFile(testFile, 'utf-8');
-    t.is(specialCharactersContent, 'Hello Earth!', 'special characters should be interpreted correctly, matching from first "o World!" to the last "!", due to greedy matching');
+    t.is(
+        specialCharactersContent,
+        'Hello Earth!',
+        'special characters should be interpreted correctly, matching from first "o World!" to the last "!", due to greedy matching'
+    );
 });
 
 test('regexReplace - multiline replacement', async (t) => {
@@ -107,7 +111,11 @@ test('regexReplace - multiline replacement', async (t) => {
     });
 
     const updatedMultiLineContent = await readFile(testFile, 'utf-8');
-    t.is(updatedMultiLineContent, 'Hi World!\nHi People!\nHi Universe!', 'multiline flag should allow for replacement on multiple lines');
+    t.is(
+        updatedMultiLineContent,
+        'Hi World!\nHi People!\nHi Universe!',
+        'multiline flag should allow for replacement on multiple lines'
+    );
 });
 
 test('regexReplace - no matches found', async (t) => {

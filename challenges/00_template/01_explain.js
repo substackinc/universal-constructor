@@ -7,4 +7,6 @@ console.log('1. Read the instructions in step 01, which explains what needs to b
 console.log('2. Execute the corresponding code to pass the step.');
 console.log('3. Move on to the subsequent steps as you complete each one.');
 console.log('4. The last script will give you a big congratulations when you finish the challenge!\n');
-console.log('Start with this template to create new challenges. Modify the instructions and the checking logic as needed.');
+console.log(
+    'Start with this template to create new challenges. Modify the instructions and the checking logic as needed.'
+);

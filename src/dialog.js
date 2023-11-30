@@ -30,11 +30,11 @@ class Dialog extends EventEmitter {
     }
 
     async setup({
-                    pastMessagesToRetrieve = 2,
-                    threadFile = '.thread',
-                    assistantFile = '.assistant',
-                    instructionsFile = 'instructions.md',
-                } = {}) {
+        pastMessagesToRetrieve = 2,
+        threadFile = '.thread',
+        assistantFile = '.assistant',
+        instructionsFile = 'instructions.md',
+    } = {}) {
         // setup assistant
         let assistantId = readFile(assistantFile);
         this.toolsByName = await importAllTools();
@@ -43,7 +43,7 @@ class Dialog extends EventEmitter {
             function: t.spec,
         }));
         tools.push(
-            { type: 'retrieval' },
+            { type: 'retrieval' }
             //{ type: 'code_interpreter' },
         );
 
@@ -194,7 +194,10 @@ class Dialog extends EventEmitter {
         try {
             return JSON.parse(argumentsStr);
         } catch (parseError) {
-            if (parseError instanceof SyntaxError && parseError.message.includes('Unexpected non-whitespace character after JSON')) {
+            if (
+                parseError instanceof SyntaxError &&
+                parseError.message.includes('Unexpected non-whitespace character after JSON')
+            ) {
                 let trimmedArguments = argumentsStr.replace(/\}\s*$/, '');
                 return JSON.parse(trimmedArguments);
             } else {

@@ -15,7 +15,7 @@ readFile.spec = {
             },
             range: {
                 type: 'string',
-                pattern: '^\d+-\d+$',
+                pattern: '^d+-d+$',
                 description: 'Optional. A range of line numbers to read, formatted as "start-end".',
             },
         },
@@ -23,8 +23,8 @@ readFile.spec = {
     },
 };
 
-export default async function readFile({filepath, range}) {
-    console.log(`Reading ${filepath}${range ? ` Lines: ${range}` : ''}`)
+export default async function readFile({ filepath, range }) {
+    console.log(`Reading ${filepath}${range ? ` Lines: ${range}` : ''}`);
     const fullPath = path.resolve(filepath);
     try {
         let content = await fs.readFile(fullPath, 'utf8');
@@ -33,7 +33,7 @@ export default async function readFile({filepath, range}) {
             const lines = content.split('\n');
             content = lines.slice(start - 1, end).join('\n');
         }
-        return {content};
+        return { content };
     } catch (error) {
         throw error; // Rethrow the error to be handled by the caller
     }

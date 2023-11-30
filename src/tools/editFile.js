@@ -15,8 +15,7 @@ editFile.spec = {
             },
             uniqueContext: {
                 type: 'string',
-                description:
-                    'The context that shows where in the file to start looking',
+                description: 'The context that shows where in the file to start looking',
             },
             exactTarget: {
                 type: 'string',
@@ -38,12 +37,7 @@ editFile.spec = {
  *
  * This thing tries to make this ergonomic for UC
  */
-export default async function editFile({
-                                           filepath,
-                                           uniqueContext,
-                                           exactTarget,
-                                           replacement,
-                                       }) {
+export default async function editFile({ filepath, uniqueContext, exactTarget, replacement }) {
     console.log('Editing', filepath);
     // console.log('CBTEST ctx', uniqueContext)
     // console.log('CBTEST sbstr', exactTarget)

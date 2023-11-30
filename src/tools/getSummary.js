@@ -19,13 +19,7 @@ export default async function getSummary() {
             `You can run tests with 'npm test' or 'npm test [file]'`,
         ],
         shell_results: await execMulti(
-            ...[
-                'cat priorities.md',
-                'git ls-files',
-                'git status -u',
-                'git log -n 5',
-                'cat package.json',
-            ],
+            ...['cat priorities.md', 'git ls-files', 'git status -u', 'git log -n 5', 'cat package.json']
         ),
     };
 }

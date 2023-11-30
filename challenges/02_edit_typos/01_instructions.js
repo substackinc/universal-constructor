@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Create the output directory if it doesn't exist
 const outputDir = join(__dirname, 'output');
 if (!fs.existsSync(outputDir)) {
-  fs.mkdirSync(outputDir);
+    fs.mkdirSync(outputDir);
 }
 
 // Copy the story with typos to the output directory
