@@ -151,6 +151,7 @@ class Dialog extends EventEmitter {
     }
 
     async _takeAction(run) {
+        // This function processes actions required by the thread's run
         let tool_outputs = [];
         for (let call of run.required_action.submit_tool_outputs.tool_calls) {
             if (call.type !== 'function' || !this.toolsByName[call.function.name]) {
@@ -166,14 +167,14 @@ class Dialog extends EventEmitter {
             }
             let f = this.toolsByName[call.function.name];
             try {
-                let arg = JSON.parse(call.function.arguments);
+                let arg = this._parseToolArguments(call.function.arguments);
                 const result = await f(arg);
                 tool_outputs.push({
                     tool_call_id: call.id,
                     output: JSON.stringify(result),
                 });
             } catch (ex) {
-                console.error(`Error running command ${call.function.name}(${call.function.arguments})`);
+                console.error(`Error running command ${call.function.name} with args ${call.function.arguments}`);
                 console.error(ex);
                 tool_outputs.push({
                     tool_call_id: call.id,
@@ -185,6 +186,21 @@ class Dialog extends EventEmitter {
             }
         }
         return this.beta.threads.runs.submitToolOutputs(this.thread.id, run.id, { tool_outputs });
+    }
+
+    _parseToolArguments(argumentsStr) {
+        // This function attempts to parse a JSON string, correcting for a common error pattern:
+        // an extra closing curly brace at the very end of the string.
+        try {
+            return JSON.parse(argumentsStr);
+        } catch (parseError) {
+            if (parseError instanceof SyntaxError && parseError.message.includes('Unexpected non-whitespace character after JSON')) {
+                let trimmedArguments = argumentsStr.replace(/\}\s*$/, '');
+                return JSON.parse(trimmedArguments);
+            } else {
+                throw parseError; // Re-throw exception if it's not the specific case we're catching.
+            }
+        }
     }
 
     async cancelOutstanding() {
