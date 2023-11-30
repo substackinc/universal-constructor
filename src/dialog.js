@@ -36,8 +36,8 @@ class Dialog extends EventEmitter {
         instructionsFile = 'instructions.md',
     } = {}) {
         // Grab name from git if possible, if not use username
-        const { stdout } = await execShell({command: 'git config --get user.name'})
-        this.userName = stdout ? stdout.trim() : process.env.USER;
+        const { success, stdout } = await execShell({command: 'git config --get user.name'})
+        this.userName = success && stdout ? stdout.trim() : process.env.USER;
 
         // setup assistant
         let assistantId = readFile(assistantFile);
