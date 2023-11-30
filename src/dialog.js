@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { readFileSync, writeFileSync } from 'fs';
 import OpenAI from 'openai';
-import importAllTools from './tools/index.js';
+import importAllTools, { execShell } from './tools/index.js';
 
 function readFile(file) {
     try {
@@ -35,6 +35,10 @@ class Dialog extends EventEmitter {
         assistantFile = '.assistant',
         instructionsFile = 'instructions.md',
     } = {}) {
+        // Grab name from git if possible, if not use username
+        const { stdout } = await execShell({command: 'git config --get user.name'})
+        this.userName = stdout ? stdout.trim() : process.env.USER;
+
         // setup assistant
         let assistantId = readFile(assistantFile);
         this.toolsByName = await importAllTools();
@@ -49,8 +53,8 @@ class Dialog extends EventEmitter {
 
         const assistantConfig = {
             name: 'UC',
-            description: `${process.env.user}'s Universal Constructor coding companion.`,
-            instructions: readFile(instructionsFile).replaceAll(':user', process.env.USER),
+            description: `${this.userName}'s Universal Constructor coding companion.`,
+            instructions: readFile(instructionsFile).replaceAll(':user', this.userName),
             tools,
             model: 'gpt-4-1106-preview',
         };

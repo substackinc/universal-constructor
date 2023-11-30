@@ -109,7 +109,7 @@ function setupReadline(commands) {
 }
 
 function prompt() {
-    console.log(chalk1(`\n@${process.env.USER}:`));
+    console.log(chalk1(`\n@${dialog.userName}:`));
     rl.prompt(true);
 }
 
@@ -121,7 +121,7 @@ async function handleInput(input) {
 function handleMessage({ role, content }) {
     let roleString;
     if (role === 'user') {
-        roleString = chalk1(`\n@${process.env.USER}:`) + '\n';
+        roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
     } else {
         roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     }
