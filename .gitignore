@@ -5,4 +5,8 @@ scratch.txt
 .thread*
 .assistant*
 scratch.js
-gym/arena
+
+# Custom rules for universal-constructor project
+challenges/*/output.txt
+challenges/*/output.js
+challenges/*/output/
