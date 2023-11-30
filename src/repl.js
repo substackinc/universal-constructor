@@ -156,8 +156,7 @@ function printWelcome() {
     console.log('╔═════════════════════════════════════════╗');
     console.log('║ Welcome to the Universal Constructor!   ║');
     console.log('║ ‾‾‾‾‾‾‾                                 ║');
-    console.log('║ /rs restarts the repl                   ║');
-    console.log('║ /cancel cancels any outstanding runs    ║');
+    console.log('║ ctrl+c to cancel/restart                ║');
     console.log('║ /reset gets you a fresh thread          ║');
     console.log('║ you gotta hit enter twice               ║');
     console.log('║                                         ║');
