@@ -1,5 +1,5 @@
 // src/tools/searchFile.js
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 
 searchFile.spec = {
@@ -17,11 +17,16 @@ searchFile.spec = {
                 description: 'The search string to find in the file.',
             },
         },
+        require: ['filepath', 'search']
     },
 };
 
-function sliceLines(str, lines) {
-    return str.split('\n').slice(lines).join('\n');
+function sliceLinesRight(str, nlines) {
+    return str.split('\n').slice(-nlines).join('\n');
+}
+
+function sliceLinesLeft(str, nlines) {
+    return str.split('\n').slice(0, nlines).join('\n');
 }
 
 export default async function searchFile({ filepath, search }) {
@@ -36,11 +41,13 @@ export default async function searchFile({ filepath, search }) {
             const right = splitContent[index + 1];
             matches.push({
                 // Include search term in bold
-                found: `${sliceLines(left, -1)}\u001b[1m${search}\u001b[22m${sliceLines(right, 1)}`,
-                context: `${sliceLines(left, -5)}${search}${sliceLines(right, 5)}`,
+                found: `${sliceLinesRight(left, 1)}\u001b[1m${search}\u001b[22m${sliceLinesLeft(right, 1)}`,
+                context: `${sliceLinesRight(left, 5)}${search}${sliceLinesLeft(right, 50)}`,
             });
         }
     });
+
+    //console.log(matches);
 
     return {
         success: true,
