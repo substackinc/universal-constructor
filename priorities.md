@@ -44,7 +44,7 @@ This file outlines the current priorities for the Universal Constructor project.
 
 ## Ideas for next small tasks:
 
--   Get editFile to 95%+ reliable for small code changes
+-   Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
 -   Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
--   Unit tests & the ability to work with them
 -   Teach UC to be able to fix/improve/add tools for itself as it goes (maybe plus resume after restart so it can do it live)
+-   Ability to change working directory; work on and understand other projects (Substack?)

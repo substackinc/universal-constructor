@@ -1,6 +1,8 @@
 import { spawn } from 'child_process';
 
 function start() {
+    // Set the terminal title
+    console.log('\u001b]2;Universal Constructor\u0007');
     // use --no-deprecation until openai fixes their fetch/punycode shit
     const process = spawn('node', ['--no-deprecation', 'src/repl.js'], { stdio: 'inherit' });
 
