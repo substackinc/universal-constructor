@@ -17,7 +17,7 @@ searchFile.spec = {
                 description: 'The search string to find in the file.',
             },
         },
-        require: ['filepath', 'search']
+        required: ['filepath', 'search']
     },
 };
 
