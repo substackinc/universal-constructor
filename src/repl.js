@@ -6,6 +6,12 @@ import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
 import cliSpinners from 'cli-spinners';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const ucDir = path.resolve(path.dirname(__filename), '..');
+const dotenvFile = path.resolve(path.dirname(__filename), '../.env');
 
 marked.use(
     markedTerminal({
@@ -18,7 +24,7 @@ marked.use(
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
 
-dotenv.config();
+dotenv.config({path: dotenvFile});
 let dialog;
 let rl;
 
@@ -31,7 +37,11 @@ async function main() {
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('done_thinking', handleDoneThinking);
 
-    await dialog.setup();
+    await dialog.setup({
+        threadFile: path.resolve(ucDir, '.thread'),
+        assistantFile: path.resolve(ucDir, '.assistant'),
+        instructionsFile: path.resolve(ucDir, 'instructions.md'),
+    });
 
     rl = await setupReadline({
         '/quit': () => process.exit(1),
