@@ -1,10 +1,16 @@
+#!/usr/bin/env node
 import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function start() {
     // Set the terminal title
     console.log('\u001b]2;Universal Constructor\u0007');
     // use --no-deprecation until openai fixes their fetch/punycode shit
-    const process = spawn('node', ['--no-deprecation', 'src/repl.js'], { stdio: 'inherit' });
+    const process = spawn('node', ['--no-deprecation', `${__dirname}/src/repl.js`], { stdio: 'inherit' });
 
     process.on('exit', (code) => {
         if (code === 0) {

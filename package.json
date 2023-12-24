@@ -3,6 +3,9 @@
     "description": "AI-powered coding assistant and problem-solver",
     "version": "1.0.0",
     "main": "run.js",
+  "bin": {
+    "uc": "./run.js"
+  },
     "author": {
         "name": "Chris Best",
         "email": "chris@substackinc.com",
