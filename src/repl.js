@@ -47,7 +47,7 @@ async function main() {
         '/quit': () => process.exit(1),
         '/reset': async () => {
             console.log('Resetting');
-            unlinkSync('.thread');
+            unlinkSync(path.resolve(ucDir, '.thread'));
             process.exit(0);
         },
         '/rs': () => process.exit(0),
