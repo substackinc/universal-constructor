@@ -193,6 +193,11 @@ class Dialog extends EventEmitter {
     }
 
     _parseToolArguments(argumentsStr) {
+
+        if (!argumentsStr.trim().startsWith('{')) {
+            throw new Error(`Expecting arguments formatted as JSON, but got "${argumentsStr}"`)
+        }
+
         // This function attempts to parse a JSON string, correcting for a common error pattern:
         // an extra closing curly brace at the very end of the string.
         try {

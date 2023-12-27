@@ -18,7 +18,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
-import { readFile } from './src/tools/readFile.js';
+import { readFile } from './src/tools/history.js';
 import { searchFile } from './src/tools/searchFile.js';
 const execPromise = promisify(exec);
 
