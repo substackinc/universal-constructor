@@ -131,6 +131,7 @@ async function handleInput(input) {
     const  maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5*60;
     let prefix = '';
 
+    // tell it if we've run any commands recently
     let commandHistory = await parseZshHistory(maxAge, 25);
     if (commandHistory.length) {
         prefix += `(I've run ${commandHistory.length} commands ${prevInput ? 'since my last message' : 'recently.'})`
