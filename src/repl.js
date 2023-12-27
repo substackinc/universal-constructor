@@ -8,6 +8,7 @@ import { unlinkSync } from 'fs';
 import cliSpinners from 'cli-spinners';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { getHistory, parseZshHistory } from './tools/history.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -27,6 +28,7 @@ const chalk2 = chalk.hex('#fcad01').bold;
 dotenv.config({path: dotenvFile});
 let dialog;
 let rl;
+let lastInput = 0;
 
 async function main() {
     printWelcome();
@@ -124,7 +126,21 @@ function prompt() {
 }
 
 async function handleInput(input) {
-    await dialog.processMessage(input);
+    const prevInput = lastInput;
+    lastInput = +new Date();
+    const  maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5*60;
+    let prefix = '';
+
+    let commandHistory = await parseZshHistory(maxAge, 25);
+    if (commandHistory.length) {
+        prefix += `(I've run ${commandHistory.length} commands ${prevInput ? 'since my last message' : 'recently.'})`
+    }
+    if (prefix) {
+        console.log(prefix);
+        prefix += '\n'
+    }
+
+    await dialog.processMessage(prefix + input);
     prompt();
 }
 

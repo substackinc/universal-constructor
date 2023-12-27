@@ -22,15 +22,15 @@ getHistory.spec = {
     },
 };
 
-export async function getHistory({ maxAge = 15 * 60, maxLines = 25 } = {}) {
-    console.log(`Getting history`, maxAge, maxLines);
+export async function getHistory({ maxAge = 15 * 60, maxLines = 25, quiet = false } = {}) {
+    console.log(`Getting command history`, maxAge, maxLines);
     return {
         success: true,
         commandHistory: await parseZshHistory(maxAge, maxLines)
     };
 }
 
-async function parseZshHistory(maxAge, maxLines) {
+export async function parseZshHistory(maxAge, maxLines) {
     let historyFilePath = path.join(os.homedir(), '.zsh_history');
     //console.log('Reading history from', historyFilePath);
     const historyData = await fs.readFile(historyFilePath, { encoding: 'utf-8' });
