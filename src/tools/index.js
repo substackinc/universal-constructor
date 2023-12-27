@@ -23,10 +23,19 @@ export default async function importAllTools(directory = dirname(fileURLToPath(i
         if (file.endsWith('.js') && file !== 'index.js') {
             const filePath = join(directory, file);
             const module = await import(filePath);
-            if (typeof module.default !== 'function' || !module.default.spec) {
-                console.error('Skipping invalid tool', module);
-            } else {
-                toolsByName[module.default.name] = module.default;
+            let toolsFound = 0;
+            for (let k of Object.keys(module)) {
+                if (typeof module[k] === 'function' && module[k].spec) {
+                    const name = module[k].name;
+                    if (toolsByName[name]) {
+                        throw new Error("Duplicate tool name: " + name);
+                    }
+                    toolsByName[name] = module[k];
+                    toolsFound++;
+                }
+            }
+            if (toolsFound === 0) {
+                console.error(`No valid tools found in ${file}. Did you forget the spec?`);
             }
         }
     }
