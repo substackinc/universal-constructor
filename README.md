@@ -18,17 +18,28 @@ The Universal Constructor Assistant, nicknamed UC, is an AI-powered coding assis
 1. Clone the repository to your local machine.
 2. Install the required npm packages:
 
-```
+```sh
 npm install
 ```
 
 3. Set up your environment variables by creating a `.env` file in the root of the project with the following content:
 
-```
+```sh
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 Replace `your_openai_api_key_here` with your [actual OpenAI API key](https://platform.openai.com/api-keys).
+
+4. Set up your ~/.zshrc to save shared history (So UC can see what you do between runs)
+
+```sh
+# Save history as we go
+setopt INC_APPEND_HISTORY
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
+export HISTSIZE=1000
+export SAVEHIST=1000
+```
 
 ### Running the Assistant
 
