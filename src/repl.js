@@ -138,7 +138,7 @@ async function handleInput(input) {
     // if (commandHistory.length) {
     //     recentUserChanges.push(`I've run ${commandHistory.length} shell commands.`);
     // }
-    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => `ran the shell command $ ${c.command}`)
+    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => `ran shell command $ ${c.command}`)
     recentUserChanges = recentUserChanges.concat(commandHistory);
 
     // let it if we've changed any files recently
