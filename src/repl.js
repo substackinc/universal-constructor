@@ -131,27 +131,27 @@ async function handleInput(input) {
     lastInput = +new Date();
     const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
     let recentUserChanges = [];
+    let contextMessage;
 
     // tell it if we've run any commands recently
-    let commandHistory = await parseZshHistory(maxAge, 25);
-    if (commandHistory.length) {
-        recentUserChanges.push(`I've run ${commandHistory.length} shell commands.`);
-    }
+    // let commandHistory = await parseZshHistory(maxAge, 25);
+    // if (commandHistory.length) {
+    //     recentUserChanges.push(`I've run ${commandHistory.length} shell commands.`);
+    // }
+    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => `ran the shell command $ ${c.command}`)
+    recentUserChanges = recentUserChanges.concat(commandHistory);
 
     // let it if we've changed any files recently
-    recentUserChanges = recentUserChanges.concat(getFileChangeSummary(prevInput));
+    recentUserChanges = recentUserChanges.concat(getFileChangeSummary(lastInput-maxAge*1000));
 
     if (recentUserChanges.length) {
-        let interval = prevInput ? 'since last message' : 'recently';
+        let interval = prevInput ? 'since last message' : 'in the past 5 minutes';
         let changeText = recentUserChanges.map(c => ` - ${c}`).join('\n');
-        let contextMessage = `[Automatic message] By thew way, ${interval}:\n${changeText}`;
+        contextMessage = `\n<informational-only>\n${interval}:\n${changeText}\n</informational-only>`;
         console.log(contextMessage);
-        await dialog.processMessage(contextMessage, input);
-    } else {
-        await dialog.processMessage(input);
-    }
 
-    await dialog.processMessage();
+    }
+    await dialog.processMessage(input, contextMessage);
     prompt();
 }
 

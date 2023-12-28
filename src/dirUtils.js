@@ -41,9 +41,9 @@ export function getFileChanges(since = 0) {
 }
 
 const verbs = {
-    'change': 'changed',
-    'add': 'added',
-    'unlink': 'deleted',
+    'change': 'changed the file',
+    'add': 'added the file',
+    'unlink': 'deleted the file',
 };
 
 export function getFileChangeSummary(since = 0, events = ['change', 'add', 'unlink']) {
