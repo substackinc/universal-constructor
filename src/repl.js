@@ -9,6 +9,7 @@ import cliSpinners from 'cli-spinners';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { getHistory, parseZshHistory } from './tools/history.js';
+import { getFileChangeSummary } from './watcher.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -19,13 +20,13 @@ marked.use(
         width: process.stdout.columns - 1,
         reflowText: true,
         tab: 2,
-    })
+    }),
 );
 
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
 
-dotenv.config({path: dotenvFile});
+dotenv.config({ path: dotenvFile });
 let dialog;
 let rl;
 let lastInput = 0;
@@ -128,17 +129,25 @@ function prompt() {
 async function handleInput(input) {
     const prevInput = lastInput;
     lastInput = +new Date();
-    const  maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5*60;
+    const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
+    let recentUserChanges = []
     let prefix = '';
 
     // tell it if we've run any commands recently
     let commandHistory = await parseZshHistory(maxAge, 25);
     if (commandHistory.length) {
-        prefix += `(I've run ${commandHistory.length} commands ${prevInput ? 'since my last message' : 'recently.'})`
+        recentUserChanges.push(`Run ${commandHistory.length} shell commands.`)
     }
-    if (prefix) {
+
+    // let it if we've changed any files recenty
+    recentUserChanges = recentUserChanges.concat(getFileChangeSummary(prevInput));
+
+    if (recentUserChanges.length) {
+        let interval = prevInput ? 'since last message' : 'recently';
+        let changeText = recentUserChanges.map(c => ` - ${c}`).join('\n');
+
+        prefix = `(User changes ${interval}:\n${changeText}\n)`;
         console.log(prefix);
-        prefix += '\n'
     }
 
     await dialog.processMessage(prefix + input);
