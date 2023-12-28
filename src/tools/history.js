@@ -31,35 +31,40 @@ export async function getHistory({ maxAge = 15 * 60, maxLines = 25, quiet = fals
 }
 
 export async function parseZshHistory(maxAge, maxLines) {
-    let historyFilePath = path.join(os.homedir(), '.zsh_history');
-    //console.log('Reading history from', historyFilePath);
-    const historyData = await fs.readFile(historyFilePath, { encoding: 'utf-8' });
-    const lines = historyData.split('\n').filter(line => line && line.trim());
-    let parsedHistory = [];
+    try {
+        let historyFilePath = process.env.HISTFILE || path.join(os.homedir(), '.zsh_history');
+        //console.log('Reading history from', historyFilePath);
+        const historyData = await fs.readFile(historyFilePath, { encoding: 'utf-8' });
+        const lines = historyData.split('\n').filter(line => line && line.trim());
+        let parsedHistory = [];
 
-    for (const line of lines) {
-        // Extended history lines start with ": ", followed by the timestamp and duration
-        let lastTimeSeen = 0;
-        if (line.charAt(0) === ':') {
-            let [,timestamp, str] = line.split(':');
-            timestamp = timestamp.trim();
-            let [, command] = str.split(';')
+        for (const line of lines) {
+            // Extended history lines start with ": ", followed by the timestamp and duration
+            let lastTimeSeen = 0;
+            if (line.charAt(0) === ':') {
+                let [,timestamp, str] = line.split(':');
+                timestamp = timestamp.trim();
+                let [, command] = str.split(';')
 
-            const nowMs = +new Date();
-            const thenMs = parseInt(timestamp) * 1000;
+                const nowMs = +new Date();
+                const thenMs = parseInt(timestamp) * 1000;
 
-            const secondsAgo = Math.round((nowMs - thenMs)/1000);
-            parsedHistory.push({ command: command.trim(), secondsAgo });
+                const secondsAgo = Math.round((nowMs - thenMs)/1000);
+                parsedHistory.push({ command: command.trim(), secondsAgo });
 
-            if (secondsAgo > maxAge) {
-                // if we see a line older than maxAge, we can get rid of it and everything that came before
-               parsedHistory = [];
+                if (secondsAgo > maxAge) {
+                    // if we see a line older than maxAge, we can get rid of it and everything that came before
+                    parsedHistory = [];
+                }
+            } else {
+                // Lines without timestamp
+                parsedHistory.push({ command: line });
             }
-        } else {
-            // Lines without timestamp
-            parsedHistory.push({ command: line });
         }
-    }
 
-    return parsedHistory.slice(-maxLines);
+        return parsedHistory.slice(-maxLines);
+    } catch (ex) {
+        console.error("Failed to grab zsh history", ex);
+        return [];
+    }
 }
