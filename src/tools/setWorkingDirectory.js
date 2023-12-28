@@ -1,6 +1,7 @@
 // src/tools/setWorkingDirectory.js
 import fs from 'fs';
 import path from 'path';
+import { chdir } from '../dirUtils.js';
 
 /**
  * Sets the working directory for the process.
@@ -42,7 +43,7 @@ export default async function setWorkingDirectory({ dir }) {
     throw new Error('The specified directory does not exist.');
   }
 
-  process.chdir(dir);
+  await chdir(dir);
   console.log("Changed directory to: ", process.cwd())
   return {
     success: true,

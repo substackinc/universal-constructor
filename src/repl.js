@@ -9,7 +9,7 @@ import cliSpinners from 'cli-spinners';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { getHistory, parseZshHistory } from './tools/history.js';
-import { getFileChangeSummary } from './watcher.js';
+import { getFileChangeSummary } from './dirUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -139,7 +139,7 @@ async function handleInput(input) {
         recentUserChanges.push(`Run ${commandHistory.length} shell commands.`)
     }
 
-    // let it if we've changed any files recenty
+    // let it if we've changed any files recently
     recentUserChanges = recentUserChanges.concat(getFileChangeSummary(prevInput));
 
     if (recentUserChanges.length) {
