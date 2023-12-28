@@ -112,15 +112,20 @@ class Dialog extends EventEmitter {
         }
     }
 
-    async processMessage(messageContent) {
+    async processMessage(...messages) {
         // fetch and fire any messages so we don't miss any before this new one we create
         await this._fetchMessages();
 
-        let message = await this.beta.threads.messages.create(this.thread.id, {
-            role: 'user',
-            content: messageContent,
-        });
-        this.lastMessageId = message.id;
+        for (let messageContent of messages) {
+            if (!messageContent) {
+                continue;
+            }
+            let message = await this.beta.threads.messages.create(this.thread.id, {
+                role: 'user',
+                content: messageContent,
+            });
+            this.lastMessageId = message.id;
+        }
 
         this.emit('start_thinking');
         let run = await this.beta.threads.runs.create(this.thread.id, {

@@ -5,11 +5,14 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 export const UC_DIR = path.resolve(path.dirname(__filename), '..');
 
-const changedPaths = {};
+let changedPaths = {};
 let watcher;
+
+await setupWatcher();
 
 async function setupWatcher() {
     if (watcher) {
+        changedPaths = {};
         await watcher.close();
     }
     watcher = chokidar.watch('.', {
@@ -19,7 +22,6 @@ async function setupWatcher() {
         //console.log(event, path);
         changedPaths[path] = { path, event, timestamp: +new Date() };
     });
-
 }
 
 export async function chdir(directory) {
@@ -50,7 +52,7 @@ export function getFileChangeSummary(since = 0, events = ['change', 'add', 'unli
 
     for (let c of changes) {
         if (events.includes(c.event)) {
-            summary.push(verbs[c.event] + ' ' + c.path + ' CBTEST');
+            summary.push(verbs[c.event] + ' ' + c.path);
         }
     }
     return summary;

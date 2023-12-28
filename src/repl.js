@@ -130,13 +130,12 @@ async function handleInput(input) {
     const prevInput = lastInput;
     lastInput = +new Date();
     const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
-    let recentUserChanges = []
-    let prefix = '';
+    let recentUserChanges = [];
 
     // tell it if we've run any commands recently
     let commandHistory = await parseZshHistory(maxAge, 25);
     if (commandHistory.length) {
-        recentUserChanges.push(`Run ${commandHistory.length} shell commands.`)
+        recentUserChanges.push(`I've run ${commandHistory.length} shell commands.`);
     }
 
     // let it if we've changed any files recently
@@ -145,12 +144,14 @@ async function handleInput(input) {
     if (recentUserChanges.length) {
         let interval = prevInput ? 'since last message' : 'recently';
         let changeText = recentUserChanges.map(c => ` - ${c}`).join('\n');
-
-        prefix = `(User changes ${interval}:\n${changeText}\n)`;
-        console.log(prefix);
+        let contextMessage = `[Automatic message] By thew way, ${interval}:\n${changeText}`;
+        console.log(contextMessage);
+        await dialog.processMessage(contextMessage, input);
+    } else {
+        await dialog.processMessage(input);
     }
 
-    await dialog.processMessage(prefix + input);
+    await dialog.processMessage();
     prompt();
 }
 
