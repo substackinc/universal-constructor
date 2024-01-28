@@ -23,7 +23,6 @@ class Listener extends EventEmitter {
             channels: 1,
             debug: false,
             exitOnSilence: 6,
-            //device: "Chris’s AirPods Max"
             device: 'default'
         });
 
@@ -95,7 +94,8 @@ class Listener extends EventEmitter {
     isThisJunk(transcription) {
         // for some reason it tends to spit out other languages when it hears noise
         // Regex to detect korean & russian characters
-        const unwantedCharsRegex = /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uD7B0-\uD7FF\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F]/g;
+        //const unwantedCharsRegex = /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uD7B0-\uD7FF\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F]/g;
+        const unwantedCharsRegex = /[^\u0000-\u007F0-9.,?!@#$%^&*()_+]/g;
         if (unwantedCharsRegex.test(transcription)) {
             return true;
         }

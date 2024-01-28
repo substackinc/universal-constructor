@@ -27,6 +27,7 @@ class Dialog extends EventEmitter {
         this.thread = null;
         this.lastMessageId = null;
         this.toolsByName = null;
+        this.thinking = false;
     }
 
     async setup({
@@ -112,21 +113,41 @@ class Dialog extends EventEmitter {
         }
     }
 
-    async processMessage(...messages) {
+    async addMessage(text, typeTag) {
+        if (!text) {
+            return;
+        }
+
         // fetch and fire any messages so we don't miss any before this new one we create
         await this._fetchMessages();
 
-        for (let messageContent of messages) {
-            if (!messageContent) {
-                continue;
+        if (text) {
+            let content = text;
+            if (typeTag) {
+                content = `<${typeTag}>${text}</${typeTag}>`
             }
-            let message = await this.beta.threads.messages.create(this.thread.id, {
-                role: 'user',
-                content: messageContent,
-            });
-            this.lastMessageId = message.id;
-        }
 
+            let create = async () => {
+                let m = await this.beta.threads.messages.create(this.thread.id, {
+                    role: 'user',
+                    content
+                });
+                this.lastMessageId = m.id;
+            }
+
+            if (this.thinking) {
+                this.once('done_thinking', create)
+            } else {
+                await create();
+            }
+        }
+    }
+
+    async processRun() {
+        // fetch and fire any messages so we don't miss any before this new one we create
+        await this._fetchMessages();
+
+        this.thinking = true;
         this.emit('start_thinking');
         let run = await this.beta.threads.runs.create(this.thread.id, {
             assistant_id: this.assistant.id,
@@ -154,6 +175,7 @@ class Dialog extends EventEmitter {
             // sleep a little so we're not just hammering the api
             await new Promise((r) => setTimeout(r, 500));
         }
+        this.thinking = false;
         this.emit('done_thinking', { run });
         await this._fetchMessages();
         return { run };

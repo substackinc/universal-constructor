@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { getHistory, parseZshHistory } from './tools/history.js';
 import { getFileChangeSummary } from './dirUtils.js';
+import Listener from './listener.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -30,6 +31,8 @@ dotenv.config({ path: dotenvFile });
 let dialog;
 let rl;
 let lastInput = 0;
+let listener = null;
+let working = false;
 
 async function main() {
     printWelcome();
@@ -39,6 +42,8 @@ async function main() {
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('done_thinking', handleDoneThinking);
+
+    await startListening();
 
     await dialog.setup({
         threadFile: path.resolve(ucDir, '.thread'),
@@ -60,9 +65,35 @@ async function main() {
     prompt();
 }
 
+async function startListening() {
+    listener = new Listener();
+    listener.on('text', async (text) => {
+        if (!text.trim()) {
+            return;
+        }
+        console.log("Transcribed:", text);
+        await dialog.addMessage(text, 'transcribedVoice');
+
+        // have some special words that trigger us to send.
+        let l = text.toLowerCase();
+        if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("please?") || l.endsWith("please."))) {
+            working = true;
+            await dialog.processRun();
+            working = false;
+        }
+
+        if (!working) {
+            prompt();
+        }
+    });
+    await listener.start();
+    console.log("Listening...")
+}
+
+
 function setupReadline(commands) {
     let inputBuffer = [];
-    let working = false;
+
     let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -70,26 +101,22 @@ function setupReadline(commands) {
         terminal: true,
     });
 
-    async function submit() {
-        let input = inputBuffer.join('\n');
-        inputBuffer = [];
-        try {
-            working = true;
-            await handleInput(input);
-        } finally {
-            working = false;
-        }
-    }
 
     rl.on('line', async (line) => {
-        if (line === '' && inputBuffer.join('').trim() !== '') {
-            // enter on a blank line submits
-            await submit();
-        } else if (commands[line]) {
-            await commands[line]();
-        } else {
-            inputBuffer.push(line);
-            rl.prompt();
+        try {
+            working = true;
+            if (commands[line]) {
+                await commands[line]();
+            } else if (line === '') {
+                // empty line == go
+                await dialog.processRun();
+                prompt();
+            } else {
+                await dialog.addMessage(line);
+                rl.prompt();
+            }
+        } finally {
+            working = false;
         }
     });
 
@@ -124,35 +151,6 @@ function setupReadline(commands) {
 function prompt() {
     console.log(chalk1(`\n@${dialog.userName}:`));
     rl.prompt(true);
-}
-
-async function handleInput(input) {
-    const prevInput = lastInput;
-    lastInput = +new Date();
-    const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
-    let recentUserChanges = [];
-    let contextMessage;
-
-    // tell it if we've run any commands recently
-    // let commandHistory = await parseZshHistory(maxAge, 25);
-    // if (commandHistory.length) {
-    //     recentUserChanges.push(`I've run ${commandHistory.length} shell commands.`);
-    // }
-    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => `ran shell command $ ${c.command}`)
-    recentUserChanges = recentUserChanges.concat(commandHistory);
-
-    // let it if we've changed any files recently
-    recentUserChanges = recentUserChanges.concat(getFileChangeSummary(lastInput-maxAge*1000));
-
-    if (recentUserChanges.length) {
-        let interval = prevInput ? 'since last message' : 'in the past 5 minutes';
-        let changeText = recentUserChanges.map(c => ` - ${c}`).join('\n');
-        contextMessage = `\n<informational-only>\n${interval}:\n${changeText}\n</informational-only>`;
-        console.log(contextMessage);
-
-    }
-    await dialog.processMessage(input, contextMessage);
-    prompt();
 }
 
 function handleMessage({ role, content }) {
