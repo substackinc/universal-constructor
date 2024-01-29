@@ -13,7 +13,19 @@ const play = (file) => new Promise((resolve, reject) => {
     });
 });
 
-async function speak(text) {
+async function speak(text, truncate=100) {
+
+    if (truncate > 0 && text.length > truncate) {
+        // last para
+        text = text.split('\n').pop();
+
+        if (tex.length > truncate) {
+           // be brutal
+            text = text.slice(-truncate)
+        }
+    }
+    console.log('CBTEST truncate', truncate, text);
+
     const speechFile = 'test.mp3'
     const mp3 = await openai.audio.speech.create({
         model: "tts-1-hd",

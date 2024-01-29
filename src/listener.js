@@ -106,6 +106,27 @@ class Listener extends EventEmitter {
         if (unwantedCharsRegex.test(transcription)) {
             return true;
         }
+
+        if(transcription.startsWith('https://"') || transcription.startsWith('www.')) {
+            return true;
+        }
+
+        const junkPhrases = [
+            'Pfft.',
+            'Thank you.',
+            'Thank you for watching!',
+            'Thank you for watching.',
+            'Thanks for watching!',
+            'Bye-bye.',
+            'Bye. Bye.',
+            'Bye.',
+            'Cheers!',
+            'Thank you so much for having us. Appreciate it.'
+        ]
+        if (junkPhrases.includes(transcription)) {
+            return true;
+        }
+
         return false;
     }
 
