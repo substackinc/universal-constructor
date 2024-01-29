@@ -14,7 +14,7 @@ class Listener extends EventEmitter {
         dotenv.config();
         this.openai = new OpenAI();
         this.micInstance = null;
-        this.samplerate = 44100;
+        this.samplerate = 16000; //44100;
     }
 
     async start() {
@@ -29,7 +29,7 @@ class Listener extends EventEmitter {
         const inputStream = this.micInstance.getAudioStream();
         const vadStream = VAD.createStream({
             mode: VAD.Mode.VERY_AGGRESSIVE,
-            audioFrequency: 16000,
+            audioFrequency: this.samplerate,
             debounceTime: 2000,
         });
 
