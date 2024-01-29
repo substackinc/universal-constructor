@@ -57,6 +57,10 @@ class Listener extends EventEmitter {
             })
             this.maxRms = 0;
             this.maxDb = -99999;
+            // trying this: write one chunk of data from before, so we don't miss the initial sound.
+            if (this.lastData) {
+                this.fileEncoder.write(this.lastData);
+            }
         } else if (speech.end) {
             speech.maxRms = this.maxRms;
             speech.maxDb = this.maxDb;
@@ -80,6 +84,9 @@ class Listener extends EventEmitter {
             this.maxRms = Math.max(this.maxRms, rms);
             this.maxDb = Math.max(this.maxDb, db);
             this.fileEncoder.write(audioData);
+            this.lastData = null;
+        } else {
+            this.lastData = audioData;
         }
     }
 

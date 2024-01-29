@@ -31,7 +31,7 @@ class Dialog extends EventEmitter {
     }
 
     async setup({
-        pastMessagesToRetrieve = 2,
+        pastMessagesToRetrieve = 5,
         threadFile = '.thread',
         assistantFile = '.assistant',
         instructionsFile = 'instructions.md',
@@ -85,11 +85,11 @@ class Dialog extends EventEmitter {
 
         // fetch recent messages and fire events for them
         if (pastMessagesToRetrieve > 0) {
-            await this._fetchMessages(pastMessagesToRetrieve);
+            await this._fetchMessages(pastMessagesToRetrieve, { historic: true });
         }
     }
 
-    async _fetchMessages(limit = 20) {
+    async _fetchMessages(limit = 20, extraInfo) {
         const { data } = await this.beta.threads.messages.list(this.thread.id, {
             order: 'desc',
             before: this.lastMessageId,
@@ -104,10 +104,12 @@ class Dialog extends EventEmitter {
                     console.error(message.content);
                     content = '<missing>';
                 }
+
                 this.emit('message', {
                     role: message.role,
                     content,
                     message,
+                    ...extraInfo
                 });
             }
         }

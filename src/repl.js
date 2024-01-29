@@ -11,6 +11,7 @@ import path from 'path';
 import { getHistory, parseZshHistory } from './tools/history.js';
 import { getFileChangeSummary } from './dirUtils.js';
 import Listener from './listener.js';
+import speak from './speaker.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -76,7 +77,7 @@ async function startListening() {
 
         // have some special words that trigger us to send.
         let l = text.toLowerCase();
-        if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("please?") || l.endsWith("please."))) {
+        if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please."))) {
             working = true;
             await dialog.processRun();
             working = false;
@@ -153,12 +154,15 @@ function prompt() {
     rl.prompt(true);
 }
 
-function handleMessage({ role, content }) {
+function handleMessage({ role, content, historic }) {
     let roleString;
     if (role === 'user') {
         roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
     } else {
         roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+        if (!historic) {
+            speak(content);
+        }
     }
     let markedContent = marked(content).trimEnd();
     console.log(roleString + markedContent);
