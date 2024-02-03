@@ -126,7 +126,7 @@ class Dialog extends EventEmitter {
         if (text) {
             let content = text;
             if (typeTag) {
-                content = `<${typeTag}>${text}</${typeTag}>`
+                content = `<${typeTag}>\n${text}\n</${typeTag}>`
             }
 
             let create = async () => {
@@ -142,6 +142,7 @@ class Dialog extends EventEmitter {
             } else {
                 await create();
             }
+            return content;
         }
     }
 

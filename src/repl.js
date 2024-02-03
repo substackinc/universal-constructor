@@ -12,6 +12,7 @@ import { getHistory, parseZshHistory } from './tools/history.js';
 import { getFileChangeSummary } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
+import minimist from 'minimist';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -34,17 +35,42 @@ let rl;
 let lastInput = 0;
 let listener = null;
 let working = false;
+let shouldSpeak = false;
+let shouldUpdate = false;
 
 async function main() {
+    const args = minimist(process.argv.slice(2), {
+        boolean: ['listen', 'speak', 'update'],
+        alias: { l: 'listen', s: 'speak', u: 'update', h: 'help'  },
+        default: { listen: false, speak: false, updates: false },
+    });
+    // Handle --help option
+    if (args.help) {
+        printHelp();
+        process.exit(0);
+    }
+
     printWelcome();
 
-    dialog = new Dialog();
+    if (args.speak) {
+        shouldSpeak = true;
+        console.log("Speech enabled");
+    }
+    if (args.update) {
+        shouldUpdate = true;
+        console.log("File and command updates enabled");
+    }
 
+
+    dialog = new Dialog();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('done_thinking', handleDoneThinking);
 
-    await startListening();
+    // If listen flag is true, start microphone listener
+    if ( args.listen) {
+        await startListening();
+    }
 
     await dialog.setup({
         threadFile: path.resolve(ucDir, '.thread'),
@@ -79,6 +105,9 @@ async function startListening() {
         let l = text.toLowerCase();
         if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please."))) {
             working = true;
+            if (shouldUpdate) {
+                await addUpdateMessages()
+            }
             await dialog.processRun();
             working = false;
         }
@@ -110,6 +139,9 @@ function setupReadline(commands) {
                 await commands[line]();
             } else if (line === '') {
                 // empty line == go
+                if (shouldUpdate) {
+                    await addUpdateMessages()
+                }
                 await dialog.processRun();
                 prompt();
             } else {
@@ -160,7 +192,7 @@ function handleMessage({ role, content, historic }) {
         roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
     } else {
         roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
-        if (!historic) {
+        if (!historic && shouldSpeak) {
             speak(content);
         }
     }
@@ -190,6 +222,27 @@ function handleDoneThinking() {
     cancelSpinner && cancelSpinner();
 }
 
+async function addUpdateMessages() {
+    const prevInput = lastInput;
+    lastInput = +new Date();
+    const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
+    let recentUserChanges = [];
+    let contextMessage;
+    let interval = prevInput ? 'since last message' : 'in the past 5 minutes';
+
+    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => c.command);
+    if (commandHistory.length) {
+        let m = await dialog.addMessage(commandHistory.join('\n'), 'recentlyRunCommands');
+        console.log(m);
+    }
+
+    let changedFiles = getFileChangeSummary(lastInput-maxAge*1000)
+    if (changedFiles.length) {
+        let m = await dialog.addMessage(changedFiles.join('\n'), 'recentlyChangedFiles')
+        console.log(m);
+    }
+}
+
 function printWelcome() {
     console.log('\n');
     console.log('╔═════════════════════════════════════════╗');
@@ -201,6 +254,15 @@ function printWelcome() {
     console.log('║                                         ║');
     console.log('║ have fun <3                             ║');
     console.log('╚═════════════════════════════════════════╝');
+}
+
+function printHelp() {
+    console.log(`Usage: uc [options]\n`);
+    console.log(`Options:`);
+    console.log(`  --listen, -l          Listen for voice input via microphone (default: false)`);
+    console.log(`  --speak, -s           Speak out the content (default: false)`);
+    console.log(`  --updates, -u         Perform file & command-line updates (default: false)`);
+    console.log(`  --help, -h            Display this help message and exit`);
 }
 
 // run the main function

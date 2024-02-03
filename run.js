@@ -10,9 +10,13 @@ function start() {
     // Set the terminal title
     console.log('\u001b]2;Universal Constructor\u0007');
     // use --no-deprecation until openai fixes their fetch/punycode shit
-    const process = spawn('node', ['--no-deprecation', `${__dirname}/src/repl.js`], { stdio: 'inherit' });
+    const childProcess = spawn('node', [
+            '--no-deprecation',
+            `${__dirname}/src/repl.js`,
+            ...process.argv.slice(2),
+        ], { stdio: 'inherit' });
 
-    process.on('exit', (code) => {
+    childProcess.on('exit', (code) => {
         if (code === 0) {
             console.log('Restarting. (Press ctrl-c twice to exit)');
             start();

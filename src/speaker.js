@@ -19,7 +19,7 @@ async function speak(text, truncate=100) {
         // last para
         text = text.split('\n').pop();
 
-        if (tex.length > truncate) {
+        if (text.length > truncate) {
            // be brutal
             text = text.slice(-truncate)
         }
