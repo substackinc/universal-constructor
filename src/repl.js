@@ -8,7 +8,7 @@ import { unlinkSync } from 'fs';
 import cliSpinners from 'cli-spinners';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { getHistory, parseZshHistory } from './tools/history.js';
+import { parseZshHistory } from './tools/history.js';
 import { getFileChangeSummary } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
@@ -122,15 +122,12 @@ async function startListening() {
 
 
 function setupReadline(commands) {
-    let inputBuffer = [];
-
     let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
         prompt: '> ',
         terminal: true,
     });
-
 
     rl.on('line', async (line) => {
         try {
@@ -171,7 +168,7 @@ function setupReadline(commands) {
                 console.log('\nCancelling... (ctrl-d quits)');
                 await dialog.cancelOutstanding();
             } else {
-                // otherwise lets exit cleanly so we can be restarted if appropriate
+                // otherwise let's exit cleanly, so we can be restarted if appropriate
                 console.log('\nRestarting... (ctrl-d quits)');
                 process.exit(0);
             }
@@ -193,7 +190,7 @@ function handleMessage({ role, content, historic }) {
     } else {
         roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
         if (!historic && shouldSpeak) {
-            speak(content);
+            speak(content).then();
         }
     }
     let markedContent = marked(content).trimEnd();
