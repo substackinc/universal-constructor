@@ -1,14 +1,13 @@
+import './config.js';
 import VAD from 'node-vad';
 import mic from 'mic';
 import { OpenAI } from 'openai';
-import dotenv from 'dotenv';
 import fs from 'fs';
 import { FileEncoder } from 'flac-bindings';
 
 const vad = new VAD(VAD.Mode.VERY_AGGRESSIVE);
 let rate = 44100; // 16000;
 
-dotenv.config();
 const openai = new OpenAI();
 
 const micInstance = mic({

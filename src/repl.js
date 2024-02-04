@@ -1,22 +1,17 @@
+import './config.js';
 import Dialog from './dialog.js';
-import dotenv from 'dotenv';
 import readline from 'readline';
 import chalk from 'chalk';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { unlinkSync } from 'fs';
 import cliSpinners from 'cli-spinners';
-import { fileURLToPath } from 'url';
 import path from 'path';
 import { parseZshHistory } from './tools/history.js';
-import { getFileChangeSummary } from './dirUtils.js';
+import { getFileChangeSummary, UC_DIR } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
-
-const __filename = fileURLToPath(import.meta.url);
-const ucDir = path.resolve(path.dirname(__filename), '..');
-const dotenvFile = path.resolve(path.dirname(__filename), '../.env');
 
 marked.use(
     markedTerminal({
@@ -29,7 +24,6 @@ marked.use(
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
 
-dotenv.config({ path: dotenvFile });
 let dialog;
 let rl;
 let lastInput = +new Date();
@@ -73,16 +67,16 @@ async function main() {
     }
 
     await dialog.setup({
-        threadFile: path.resolve(ucDir, '.thread'),
-        assistantFile: path.resolve(ucDir, '.assistant'),
-        instructionsFile: path.resolve(ucDir, 'instructions.md'),
+        threadFile: path.resolve(UC_DIR, '.thread'),
+        assistantFile: path.resolve(UC_DIR, '.assistant'),
+        instructionsFile: path.resolve(UC_DIR, 'instructions.md'),
     });
 
     rl = await setupReadline({
         '/quit': () => process.exit(1),
         '/reset': async () => {
             console.log('Resetting');
-            unlinkSync(path.resolve(ucDir, '.thread'));
+            unlinkSync(path.resolve(UC_DIR, '.thread'));
             process.exit(0);
         },
         '/rs': () => process.exit(0),
