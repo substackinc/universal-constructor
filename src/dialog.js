@@ -57,7 +57,7 @@ class Dialog extends EventEmitter {
             description: `${this.userName}'s Universal Constructor coding companion.`,
             instructions: readFile(instructionsFile).replaceAll(':user', this.userName),
             tools,
-            model: 'gpt-4-1106-preview',
+            model: 'gpt-4-0125-preview',
         };
         if (!assistantId) {
             console.log(`Creating a new assistant: ${assistantConfig.name}, ${assistantConfig.description}`);
