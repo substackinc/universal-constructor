@@ -37,6 +37,7 @@ export async function parseZshHistory(maxAge, maxLines) {
         const historyData = await fs.readFile(historyFilePath, { encoding: 'utf-8' });
         const lines = historyData.split('\n').filter(line => line && line.trim());
         let parsedHistory = [];
+        const nowMs = +new Date();
 
         for (const line of lines) {
             // Extended history lines start with ": ", followed by the timestamp and duration
@@ -46,7 +47,6 @@ export async function parseZshHistory(maxAge, maxLines) {
                 timestamp = timestamp.trim();
                 let [, command] = str.split(';')
 
-                const nowMs = +new Date();
                 const thenMs = parseInt(timestamp) * 1000;
 
                 const secondsAgo = Math.round((nowMs - thenMs)/1000);

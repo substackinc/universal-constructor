@@ -32,7 +32,7 @@ const chalk2 = chalk.hex('#fcad01').bold;
 dotenv.config({ path: dotenvFile });
 let dialog;
 let rl;
-let lastInput = 0;
+let lastInput = +new Date();
 let listener = null;
 let working = false;
 let shouldSpeak = false;
@@ -47,7 +47,7 @@ async function main() {
     // Handle --help option
     if (args.help) {
         printHelp();
-        process.exit(0);
+        process.exit(1); // error code so that we don't restart
     }
 
     printWelcome();
@@ -226,9 +226,6 @@ async function addUpdateMessages() {
     const prevInput = lastInput;
     lastInput = +new Date();
     const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
-    let recentUserChanges = [];
-    let contextMessage;
-    let interval = prevInput ? 'since last message' : 'in the past 5 minutes';
 
     let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => c.command);
     if (commandHistory.length) {

@@ -2,6 +2,8 @@ import fs from 'fs';
 import { OpenAI } from 'openai';
 import dotenv from 'dotenv';
 import playSound from 'play-sound';
+import path from 'path';
+import os from 'os';
 dotenv.config();
 const openai = new OpenAI();
 const player = playSound();
@@ -32,7 +34,7 @@ async function speak(text, truncate=200) {
     }
     //console.log('CBTEST truncate', truncate, text);
 
-    const speechFile = 'test.mp3'
+    const speechFile = path.join(os.tmpdir(), 'uc.mp3');
     const mp3 = await openai.audio.speech.create({
         model: "tts-1-hd",
         voice: "onyx",
