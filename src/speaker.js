@@ -13,18 +13,24 @@ const play = (file) => new Promise((resolve, reject) => {
     });
 });
 
-async function speak(text, truncate=100) {
+async function speak(text, truncate=200) {
 
     if (truncate > 0 && text.length > truncate) {
         // last para
         text = text.split('\n').pop();
 
-        if (text.length > truncate) {
-           // be brutal
-            text = text.slice(-truncate)
+        while (text.length > truncate) {
+            let sentences = text.split('. ');
+            if (sentences.length > 1) {
+                text = sentences.slice(1).join('. ');
+            }
+            else {
+                // be brutal
+                text = text.slice(-truncate)
+            }
         }
     }
-    console.log('CBTEST truncate', truncate, text);
+    //console.log('CBTEST truncate', truncate, text);
 
     const speechFile = 'test.mp3'
     const mp3 = await openai.audio.speech.create({
