@@ -1,13 +1,10 @@
 #!/usr/bin/env node --no-deprecation
-import punycode from 'punycode/punycode.js';
 import EventEmitter from 'events';
-import speak from './speaker.js';
 import OpenAI from 'openai';
 import fs, { readFileSync } from 'fs';
 
 import { Marked, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
-import storage from 'node-persist';
 import { loadJson, saveJson } from './fileUtils.js';
 import importAllTools, { execShell } from './tools/index.js';
 
@@ -111,13 +108,6 @@ class Dialog2 extends EventEmitter {
                     }
                 }
             }
-        }
-        for (const index in toolCallsByIndex) {
-            console.log("CBTEST FULL TOOL CALL", index);
-            console.log(toolCallsByIndex[index]);
-
-
-
         }
         let tool_calls = Object.values(toolCallsByIndex);
         if (tool_calls.length) {

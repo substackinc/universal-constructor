@@ -75,7 +75,7 @@ async function main() {
     }
 
     await dialog.setup({
-        threadFile: path.resolve(ucDir, '.thread2'),
+        threadFile: path.resolve(ucDir, '.thread'),
         assistantFile: path.resolve(ucDir, '.assistant'),
         instructionsFile: path.resolve(ucDir, 'instructions.md'),
     });
@@ -201,6 +201,10 @@ function handleThinking({message, chunk, first}) {
 }
 
 function handleMessage({ role, content, historic, streamed }) {
+    if (!content || role === 'tool') {
+        return;
+    }
+
     let roleString;
     if (role === 'user') {
         roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
