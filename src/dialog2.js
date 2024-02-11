@@ -3,17 +3,8 @@ import EventEmitter from 'events';
 import OpenAI from 'openai';
 import fs, { readFileSync } from 'fs';
 
-import { Marked, marked } from 'marked';
-import { markedTerminal } from 'marked-terminal';
 import { loadJson, saveJson } from './fileUtils.js';
 import importAllTools, { execShell } from './tools/index.js';
-
-const markedHtml = new Marked();
-const markedTerm = new Marked(markedTerminal({
-    width: process.stdout.columns - 1,
-    reflowText: true,
-    tab: 2,
-}));
 
 class Dialog2 extends EventEmitter {
 
@@ -191,7 +182,7 @@ class Dialog2 extends EventEmitter {
                 parseError instanceof SyntaxError &&
                 parseError.message.includes('Unexpected non-whitespace character after JSON')
             ) {
-                let trimmedArguments = argumentsStr.replace(/\}\s*$/, '');
+                let trimmedArguments = argumentsStr.replace(/}\s*$/, '');
                 return JSON.parse(trimmedArguments);
             } else {
                 throw parseError; // Re-throw exception if it's not the specific case we're catching.
@@ -218,14 +209,14 @@ class Dialog2 extends EventEmitter {
         })
         for await (const chunk of completion) {
             if (shouldCancel) {
-                yield '\n';
+                yield {content: '... [cancelled]\n'};
                 break;
             }
             if (chunk.choices[0].finish_reason) {
-                if (chunk.choices[0].finish_reason != "stop") {
+                if (chunk.choices[0].finish_reason !== "stop") {
                     console.error("\nFinish reason: " + chunk.choices[0].finish_reason);
                 } else {
-                    yield '\n'
+                    yield { content: '\n'};
                 }
                 break;
             } else {
