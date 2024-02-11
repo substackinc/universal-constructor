@@ -13,6 +13,7 @@ import { getFileChangeSummary } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
+import Dialog2 from './dialog2.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -62,7 +63,7 @@ async function main() {
     }
 
 
-    dialog = new Dialog();
+    dialog = new Dialog2();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('done_thinking', handleDoneThinking);
@@ -73,7 +74,7 @@ async function main() {
     }
 
     await dialog.setup({
-        threadFile: path.resolve(ucDir, '.thread'),
+        threadFile: path.resolve(ucDir, '.thread2'),
         assistantFile: path.resolve(ucDir, '.assistant'),
         instructionsFile: path.resolve(ucDir, 'instructions.md'),
     });
