@@ -100,8 +100,8 @@ async function startListening() {
         if (!text.trim()) {
             return;
         }
-        console.log("Transcribed:", text);
-        await dialog.addMessage(text, 'transcribedVoice');
+        //console.log("Transcribed:", text);
+        await dialog.addMessage(text, {tag: 'transcribedVoice'});
 
         // have some special words that trigger us to send.
         let l = text.toLowerCase();
@@ -141,11 +141,13 @@ function setupReadline(commands) {
                 if (shouldUpdate) {
                     let contextMessage = await getContextMessage();
                     await dialog.addMessage(contextMessage);
+                    handleMessage(contextMessage);
                 }
                 await dialog.processRun();
                 prompt();
             } else {
-                await dialog.addMessage(line);
+                // don't fire the message event since we dont need to print it again
+                await dialog.addMessage(line, {fire: false});
                 rl.prompt();
             }
         } finally {
@@ -277,7 +279,7 @@ async function getContextMessage() {
     return {
         role: 'system',
         content: contextMessage,
-        summary: `Context ${commandHistory.length} commands run, ${changedFiles.length} files changed`,
+        summary: `Context @${time}, ${commandHistory.length} commands run, ${changedFiles.length} files changed`,
     }
 }
 

@@ -50,15 +50,15 @@ class Dialog2 extends EventEmitter {
     }
 
 
-    async addMessage(msg, typeTag) {
+    async addMessage(msg, { tag, fire = true} = {}) {
         let m;
         if (typeof msg === 'string') {
             if (!msg || msg.trim() === '') {
                 throw new Error('Can\'t send an empty message');
             }
             let content = msg;
-            if (typeTag) {
-                content = `<${typeTag}>\n${text}\n</${typeTag}>`;
+            if (tag) {
+                content = `<${tag}>\n${msg}\n</${tag}>`;
             }
             m = { role: 'user', content };
         } else if (typeof msg === 'object') {
@@ -69,6 +69,9 @@ class Dialog2 extends EventEmitter {
         }
 
         this.messages.push(m);
+        if (fire) {
+            this.emit('message', m);
+        }
         await this.save();
     }
 
