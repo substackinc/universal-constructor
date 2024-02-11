@@ -9,7 +9,7 @@ import { Marked, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import storage from 'node-persist';
 import { loadJson, saveJson } from './fileUtils.js';
-import { execShell } from './tools/index.js';
+import importAllTools, { execShell } from './tools/index.js';
 
 const markedHtml = new Marked();
 const markedTerm = new Marked(markedTerminal({
@@ -44,6 +44,14 @@ class Dialog2 extends EventEmitter {
         this.userName = success && stdout ? stdout.trim() : process.env.USER;
         this.assistant = {name: "UC"};
 
+        this.toolsByName = await importAllTools();
+        this.tools = Object.values(this.toolsByName).map((t) => ({
+            type: 'function',
+            function: t.spec,
+        }));
+
+
+        // replay history
         for (let m of this.messages) {
             if (m.role !== 'system') {
                 this.emit('message', {historic: true, ...m});
@@ -70,8 +78,10 @@ class Dialog2 extends EventEmitter {
     }
 
     async processRun() {
-        this.thinking = true;
-        this.emit('start_thinking');
+        if (!this.thinking) {
+            this.thinking = true;
+            this.emit('start_thinking');
+        }
 
         const m = {
             role: "assistant", content: ''
@@ -79,36 +89,142 @@ class Dialog2 extends EventEmitter {
         let messagesCopy = JSON.parse(JSON.stringify(this.messages));
         this.messages.push(m);
         let first = true;
-        for await (let x of this.streamCompletion(messagesCopy)) {
-            m.content += x;
-            this.emit('thinking', {
-                message: m,
-                chunk: x,
-                first
-            });
-            first = false;
+        let toolCallsByIndex = {};
+        for await (let {content, tool_calls} of this.streamCompletion(messagesCopy)) {
+            if (content) {
+                m.content += content;
+                this.emit('thinking', {
+                    message: m,
+                    chunk: content,
+                    first
+                });
+                first = false;
+            }
+            else if (tool_calls) {
+                for (let c of tool_calls) {
+                    // console.log("CBTEST C");
+                    // console.log(c);
+                    if (!toolCallsByIndex[c.index]) {
+                        toolCallsByIndex[c.index] = c;
+                    } else {
+                        toolCallsByIndex[c.index].function.arguments += c.function.arguments;
+                    }
+                }
+            }
         }
-        //TODO: handle tool calls
+        for (const index in toolCallsByIndex) {
+            console.log("CBTEST FULL TOOL CALL", index);
+            console.log(toolCallsByIndex[index]);
+
+
+
+        }
+        let tool_calls = Object.values(toolCallsByIndex);
+        if (tool_calls.length) {
+
+            this.messages.push({
+                role: "assistant",
+                tool_calls
+            })
+
+            let tool_outputs = await this.#runToolCalls(tool_calls);
+
+            for (let output of tool_outputs) {
+                let m = {
+                    role: 'tool',
+                    content: output.output,
+                    tool_call_id: output.tool_call_id
+                }
+                this.messages.push(m);
+            }
+            // recurse! (is this a good idea?)
+            return await this.processRun();
+        }
 
         await this.save();
+        this.thinking = false;
         this.emit("done_thinking");
         this.emit("message", {streamed: true, ...m});
         return m;
+    }
+
+    async #runToolCalls(toolCalls) {
+        let tool_outputs = [];
+        for (let call of toolCalls) {
+            if (call.type !== 'function' || !this.toolsByName[call.function.name]) {
+                console.error('unknown tool call', call);
+                tool_outputs.push({
+                    tool_call_id: call.id,
+                    output: JSON.stringify({
+                        success: false,
+                        error: `FAILED! No such ${call.type} as ${call.function.name}`,
+                    }),
+                });
+                continue;
+            }
+            let f = this.toolsByName[call.function.name];
+            try {
+                let arg = this._parseToolArguments(call.function.arguments);
+                console.log('CBTEST RUNNING TOOL', call.function.name, arg);
+                const result = await f(arg);
+                tool_outputs.push({
+                    tool_call_id: call.id,
+                    output: JSON.stringify(result),
+                });
+            } catch (ex) {
+                console.error(`Error running command ${call.function.name} with args ${call.function.arguments}`);
+                console.error(ex);
+                tool_outputs.push({
+                    tool_call_id: call.id,
+                    output: JSON.stringify({
+                        success: false,
+                        error_message: `Running this tool failed. ${ex.toString()}`,
+                    }),
+                });
+            }
+        }
+        return tool_outputs;
+    }
+
+    _parseToolArguments(argumentsStr) {
+
+        if (!argumentsStr.trim().startsWith('{')) {
+            throw new Error(`Expecting arguments formatted as JSON, but got "${argumentsStr}"`)
+        }
+
+        // This function attempts to parse a JSON string, correcting for a common error pattern:
+        // an extra closing curly brace at the very end of the string.
+        try {
+            return JSON.parse(argumentsStr);
+        } catch (parseError) {
+            if (
+                parseError instanceof SyntaxError &&
+                parseError.message.includes('Unexpected non-whitespace character after JSON')
+            ) {
+                let trimmedArguments = argumentsStr.replace(/\}\s*$/, '');
+                return JSON.parse(trimmedArguments);
+            } else {
+                throw parseError; // Re-throw exception if it's not the specific case we're catching.
+            }
+        }
     }
 
     async * streamCompletion(messages) {
         // if another one is going, cancel that.
         this.cancelStream && this.cancelStream();
         let shouldCancel = false;
+        let completion;
         this.cancelStream = () => {
             shouldCancel = true;
             this.cancelStream = null;
         }
 
-        const completion = await this.openai.chat.completions.create({
+        completion = await this.openai.chat.completions.create({
             messages,
             model: this.model,
-            stream: true
+            stream: true,
+            tools: this.tools,
+            tool_choice: 'auto'
         })
         for await (const chunk of completion) {
             if (shouldCancel) {
@@ -123,7 +239,7 @@ class Dialog2 extends EventEmitter {
                 }
                 break;
             } else {
-                yield chunk.choices[0].delta.content
+                yield chunk.choices[0].delta
             }
         }
     }
