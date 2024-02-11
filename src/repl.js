@@ -147,7 +147,7 @@ function setupReadline(commands) {
                 prompt();
             } else {
                 // don't fire the message event since we dont need to print it again
-                await dialog.addMessage(line, {fire: false});
+                await dialog.addMessage(line, {fire: false, allowCombining: true});
                 rl.prompt();
             }
         } finally {

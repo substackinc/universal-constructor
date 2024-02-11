@@ -40,17 +40,15 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [ ] Expand abundance to all humans who want it
 -   [ ] Multiple permanent human habitations in the solar system that could survive the destruction of earth
 -   [ ] First human interstellar voyage
--   TODO: what next?
+-   [ ] TODO: what next?
 
 ## Ideas for next small tasks:
 
--   [ ] Upgraded context awareness via system messages and/or simulated tool calls **(in progress)**
--   Better markdown behaviour with streaming responses
--   Default prompts, to give people starter ideas
--   Better tool call visibility
--   Clean up multiple messaging/pasting/the repl
--   fix listen/speaking
--   Test (on e.g. fresh setup, other dirs) & merge to master
--   Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
--   Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
--   Teach UC to be able to fix/improve/add tools for itself as it goes (maybe plus resume after restart so it can do it live)
+-   [X] Upgraded context awareness via system messages and/or simulated tool calls **(in progress)**
+-   [X] fix listening
+-   [X] Better tool call visibility
+-   [ ] Clean up multiple messaging/pasting/the repl
+-   [ ] Better markdown behaviour with streaming responses
+-   [ ] Test (on e.g. fresh setup, other dirs) & merge to master
+-   [ ] Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
+-   [ ] Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes

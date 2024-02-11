@@ -13,7 +13,6 @@ class Dialog2 extends EventEmitter {
         this.openai = new OpenAI(openAIConfig);
         this.model = 'gpt-4-0125-preview';
         this.messages = null;
-
     }
 
     async setup({
@@ -50,7 +49,7 @@ class Dialog2 extends EventEmitter {
     }
 
 
-    async addMessage(msg, { tag, fire = true} = {}) {
+    async addMessage(msg, { tag, fire = true, allowCombining = false } = {}) {
         let m;
         if (typeof msg === 'string') {
             if (!msg || msg.trim() === '') {
@@ -60,7 +59,7 @@ class Dialog2 extends EventEmitter {
             if (tag) {
                 content = `<${tag}>\n${msg}\n</${tag}>`;
             }
-            m = { role: 'user', content };
+            m = { role: 'user', content, ts: +new Date() };
         } else if (typeof msg === 'object') {
             m = msg;
         } else {
@@ -68,7 +67,14 @@ class Dialog2 extends EventEmitter {
             throw new Error('Invalid message');
         }
 
-        this.messages.push(m);
+        // allow combine messages if they're from the same role and close in time
+        let lastMessage = this.messages[this.messages.length-1];
+        if (allowCombining && lastMessage.role === m.role && m.ts - lastMessage.ts < 1000 * 60) {
+            this.messages[this.messages.length-1].content += '\n' + m.content;
+        } else {
+            this.messages.push(m);
+        }
+
         if (fire) {
             this.emit('message', m);
         }
