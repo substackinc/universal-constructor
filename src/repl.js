@@ -28,6 +28,7 @@ marked.use(
 
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
+const chalk3 = chalk.gray.bold;
 
 dotenv.config({ path: dotenvFile });
 let dialog;
@@ -200,25 +201,25 @@ function handleThinking({message, chunk, first}) {
     }
 }
 
-function handleMessage({ role, content, historic, streamed }) {
-    if (!content || role === 'tool') {
+function handleMessage({ role, content, summary, historic, streamed }) {
+    if ((!content && !summary)) {
         return;
     }
 
-    let roleString;
     if (role === 'user') {
-        roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
-    } else {
-        roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+        console.log(chalk1(`\n@${dialog.userName}:`) + '\n' + marked(content).trimEnd());
+    }
+    else if (role === 'assistant' && !streamed) {
+
+        let c = summary || marked(content).trimEnd();
+        console.log(chalk2(`\n@${dialog.assistant.name}:`) + '\n' + c);
         if (!historic && shouldSpeak) {
             speak(content).then();
         }
-    }
-    let markedContent = marked(content).trimEnd();
-
-    // don't print if we've already streamed it
-    if (!streamed) {
-        console.log(roleString + markedContent);
+    } else if (role === 'system' && summary) {
+        console.log(chalk3(`\nsystem: ${summary}`));
+    } else if (role === 'tool' && summary) {
+        console.log(chalk3(`\ntool: ${summary}`));
     }
 }
 
@@ -275,7 +276,8 @@ async function getContextMessage() {
     //console.log("CBTEST CONTEXT", contextMessage);
     return {
         role: 'system',
-        content: contextMessage
+        content: contextMessage,
+        summary: `Context ${commandHistory.length} commands run, ${changedFiles.length} files changed`,
     }
 }
 
