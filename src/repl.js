@@ -1,4 +1,3 @@
-import Dialog from './dialog.js';
 import dotenv from 'dotenv';
 import readline from 'readline';
 import chalk from 'chalk';
@@ -108,7 +107,7 @@ async function startListening() {
         if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please."))) {
             working = true;
             if (shouldUpdate) {
-                await addUpdateMessages()
+                await dialog.addMessage(await getContextMessage());
             }
             await dialog.processRun();
             working = false;
@@ -139,7 +138,8 @@ function setupReadline(commands) {
             } else if (line === '') {
                 // empty line == go
                 if (shouldUpdate) {
-                    await addUpdateMessages()
+                    let contextMessage = await getContextMessage();
+                    await dialog.addMessage(contextMessage);
                 }
                 await dialog.processRun();
                 prompt();
@@ -245,22 +245,45 @@ function handleDoneThinking() {
     cancelSpinner && cancelSpinner();
 }
 
-async function addUpdateMessages() {
+async function getContextMessage() {
     const prevInput = lastInput;
     lastInput = +new Date();
     const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
 
-    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => c.command);
-    if (commandHistory.length) {
-        let m = await dialog.addMessage(commandHistory.join('\n'), 'recentlyRunCommands');
-        console.log(m);
-    }
+    let time = new Date().toLocaleDateString('en-US', {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
 
+    let commandHistory = (await parseZshHistory(maxAge, 100)).map(c => c.command);
     let changedFiles = getFileChangeSummary(lastInput-maxAge*1000)
-    if (changedFiles.length) {
-        let m = await dialog.addMessage(changedFiles.join('\n'), 'recentlyChangedFiles')
-        console.log(m);
+
+    let contextMessage = '<ContextInfo>\n';
+
+    contextMessage += `time: ${time}\ncwd: ${process.cwd()}]\n`;
+
+    if (commandHistory.length) {
+        contextMessage += `\nRecent commands:\n${truncateFromStart(commandHistory).join('\n')}`;
     }
+    if (changedFiles.length) {
+        contextMessage += `\nChanged files:\n${truncateFromStart(changedFiles).join('\n')}\n`;
+    }
+    contextMessage += '</ContextInfo>';
+    //console.log("CBTEST CONTEXT", contextMessage);
+    return {
+        role: 'system',
+        content: contextMessage
+    }
+}
+
+function truncateFromStart(list, len=5) {
+    if (list.length <= len) {
+        return list;
+    }
+    return [ `...${list.length-len} not shown`, ...list.slice(list.length - len)];
 }
 
 function printWelcome() {

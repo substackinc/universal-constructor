@@ -1,4 +1,4 @@
-import chokidar, { watch } from 'chokidar';
+import chokidar from 'chokidar';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -16,7 +16,7 @@ async function setupWatcher() {
         await watcher.close();
     }
     watcher = chokidar.watch('.', {
-        ignored: ['.git', '.idea', 'node_modules'],
+        ignored: ['.git', '.idea', 'node_modules', '.thread'],
         ignoreInitial: true,
     }).on('all', (event, path) => {
         //console.log(event, path);
@@ -41,9 +41,9 @@ export function getFileChanges(since = 0) {
 }
 
 const verbs = {
-    'change': 'changed the file',
-    'add': 'added the file',
-    'unlink': 'deleted the file',
+    'change': 'modified',
+    'add': 'added',
+    'unlink': 'deleted',
 };
 
 export function getFileChangeSummary(since = 0, events = ['change', 'add', 'unlink']) {
