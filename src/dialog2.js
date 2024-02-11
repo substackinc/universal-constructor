@@ -76,27 +76,45 @@ class Dialog2 extends EventEmitter {
         const m = {
             role: "assistant", content: ''
         }
-        let mcopy = JSON.parse(JSON.stringify(this.messages));
+        let messagesCopy = JSON.parse(JSON.stringify(this.messages));
         this.messages.push(m);
-        for await (let x of this.streamCompletion(mcopy)) {
+        let first = true;
+        for await (let x of this.streamCompletion(messagesCopy)) {
             m.content += x;
-            this.emit('stream', x)
+            this.emit('thinking', {
+                message: m,
+                chunk: x,
+                first
+            });
+            first = false;
         }
         //TODO: handle tool calls
 
         await this.save();
         this.emit("done_thinking");
-        this.emit("message", m)
+        this.emit("message", {streamed: true, ...m});
         return m;
     }
 
     async * streamCompletion(messages) {
+        // if another one is going, cancel that.
+        this.cancelStream && this.cancelStream();
+        let shouldCancel = false;
+        this.cancelStream = () => {
+            shouldCancel = true;
+            this.cancelStream = null;
+        }
+
         const completion = await this.openai.chat.completions.create({
             messages,
             model: this.model,
             stream: true
         })
         for await (const chunk of completion) {
+            if (shouldCancel) {
+                yield '\n';
+                break;
+            }
             if (chunk.choices[0].finish_reason) {
                 if (chunk.choices[0].finish_reason != "stop") {
                     console.error("\nFinish reason: " + chunk.choices[0].finish_reason);
@@ -109,103 +127,14 @@ class Dialog2 extends EventEmitter {
             }
         }
     }
-}
 
-async function * chunkMarkdown(textStream) {
-
-}
-
-async function * streamMarkdown2(textStream) {
-
-    const chunk = '';
-    while(true) {
-        const { value, done } = await textStream.next();
-
-
-
+    async cancelOutstanding() {
+        this.cancelStream && this.cancelStream();
     }
 }
 
-function checkForUnclosedMarkdown(inlineText) {
-
-    //unclosed * or **
-    if ([...inlineText.matchAll(/\*\*?/g)].length % 2 != 0) {
-        return true;
-    }
-    if ([...inlineText.matchAll(/`/g)].length % 2 != 0) {
-        return true;
-    }
-
-}
-
-async function * streamMarkdownChunks(textStream) {
-
-    let chunk = '';
-    let inlineMode = false;
-
-    while(true) {
-        let {value, done} = await textStream.next();
 
 
-        if (inlineMode) {
-            if (value.indexOf('\n') != -1) {
-                chunk += value;
-                yield chunk;
-                inlineMode = false;
-                chunk = '';
-            }
-        } else if (chunk === '') {
-            if (value.match(/^\n+$/m)) {
-                // only newlines between blocks, ignore.
-            } else if ([' ', '#', '`', '-', '|'].includes(value[0])) {
-                // block mode
-                chunk += value;
-                inlineMode = false;
-            } else {
-                chunk += value;
-                inlineMode = true;
-            }
-
-        }
-
-        if (done) {
-            break;
-        }
-    }
-
-}
-
-async function * streamMarkdown(textStream) {
-
-    let chunk = '';
-    let inlineMode = false;
-
-    for await (const t of textStream) {
-
-        if (inlineMode) {
-
-        }
-
-        if (chunk.length < 4) {
-            chunk += t;
-        } else {
-            let prevTokens = marked.lexer(chunk);
-            let newTokens = marked.lexer(chunk + t);
-
-            if (newTokens.length > prevTokens.length) {
-                //yield markedTerm.parseInline(chunk);
-                // for (let foo of prevTokens) {
-                //     console.log(foo);
-                // }
-                // yield ''
-                yield chunk + "$";
-                chunk = t;
-            } else {
-                chunk += t;
-            }
-        }
-    }
-}
 
 if (process.argv[1].endsWith("/uc") || process.argv[1] === new URL(import.meta.url).pathname) {
     //console.log(`File run directly, lets test it`);
@@ -225,53 +154,6 @@ if (process.argv[1].endsWith("/uc") || process.argv[1] === new URL(import.meta.u
     for await (let x of d.streamCompletion(messages)) {
         process.stdout.write(x);
     }
-
-    /*
-   const completion = await openai.chat.completions.create({
-       messages: [
-           { role: "system", content: instructions },
-           { role: "system", content: `the current directory is ${process.env.cwd}` },
-           {role: "user", content: msg}
-       ],
-       model: "gpt-4-0125-preview",
-       stream: true
-   });
-
-
-   let line = '';
-   for await (const chunk of completion) {
-
-       if (chunk.choices[0].finish_reason) {
-           if (chunk.choices[0].finish_reason != "stop") {
-               console.error("\nFinish reason: " + chunk.choices[0].finish_reason);
-           } else {
-               process.stdout.write('\n');
-           }
-           break;
-           //console.log('\n', chunk.choices[0].finish_reason)
-       } else {
-           let c = chunk.choices[0].delta.content;
-
-           line+= c;
-           if (c.endsWith('\n')) {
-               process.stdout.write(line);
-               line = '';
-           }
-           //process.stdout.write(chunk.choices[0].delta.content);
-          // wholeContent += chunk.choices[0].delta.content;
-           // process.stdout.write(`\n################\n`)
-           // process.stdout.write(wholeContent)
-           // process.stdout.write(`\n-----\n`)
-           // process.stdout.write(marked.parse(wholeContent));
-
-           // process.stdout.write(markedHtml.parse(wholeContent));
-       }
-
-   } */
-}
-
-async function* streamCompletion(messages) {
-
 }
 
 export default Dialog2;

@@ -66,6 +66,7 @@ async function main() {
     dialog = new Dialog2();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
+    dialog.on('thinking', handleThinking);
     dialog.on('done_thinking', handleDoneThinking);
 
     // If listen flag is true, start microphone listener
@@ -184,7 +185,22 @@ function prompt() {
     rl.prompt(true);
 }
 
-function handleMessage({ role, content, historic }) {
+function handleThinking({message, chunk, first}) {
+    cancelSpinner && cancelSpinner();
+    if(first) {
+        let roleString;
+        if (message.role === 'user') {
+            roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
+        } else {
+            roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+        }
+        process.stdout.write(roleString + message.content);
+    } else {
+        process.stdout.write(chunk);
+    }
+}
+
+function handleMessage({ role, content, historic, streamed }) {
     let roleString;
     if (role === 'user') {
         roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
@@ -195,7 +211,11 @@ function handleMessage({ role, content, historic }) {
         }
     }
     let markedContent = marked(content).trimEnd();
-    console.log(roleString + markedContent);
+
+    // don't print if we've already streamed it
+    if (!streamed) {
+        console.log(roleString + markedContent);
+    }
 }
 
 let cancelSpinner;
@@ -213,6 +233,7 @@ function handleStartThinking() {
         clearInterval(interval);
         let t = ((+new Date() - spinnerStart) / 1000).toFixed(0);
         process.stdout.write(`\r ${s.frames[i++ % s.frames.length]} ${t}s\n`);
+        cancelSpinner = null;
     };
 }
 
