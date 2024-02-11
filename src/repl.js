@@ -167,7 +167,7 @@ function setupReadline(commands) {
             lastKillTime = t;
             if (working) {
                 // we're in the middle of a run. Let's cancel it.
-                console.log('\nCancelling... (ctrl-d quits)');
+                //console.log('\nCancelling... (ctrl-d quits)');
                 await dialog.cancelOutstanding();
             } else {
                 // otherwise let's exit cleanly, so we can be restarted if appropriate
