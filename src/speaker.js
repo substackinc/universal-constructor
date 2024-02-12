@@ -1,10 +1,9 @@
+import './config.js';
 import fs from 'fs';
 import { OpenAI } from 'openai';
-import dotenv from 'dotenv';
 import playSound from 'play-sound';
 import path from 'path';
 import os from 'os';
-dotenv.config();
 const openai = new OpenAI();
 const player = playSound();
 

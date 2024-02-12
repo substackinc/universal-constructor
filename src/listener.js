@@ -1,8 +1,8 @@
+import './config.js';
 import { EventEmitter } from 'events';
 import VAD from 'node-vad';
 import mic from 'mic';
 import { OpenAI } from 'openai';
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -11,7 +11,6 @@ import { FileEncoder } from 'flac-bindings';
 class Listener extends EventEmitter {
     constructor() {
         super();
-        dotenv.config();
         this.openai = new OpenAI();
         this.micInstance = null;
         this.samplerate = 16000; //44100;
