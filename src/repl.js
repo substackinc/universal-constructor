@@ -1,5 +1,5 @@
+import dotenv from 'dotenv';
 import './config.js';
-import Dialog from './dialog.js';
 import readline from 'readline';
 import chalk from 'chalk';
 import { marked } from 'marked';
@@ -12,6 +12,7 @@ import { getFileChangeSummary, UC_DIR } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
+import Dialog from './dialog.js';
 
 marked.use(
     markedTerminal({
@@ -23,6 +24,7 @@ marked.use(
 
 const chalk1 = chalk.cyan.bold;
 const chalk2 = chalk.hex('#fcad01').bold;
+const chalk3 = chalk.gray.bold;
 
 let dialog;
 let rl;
@@ -59,6 +61,7 @@ async function main() {
     dialog = new Dialog();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
+    dialog.on('thinking', handleThinking);
     dialog.on('done_thinking', handleDoneThinking);
 
     // If listen flag is true, start microphone listener
@@ -92,15 +95,15 @@ async function startListening() {
         if (!text.trim()) {
             return;
         }
-        console.log("Transcribed:", text);
-        await dialog.addMessage(text, 'transcribedVoice');
+        //console.log("Transcribed:", text);
+        await dialog.addMessage(text, {tag: 'transcribedVoice'});
 
         // have some special words that trigger us to send.
         let l = text.toLowerCase();
         if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please."))) {
             working = true;
             if (shouldUpdate) {
-                await addUpdateMessages()
+                await dialog.addMessage(await getContextMessage());
             }
             await dialog.processRun();
             working = false;
@@ -131,12 +134,15 @@ function setupReadline(commands) {
             } else if (line === '') {
                 // empty line == go
                 if (shouldUpdate) {
-                    await addUpdateMessages()
+                    let contextMessage = await getContextMessage();
+                    await dialog.addMessage(contextMessage);
+                    handleMessage(contextMessage);
                 }
                 await dialog.processRun();
                 prompt();
             } else {
-                await dialog.addMessage(line);
+                // don't fire the message event since we dont need to print it again
+                await dialog.addMessage(line, {fire: false, allowCombining: true});
                 rl.prompt();
             }
         } finally {
@@ -159,7 +165,7 @@ function setupReadline(commands) {
             lastKillTime = t;
             if (working) {
                 // we're in the middle of a run. Let's cancel it.
-                console.log('\nCancelling... (ctrl-d quits)');
+                //console.log('\nCancelling... (ctrl-d quits)');
                 await dialog.cancelOutstanding();
             } else {
                 // otherwise let's exit cleanly, so we can be restarted if appropriate
@@ -177,18 +183,41 @@ function prompt() {
     rl.prompt(true);
 }
 
-function handleMessage({ role, content, historic }) {
-    let roleString;
-    if (role === 'user') {
-        roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
+function handleThinking({message, chunk, first}) {
+    cancelSpinner && cancelSpinner();
+    if(first) {
+        let roleString;
+        if (message.role === 'user') {
+            roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
+        } else {
+            roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+        }
+        process.stdout.write(roleString + message.content);
     } else {
-        roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+        process.stdout.write(chunk);
+    }
+}
+
+function handleMessage({ role, content, summary, historic, streamed }) {
+    if ((!content && !summary)) {
+        return;
+    }
+
+    if (role === 'user') {
+        console.log(chalk1(`\n@${dialog.userName}:`) + '\n' + marked(content).trimEnd());
+    }
+    else if (role === 'assistant' && !streamed) {
+
+        let c = summary || marked(content).trimEnd();
+        console.log(chalk2(`\n@${dialog.assistant.name}:`) + '\n' + c);
         if (!historic && shouldSpeak) {
             speak(content).then();
         }
+    } else if (role === 'system' && summary) {
+        console.log(chalk3(`\nsystem: ${summary}`));
+    } else if (role === 'tool' && summary) {
+        console.log(chalk3(`\ntool: ${summary}`));
     }
-    let markedContent = marked(content).trimEnd();
-    console.log(roleString + markedContent);
 }
 
 let cancelSpinner;
@@ -206,6 +235,7 @@ function handleStartThinking() {
         clearInterval(interval);
         let t = ((+new Date() - spinnerStart) / 1000).toFixed(0);
         process.stdout.write(`\r ${s.frames[i++ % s.frames.length]} ${t}s\n`);
+        cancelSpinner = null;
     };
 }
 
@@ -213,22 +243,46 @@ function handleDoneThinking() {
     cancelSpinner && cancelSpinner();
 }
 
-async function addUpdateMessages() {
+async function getContextMessage() {
     const prevInput = lastInput;
     lastInput = +new Date();
     const maxAge = prevInput ? (lastInput - prevInput) / 1000 : 5 * 60;
 
-    let commandHistory = (await parseZshHistory(maxAge, 25)).map(c => c.command);
-    if (commandHistory.length) {
-        let m = await dialog.addMessage(commandHistory.join('\n'), 'recentlyRunCommands');
-        console.log(m);
-    }
+    let time = new Date().toLocaleDateString('en-US', {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
 
+    let commandHistory = (await parseZshHistory(maxAge, 100)).map(c => c.command);
     let changedFiles = getFileChangeSummary(lastInput-maxAge*1000)
-    if (changedFiles.length) {
-        let m = await dialog.addMessage(changedFiles.join('\n'), 'recentlyChangedFiles')
-        console.log(m);
+
+    let contextMessage = '<ContextInfo>\n';
+
+    contextMessage += `time: ${time}\ncwd: ${process.cwd()}]\n`;
+
+    if (commandHistory.length) {
+        contextMessage += `\nRecent commands:\n${truncateFromStart(commandHistory).join('\n')}`;
     }
+    if (changedFiles.length) {
+        contextMessage += `\nChanged files:\n${truncateFromStart(changedFiles).join('\n')}\n`;
+    }
+    contextMessage += '</ContextInfo>';
+    //console.log("CBTEST CONTEXT", contextMessage);
+    return {
+        role: 'system',
+        content: contextMessage,
+        summary: `Context @${time}, ${commandHistory.length} commands run, ${changedFiles.length} files changed`,
+    }
+}
+
+function truncateFromStart(list, len=5) {
+    if (list.length <= len) {
+        return list;
+    }
+    return [ `...${list.length-len} not shown`, ...list.slice(list.length - len)];
 }
 
 function printWelcome() {

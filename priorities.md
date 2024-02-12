@@ -8,7 +8,7 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [x] Create command line REPL that lets you talk to the assistant
 -   [x] Add basic ability to read and edit files so it can work on itself
 -   [x] Clean up, add a README and push to github so others can try it
--   [ ] Make the edit functionality robust, so that UC can reliably commit changes
+-   [ ] Make the search/edit functionality robust, so that UC can reliably commit changes
 -   [ ] Simplify the tools code until UC can reliably add and edit its own tools
 -   [ ] Add the ability to reliably verify if a given changeset is valid/working/good
 -   [ ] Add the ability to make modest changes end-to-end (from description to tested, merged PR)
@@ -40,11 +40,15 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [ ] Expand abundance to all humans who want it
 -   [ ] Multiple permanent human habitations in the solar system that could survive the destruction of earth
 -   [ ] First human interstellar voyage
--   TODO: what next?
+-   [ ] TODO: what next?
 
 ## Ideas for next small tasks:
 
--   Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
--   Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
--   Teach UC to be able to fix/improve/add tools for itself as it goes (maybe plus resume after restart so it can do it live)
--   Ability to change working directory; work on and understand other projects (Substack?)
+-   [X] Upgraded context awareness via system messages and/or simulated tool calls **(in progress)**
+-   [X] fix listening
+-   [X] Better tool call visibility
+-   [X] Clean up multiple messaging/pasting/the repl
+-   [ ] Test (on e.g. fresh setup, other dirs) & merge to master
+-   [ ] Better markdown behaviour with streaming responses
+-   [ ] Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
+-   [ ] Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
