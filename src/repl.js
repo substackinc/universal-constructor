@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import './config.js';
-import Dialog from './dialog.js';
 import readline from 'readline';
 import chalk from 'chalk';
 import { marked } from 'marked';
