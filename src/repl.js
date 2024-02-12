@@ -12,7 +12,7 @@ import { getFileChangeSummary } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
-import Dialog2 from './dialog2.js';
+import Dialog from './dialog.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ucDir = path.resolve(path.dirname(__filename), '..');
@@ -63,7 +63,7 @@ async function main() {
     }
 
 
-    dialog = new Dialog2();
+    dialog = new Dialog();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('thinking', handleThinking);
