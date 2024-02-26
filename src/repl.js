@@ -13,11 +13,12 @@ import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
 import Dialog from './dialog.js';
+import RevisableTerminalWriter from './RevisableTerminalWriter.js';
 
 marked.use(
     markedTerminal({
-        width: process.stdout.columns - 1,
-        reflowText: true,
+        width: Math.min(80, process.stdout.columns - 5),
+        reflowText: false,
         tab: 2,
     }),
 );
@@ -185,17 +186,8 @@ function prompt() {
 
 function handleThinking({message, chunk, first}) {
     cancelSpinner && cancelSpinner();
-    if(first) {
-        let roleString;
-        if (message.role === 'user') {
-            roleString = chalk1(`\n@${dialog.userName}:`) + '\n';
-        } else {
-            roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
-        }
-        process.stdout.write(roleString + message.content);
-    } else {
-        process.stdout.write(chunk);
-    }
+    let roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
+    this.streamingWriter.writeToTerminal(roleString + marked(message.content).trimEnd());
 }
 
 function handleMessage({ role, content, summary, historic, streamed }) {
@@ -227,6 +219,7 @@ function handleStartThinking() {
     let i = 0;
     let spinnerStart = +new Date();
     process.stdout.write('\n');
+    this.streamingWriter = new RevisableTerminalWriter();
     let interval = setInterval(() => {
         process.stdout.write(chalk2(`\r ${s.frames[i++ % s.frames.length]} `));
     }, s.interval);
@@ -241,6 +234,8 @@ function handleStartThinking() {
 
 function handleDoneThinking() {
     cancelSpinner && cancelSpinner();
+    this.streamingWriter = null;
+    process.stdout.write('\n');
 }
 
 async function getContextMessage() {
