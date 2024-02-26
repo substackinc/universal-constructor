@@ -49,6 +49,6 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [X] Better tool call visibility
 -   [X] Clean up multiple messaging/pasting/the repl
 -   [ ] Test (on e.g. fresh setup, other dirs) & merge to master
--   [ ] Better markdown behaviour with streaming responses
+-   [X] Better markdown behaviour with streaming responses
 -   [ ] Get editFile to 95%+ reliable for small code changes (might be there; add challenges to test?)
 -   [ ] Ability to work in a git branch, where small steps can get committed / rolled back, to allow more complex changes
