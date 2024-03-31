@@ -7,7 +7,7 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [x] Get OpenAI Assistants API working
 -   [x] Create command line REPL that lets you talk to the assistant
 -   [x] Add basic ability to read and edit files so it can work on itself
--   [x] Clean up, add a README and push to github so others can try it
+-   [x] Clean up, add a README and push to GitHub so others can try it
 -   [ ] Make the search/edit functionality robust, so that UC can reliably commit changes
 -   [ ] Simplify the tools code until UC can reliably add and edit its own tools
 -   [ ] Add the ability to reliably verify if a given changeset is valid/working/good
@@ -21,7 +21,7 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [ ] Add ability to fully monitor projects in production
 -   [ ] Add ability to make small fixes & self-deploy
 -   [ ] Add ability to communicate directly with users and summarize information
--   [ ] Add ability to suggest it's own tasks based on monitoring and user input
+-   [ ] Add ability to suggest its own tasks based on monitoring and user input
 -   [ ] Start making small changes all the way from conception (based on monitoring & input)
 -   [ ] Add ability to subjectively judge simplicity and quality, in addition to user feedback/monitoring
 -   [ ] Start making small self-improvement fully autonomously (humans get a changelog)
