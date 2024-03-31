@@ -15,6 +15,7 @@ const play = (file) => new Promise((resolve, reject) => {
 });
 
 async function speak(text, truncate=200) {
+    if (!text || !text.trim()) return;
 
     if (truncate > 0 && text.length > truncate) {
         // last para
