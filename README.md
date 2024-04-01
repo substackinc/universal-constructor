@@ -6,6 +6,8 @@
 
 The Universal Constructor Assistant, nicknamed UC, is an AI-powered coding assistant and problem-solver designed to intelligently interact with developers, streamline workflows, and automate tasks. UC leverages OpenAI's models to provide real-time assistance.
 
+[![Demo of the Universal Constructor](https://img.youtube.com/vi/H2xBElbrvnU/0.jpg)](https://www.youtube.com/watch?v=H2xBElbrvnU)
+
 ## Getting Started
 
 ### Prerequisites
