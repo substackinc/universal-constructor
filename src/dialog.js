@@ -86,10 +86,7 @@ class Dialog extends EventEmitter {
     }
 
     async processRun() {
-        if (!this.thinking) {
-            this.thinking = true;
-            this.emit('start_thinking');
-        }
+        this.emit('start_thinking');
 
         const m = {
             role: 'assistant', content: '',
@@ -101,7 +98,7 @@ class Dialog extends EventEmitter {
         for await (let { content, tool_calls } of this.streamCompletion(messagesCopy)) {
             if (content) {
                 m.content += content;
-                this.emit('thinking', {
+                this.emit('chunk', {
                     message: m,
                     chunk: content,
                     first,
@@ -113,6 +110,7 @@ class Dialog extends EventEmitter {
                     // console.log(c);
                     if (!toolCallsByIndex[c.index]) {
                         toolCallsByIndex[c.index] = c;
+                        this.emit('start_thinking', {tool: true});
                     } else {
                         toolCallsByIndex[c.index].function.arguments += c.function.arguments;
                     }

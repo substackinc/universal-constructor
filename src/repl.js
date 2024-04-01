@@ -62,7 +62,7 @@ async function main() {
     dialog = new Dialog();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
-    dialog.on('thinking', handleThinking);
+    dialog.on('chunk', handleChunk);
     dialog.on('done_thinking', handleDoneThinking);
 
     // If listen flag is true, start microphone listener
@@ -184,8 +184,8 @@ function prompt() {
     rl.prompt(true);
 }
 
-function handleThinking({message, chunk, first}) {
-    cancelSpinner && cancelSpinner();
+function handleChunk({message, chunk, first}) {
+    stopSpinner();
     let roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     this.streamingWriter.writeToTerminal(roleString + marked(message.content).trimEnd());
 }
@@ -194,6 +194,7 @@ function handleMessage({ role, content, summary, historic, streamed }) {
     if ((!content && !summary)) {
         return;
     }
+    stopSpinner();
 
     if (role === 'user') {
         console.log(chalk1(`\n@${dialog.userName}:`) + '\n' + marked(content).trimEnd());
@@ -214,12 +215,11 @@ function handleMessage({ role, content, summary, historic, streamed }) {
 
 let cancelSpinner;
 
-function handleStartThinking() {
+function startSpinner() {
+    if (cancelSpinner) cancelSpinner();
     let s = cliSpinners.dots3;
     let i = 0;
     let spinnerStart = +new Date();
-    process.stdout.write('\n');
-    this.streamingWriter = new RevisableTerminalWriter();
     let interval = setInterval(() => {
         process.stdout.write(chalk2(`\r ${s.frames[i++ % s.frames.length]} `));
     }, s.interval);
@@ -232,8 +232,18 @@ function handleStartThinking() {
     };
 }
 
+function stopSpinner() {
+    if (cancelSpinner) cancelSpinner();
+}
+
+function handleStartThinking() {
+    process.stdout.write('\n');
+    this.streamingWriter = new RevisableTerminalWriter();
+    startSpinner();
+}
+
 function handleDoneThinking() {
-    cancelSpinner && cancelSpinner();
+    stopSpinner();
     this.streamingWriter = null;
     process.stdout.write('\n');
 }
