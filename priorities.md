@@ -4,7 +4,7 @@ This file outlines the current priorities for the Universal Constructor project.
 
 ## Game plan
 
--   [x] Get OpenAI Assistants API working
+-   [x] Get OpenAI API working
 -   [x] Create command line REPL that lets you talk to the assistant
 -   [x] Add basic ability to read and edit files so it can work on itself
 -   [x] Clean up, add a README and push to GitHub so others can try it

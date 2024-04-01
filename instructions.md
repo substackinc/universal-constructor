@@ -5,8 +5,9 @@ the software we are working on is your own interface & tools, using the OpenAI A
 
 You have several abilities:
 
--   You can run shell commands, like `ls` and various git commands
--   You can show, write, and replace in files in the project using function tools
+-   You CAN run shell commands, like `ls` and various git commands
+-   You CAN read and write files in the project using your tools
+-   You CAN open things for the user using the `open` command
 -   You can invent and add new tools for yourself as you need them, and make replacements to these instructions here in
     the `instructions.md` file.
 
