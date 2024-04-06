@@ -14,6 +14,8 @@ import speak from './speaker.js';
 import minimist from 'minimist';
 import Dialog from './dialog.js';
 import RevisableTerminalWriter from './RevisableTerminalWriter.js';
+import StreamingSpeaker from './StreamingSpeaker.js';
+import { c } from 'sinon/lib/sinon/spy-formatters.js';
 
 marked.use(
     markedTerminal({
@@ -101,7 +103,7 @@ async function startListening() {
 
         // have some special words that trigger us to send.
         let l = text.toLowerCase();
-        if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please."))) {
+        if (!working && (l.endsWith("go") || l.endsWith("go.") || l.endsWith("go ahead.") || l.endsWith("please?") || l.endsWith("please.") || l.endsWith('over') || l.endsWith('over.'))) {
             working = true;
             if (shouldUpdate) {
                 await dialog.addMessage(await getContextMessage());
@@ -188,6 +190,9 @@ function handleChunk({message, chunk, first}) {
     stopSpinner();
     let roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     this.streamingWriter.writeToTerminal(roleString + marked(message.content).trimEnd());
+    if (this.streamingSpeaker) {
+        this.streamingSpeaker.write(chunk);
+    }
 }
 
 function handleMessage({ role, content, summary, historic, streamed }) {
@@ -239,12 +244,26 @@ function stopSpinner() {
 function handleStartThinking() {
     process.stdout.write('\n');
     this.streamingWriter = new RevisableTerminalWriter();
+    if (shouldSpeak) {
+        this.streamingSpeaker = new StreamingSpeaker();
+        this.streamingSpeaker.on('startSpeaking', () => {
+            if (listener) {
+                listener.pause();
+            }
+        });
+        this.streamingSpeaker.on('doneSpeaking', () => {
+            if (listener) {
+                listener.resume()
+            }
+        });
+    }
     startSpinner();
 }
 
 function handleDoneThinking() {
     stopSpinner();
     this.streamingWriter = null;
+    this.streamingSpeaker = null;
     process.stdout.write('\n');
 }
 
@@ -306,9 +325,9 @@ function printWelcome() {
 function printHelp() {
     console.log(`Usage: uc [options]\n`);
     console.log(`Options:`);
-    console.log(`  --listen, -l          Listen for voice input via microphone (default: false)`);
-    console.log(`  --speak, -s           Speak out the content (default: false)`);
-    console.log(`  --updates, -u         Perform file & command-line updates (default: false)`);
+    console.log(`  --listen, -l          Listen for voice input via microphone`);
+    console.log(`  --speak, -s           Speak out the content`);
+    console.log(`  --updates, -u         Watch file & command-line updates`);
     console.log(`  --help, -h            Display this help message and exit`);
 }
 

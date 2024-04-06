@@ -22,7 +22,7 @@ async function speak(text, truncate=200) {
         text = text.split('\n').pop();
         text = truncateSentences(text, truncate);
     }
-    //console.log('CBTEST truncate', truncate, text);
+    // console.log('CBTEST speaking truncated', truncate, text);
 
     const speechFile = path.join(os.tmpdir(), 'uc.mp3');
     const mp3 = await openai.audio.speech.create({

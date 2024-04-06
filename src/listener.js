@@ -43,7 +43,26 @@ class Listener extends EventEmitter {
         }
     }
 
+    pause() {
+        //console.log("CBTEST pause");
+        this.paused = true;
+        if (this.file) {
+            this.fileEncoder.end();
+            this.fileEncoder = null;
+            fs.unlink(this.file, err => err && console.error(err));
+            this.file = null;
+        }
+    }
+
+    resume() {
+        //console.log("CBTEST resume");
+        this.paused = false;
+    }
+
     async handleData({ audioData, speech }) {
+        if (this.paused) {
+            return;
+        }
         //console.log(speech);
         if (speech.start) {
             this.emit('start', speech);
@@ -60,7 +79,7 @@ class Listener extends EventEmitter {
             if (this.lastData) {
                 this.fileEncoder.write(this.lastData);
             }
-        } else if (speech.end) {
+        } else if (speech.end && this.fileEncoder) {
             speech.maxRms = this.maxRms;
             speech.maxDb = this.maxDb;
             this.emit('end', speech);
@@ -78,7 +97,7 @@ class Listener extends EventEmitter {
             }
         }
 
-        if (speech.state) {
+        if (speech.state && this.fileEncoder) {
             const {rms, db} = this.calculateVolume(audioData)
             this.maxRms = Math.max(this.maxRms, rms);
             this.maxDb = Math.max(this.maxDb, db);
@@ -116,11 +135,15 @@ class Listener extends EventEmitter {
             'Thank you for watching!',
             'Thank you for watching.',
             'Thanks for watching!',
+            'Thanks for watching.',
             'Bye-bye.',
             'Bye. Bye.',
             'Bye.',
             'Cheers!',
-            'Thank you so much for having us. Appreciate it.'
+            'Thank you so much for having us. Appreciate it.',
+            'If you enjoyed this video, please like it and subscribe to my channel!',
+            "If you enjoyed this video, please like it and subscribe to my channel.",
+            "Transcribed by https://otter.ai"
         ]
         if (junkPhrases.includes(transcription)) {
             return true;
