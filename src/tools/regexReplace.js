@@ -28,7 +28,6 @@ regexReplace.spec = {
         },
         required: ['filepath', 'regex', 'replacement'],
     },
-    required: ['regex', 'filepath', 'replacement'],
 };
 
 export default async function regexReplace({ regex, filepath, replacement, dryRun = false }) {

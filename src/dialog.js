@@ -11,7 +11,7 @@ class Dialog extends EventEmitter {
     constructor(openAIConfig) {
         super();
         this.openai = new OpenAI(openAIConfig);
-        this.model = 'gpt-4-0125-preview';
+        this.model = 'gpt-4-turbo';
         this.messages = null;
     }
 
