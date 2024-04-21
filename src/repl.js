@@ -195,11 +195,30 @@ function handleChunk({message, chunk, first}) {
     }
 }
 
-function handleMessage({ role, content, summary, historic, streamed }) {
+function handleMessage({ role, content, summary, historic, streamed, type }) {
     if ((!content && !summary)) {
         return;
     }
     stopSpinner();
+
+    if (Array.isArray(content)) {
+
+        content = content.map(c => {
+            if (c.type === 'text') {
+                return c.text;
+            } else if (c.type === 'image_url') {
+                if (c.image_url.url.startsWith('data:')) {
+                    return '[Image data url]';
+                }
+                return `![image](${c.image_url.url})`;
+            } else {
+                return `[UNKNOWN CONTENT TYPE ${c.type}]`;
+            }
+        }).join('\n\n');
+
+    } else if (typeof content !== 'string') {
+        content = 'UNKNOWN CONTENT ' + typeof content;
+    }
 
     if (role === 'user') {
         console.log(chalk1(`\n@${dialog.userName}:`) + '\n' + marked(content).trimEnd());
