@@ -182,7 +182,7 @@ class Dialog extends EventEmitter {
                 if (Array.isArray(result) && result[0] && result[0].type) {
                     output = result;
                 } else {
-                    output = json.stringify(result);
+                    output = JSON.stringify(result);
                 }
                 tool_outputs.push({
                     tool_call_id: call.id,
