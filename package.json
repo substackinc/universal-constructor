@@ -26,6 +26,7 @@
     "cli-spinners": "^2.9.2",
     "dotenv": "^16.3.1",
     "flac-bindings": "^3.1.0",
+    "groq-sdk": "^0.3.2",
     "marked": "^10.0.0",
     "marked-terminal": "^6.1.0",
     "mic": "^2.1.2",

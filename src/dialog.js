@@ -1,6 +1,7 @@
 #!/usr/bin/env node --no-deprecation
 import EventEmitter from 'events';
-import OpenAI from 'openai';
+//import OpenAI from 'openai';
+import { Groq as OpenAI } from 'groq-sdk';
 import fs, { readFileSync } from 'fs';
 
 import { loadJson, saveJson } from './fileUtils.js';
@@ -11,7 +12,8 @@ class Dialog extends EventEmitter {
     constructor(openAIConfig) {
         super();
         this.openai = new OpenAI(openAIConfig);
-        this.model =  'gpt-4-turbo';
+        this.model =  'llama3-70b-8192'; // 'gpt-4-turbo';
+        this.stream = false;
         this.messages = null;
     }
 
@@ -87,36 +89,55 @@ class Dialog extends EventEmitter {
 
     async processRun() {
         this.emit('start_thinking');
+        let m;
 
-        const m = {
-            role: 'assistant', content: '',
-        };
-        let messagesCopy = stripDialog(this.messages);
-        this.messages.push(m);
-        let first = true;
         let toolCallsByIndex = {};
-        for await (let { content, tool_calls } of this.streamCompletion(messagesCopy)) {
-            if (content) {
-                m.content += content;
-                this.emit('chunk', {
-                    message: m,
-                    chunk: content,
-                    first,
-                });
-                first = false;
-            } else if (tool_calls) {
-                for (let c of tool_calls) {
-                    // console.log("CBTEST C");
-                    // console.log(c);
-                    if (!toolCallsByIndex[c.index]) {
-                        toolCallsByIndex[c.index] = c;
-                        this.emit('start_thinking', {tool: true});
-                    } else {
-                        toolCallsByIndex[c.index].function.arguments += c.function.arguments;
+        if (this.stream) {
+            m = {
+                role: 'assistant', content: '',
+            };
+            let messagesCopy = stripDialog(this.messages);
+            this.messages.push(m);
+            let first = true;
+            for await (let { content, tool_calls } of this.streamCompletion(messagesCopy)) {
+                if (content) {
+                    m.content += content;
+                    this.emit('chunk', {
+                        message: m,
+                        chunk: content,
+                        first,
+                    });
+                    first = false;
+                } else if (tool_calls) {
+                    for (let c of tool_calls) {
+                        // console.log("CBTEST C");
+                        // console.log(c);
+                        if (!toolCallsByIndex[c.index]) {
+                            toolCallsByIndex[c.index] = c;
+                            this.emit('start_thinking', {tool: true});
+                        } else {
+                            toolCallsByIndex[c.index].function.arguments += c.function.arguments;
+                        }
                     }
                 }
             }
+        } else {
+            let messagesCopy = stripDialog(this.messages);
+            let { finish_reason, message } = await this.getCompletion(messagesCopy);
+            m = message;
+            if (finish_reason === 'stop') {
+                this.messages.push(message);
+            } else if (finish_reason === 'tool_calls') {
+                for (let c of message.tool_calls) {
+                    toolCallsByIndex[c.id] = c;
+                    this.emit('start_thinking', {tool: true});
+                }
+            } else {
+                console.log('CTEST', finish_reason, message);
+                throw new 'die';
+            }
         }
+
         let tool_calls = Object.values(toolCallsByIndex);
         if (tool_calls.length) {
 
@@ -154,7 +175,7 @@ class Dialog extends EventEmitter {
         await this.save();
         this.thinking = false;
         this.emit('done_thinking');
-        this.emit('message', { streamed: true, ...m });
+        this.emit('message', { streamed: this.stream, ...m });
         return m;
     }
 
@@ -261,6 +282,20 @@ class Dialog extends EventEmitter {
                 yield chunk.choices[0].delta;
             }
         }
+    }
+
+    async getCompletion(messages) {
+        this.cancelStream && this.cancelStream();
+
+        let completion = await this.openai.chat.completions.create( {
+            messages,
+            model: this.model,
+            stream: false,
+            tools: this.tools,
+            tool_choice: 'auto'
+        })
+
+        return completion.choices[0]
     }
 
     async cancelOutstanding() {
