@@ -139,6 +139,13 @@ class Dialog extends EventEmitter {
                 };
                 this.messages.push(m);
                 this.emit('message', m);
+                // hack for passing in images as user input, to see if that helps?
+                if (output.output._userContent) {
+                    this.messages.push({
+                        role: 'user',
+                        content: output.output._userContent,
+                    });
+                }
             }
             // recurse! (is this a good idea?)
             return await this.processRun();
@@ -171,9 +178,15 @@ class Dialog extends EventEmitter {
                 let arg = this._parseToolArguments(call.function.arguments);
                 //console.log('CBTEST RUNNING TOOL', call.function.name, arg);
                 const result = await f(arg);
+                let output;
+                if (Array.isArray(result) && result[0] && result[0].type) {
+                    output = result;
+                } else {
+                    output = json.stringify(result);
+                }
                 tool_outputs.push({
                     tool_call_id: call.id,
-                    output: JSON.stringify(result),
+                    output,
                     summary: `Ran ${call.function.name} with args ${call.function.arguments} returned ${JSON.stringify(result).slice(0, 400)}`,
                 });
             } catch (ex) {
