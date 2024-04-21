@@ -37,7 +37,9 @@ async function speak(text, truncate=200) {
     const buffer = Buffer.from(await mp3.arrayBuffer());
     await fs.promises.writeFile(speechFile, buffer);
     await play(speechFile);
-    fs.unlinkSync(speechFile);
+    try {
+        fs.unlinkSync(speechFile);
+    } catch (ex) {}
 }
 
 function truncateSentences(text, characterLimit) {
