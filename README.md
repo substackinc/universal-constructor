@@ -30,6 +30,8 @@ npm install
 
 ```sh
 OPENAI_API_KEY=your_openai_api_key_here
+GROQ_API_KEY=your_groq_api_key_here # optional
+UC_API='openai' # or 'groq'
 ```
 
 Replace `your_openai_api_key_here` with your [actual OpenAI API key](https://platform.openai.com/api-keys).
