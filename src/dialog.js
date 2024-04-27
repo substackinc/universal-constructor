@@ -1,7 +1,5 @@
 #!/usr/bin/env node --no-deprecation
 import EventEmitter from 'events';
-//import OpenAI from 'openai';
-import { Groq as OpenAI } from 'groq-sdk';
 import fs, { readFileSync } from 'fs';
 
 import { loadJson, saveJson } from './fileUtils.js';
@@ -9,18 +7,34 @@ import importAllTools, { execShell } from './tools/index.js';
 
 class Dialog extends EventEmitter {
 
-    constructor(openAIConfig) {
+    constructor() {
         super();
-        this.openai = new OpenAI(openAIConfig);
-        this.model =  'llama3-70b-8192'; // 'gpt-4-turbo';
-        this.stream = false;
-        this.messages = null;
     }
 
     async setup({
                     threadFile = '.thread',
-                    instructionsFile = 'instructions.md',
+                    instructionsFile = 'instructions.md'
                 } = {}) {
+
+        switch(process.env.UC_API) {
+            case 'groq':
+                this.openai = new (await import('groq-sdk')).Groq();
+                this.model = process.env.UC_MODEL || 'llama3-70b-8192';
+                // groq llama doesn't support streaming and tool use at the same time yet
+                this.stream = false;
+                break;
+            case 'openai':
+            case null:
+                this.openai = new (await import('openai')).OpenAI();
+                this.model = process.env.UC_MODEL || 'gpt-4-turbo';
+                this.stream = true;
+                break;
+            default:
+                throw new Error('u')
+        }
+
+        this.messages = null;
+
         this.threadFile = threadFile;
         this.messages = await loadJson(threadFile);
         if (!this.messages) {
@@ -134,7 +148,7 @@ class Dialog extends EventEmitter {
                 }
             } else {
                 console.log('CTEST', finish_reason, message);
-                throw new 'die';
+                throw new Error('Unexpected finish reason: ' + finish_reason);
             }
         }
 
