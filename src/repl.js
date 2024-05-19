@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
 import './config.js';
 import readline from 'readline';
 import chalk from 'chalk';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
-import { unlinkSync } from 'fs';
+import { unlinkSync, existsSync } from 'fs'; // Added existsSync
 import cliSpinners from 'cli-spinners';
 import path from 'path';
 import { parseZshHistory } from './tools/history.js';
@@ -15,7 +14,6 @@ import minimist from 'minimist';
 import Dialog from './dialog.js';
 import RevisableTerminalWriter from './RevisableTerminalWriter.js';
 import StreamingSpeaker from './StreamingSpeaker.js';
-import { c } from 'sinon/lib/sinon/spy-formatters.js';
 
 marked.use(
     markedTerminal({
@@ -39,14 +37,23 @@ let shouldUpdate = false;
 
 async function main() {
     const args = minimist(process.argv.slice(2), {
-        boolean: ['listen', 'speak', 'update'],
-        alias: { l: 'listen', s: 'speak', u: 'update', h: 'help'  },
+        boolean: ['listen', 'speak', 'update', 'reset'],
+        alias: { l: 'listen', s: 'speak', u: 'update', h: 'help', r: 'reset' },
         default: { listen: false, speak: false, updates: false },
     });
     // Handle --help option
     if (args.help) {
         printHelp();
         process.exit(1); // error code so that we don't restart
+    }
+
+    // Handle -r flag to start new thread
+    if (args.reset) {
+        const threadFile = path.resolve(UC_DIR, '.thread');
+        if (existsSync(threadFile)) {
+            unlinkSync(threadFile);
+            console.log('Starting a new thread');
+        }
     }
 
     printWelcome();
@@ -60,7 +67,6 @@ async function main() {
         console.log("File and command updates enabled");
     }
 
-
     dialog = new Dialog();
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
@@ -68,7 +74,7 @@ async function main() {
     dialog.on('done_thinking', handleDoneThinking);
 
     // If listen flag is true, start microphone listener
-    if ( args.listen) {
+    if (args.listen) {
         await startListening();
     }
 
@@ -186,7 +192,7 @@ function prompt() {
     rl.prompt(true);
 }
 
-function handleChunk({message, chunk, first}) {
+function handleChunk({ message, chunk }) {
     stopSpinner();
     let roleString = chalk2(`\n@${dialog.assistant.name}:`) + '\n';
     this.streamingWriter.writeToTerminal(roleString + marked(message.content).trimEnd());
@@ -195,7 +201,7 @@ function handleChunk({message, chunk, first}) {
     }
 }
 
-function handleMessage({ role, content, summary, historic, streamed, type }) {
+function handleMessage({ role, content, summary, historic, streamed }) {
     if ((!content && !summary)) {
         return;
     }

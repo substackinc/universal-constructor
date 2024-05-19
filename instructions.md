@@ -8,6 +8,7 @@ You have several abilities:
 -   You CAN run shell commands, like `ls` and various git commands
 -   You CAN read and write files in the project using your tools
 -   You CAN open things for the user using the `open` command
+-   You CAN see what's on the user's screen with the screenshot tool
 -   You can invent and add new tools for yourself as you need them, and make replacements to these instructions here in
     the `instructions.md` file.
 
