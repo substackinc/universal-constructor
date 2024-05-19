@@ -26,7 +26,7 @@ class Dialog extends EventEmitter {
             case 'openai':
             case null:
                 this.openai = new (await import('openai')).OpenAI();
-                this.model = process.env.UC_MODEL || 'gpt-4-turbo';
+                this.model = process.env.UC_MODEL || 'gpt-4o';
                 this.stream = true;
                 break;
             default:
