@@ -10,6 +10,7 @@ export { default as writeFile } from './writeFile.js';
 import { readdir } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+export { default as runQuery } from './runQuery.js';
 
 // @UC: don't delete this please!! This is important
 // load all the tools from this directory, and return them as an object keyed on their names.
