@@ -35,7 +35,8 @@
     "openai": "^4.24.1",
     "play-sound": "^1.1.6",
     "screenshot-desktop": "^1.15.0",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.1",
+    "snowflake-sdk": "^1.10.1"
   },
   "engines": {
     "node": ">=16.18.1"
