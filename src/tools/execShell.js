@@ -22,7 +22,7 @@ execShell.spec = {
 export default async function execShell({ command }) {
     //console.log('Executing shell command $ ', command);
     try {
-        const { stdout, stderr } = await execPromise(command);
+        const { stdout, stderr } = await execPromise(command, {timeout: 7000});
         return {
             success: true,
             stdout,

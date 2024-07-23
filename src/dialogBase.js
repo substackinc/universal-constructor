@@ -20,6 +20,9 @@ class DialogBase extends EventEmitter {
     threadFile = '.thread',
     instructionsFile = 'instructions.md'
   } = {}) {
+    this.threadFile = threadFile;
+    this.instructionsFile = instructionsFile;
+
     this.messages = await loadJson(threadFile);
     if (!this.messages) {
       this.messages = [

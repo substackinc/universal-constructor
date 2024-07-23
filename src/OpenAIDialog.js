@@ -4,7 +4,7 @@ class OpenAIDialog extends DialogBase {
   constructor() {
     super();
     this.client = null;
-    this.model = process.env.UC_MODEL || 'gpt-4';
+    this.model = process.env.UC_MODEL || 'gpt-4o';
     this.stream = true;
   }
 
@@ -24,13 +24,15 @@ class OpenAIDialog extends DialogBase {
       this.cancelStream = null;
     };
 
-    completion = await this.client.createChatCompletion({
+    completion = await this.client.chat.completions.create({
       model: this.model,
       messages: messages,
       stream: true,
+      tools: this.tools,
+      tool_choice: 'auto',
     });
 
-    for await (const chunk of completion.data) {
+    for await (const chunk of completion) {
       if (shouldCancel) {
         yield { content: '... [cancelled]\n' };
         break;

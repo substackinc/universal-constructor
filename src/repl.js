@@ -14,6 +14,7 @@ import minimist from 'minimist';
 import Dialog from './dialog.js';
 import RevisableTerminalWriter from './RevisableTerminalWriter.js';
 import StreamingSpeaker from './StreamingSpeaker.js';
+import openAIDialog from './OpenAIDialog.js';
 
 marked.use(
     markedTerminal({
@@ -67,7 +68,20 @@ async function main() {
         console.log("File and command updates enabled");
     }
 
-    dialog = new Dialog();
+    if (process.env.UC_NEW_DIALOG) {
+        console.log('CBTEST NEW dialog');
+        switch (process.env.UC_API) {
+            case 'openai':
+                dialog = new openAIDialog();
+                break;
+            default:
+                throw new Error('Unknown API: ' + process.env.UC_API);
+        }
+    } else {
+        console.log('CBTEST OLD dialog');
+        dialog = new Dialog();
+    }
+
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
     dialog.on('chunk', handleChunk);
@@ -79,7 +93,7 @@ async function main() {
     }
 
     await dialog.setup({
-        threadFile: path.resolve(UC_DIR, '.thread'),
+        threadFile: path.resolve(UC_DIR, process.env.UC_NEW_DIALOG ? '.thread2' : '.thread'),
         assistantFile: path.resolve(UC_DIR, '.assistant'),
         instructionsFile: path.resolve(UC_DIR, 'instructions.md'),
     });
