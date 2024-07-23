@@ -3,29 +3,23 @@ import DialogBase from './dialogBase.js';
 class EchoDialog extends DialogBase {
   constructor() {
     super();
+    this.stream = true;
   }
 
-  async processRun() {
-    // For echo dialog, we simply repeat the last user's message
-    const lastMessage = this.messages[this.messages.length - 1];
-    if (lastMessage.role === 'user') {
-      const response = { role: 'assistant', content: `Echo: ${lastMessage.content}` };
-      this.messages.push(response);
-      this.emit('message', response);
-    }
-    await this.save();
-  }
-
-  // Stub methods
   async* streamCompletion(messages) {
-    const userMessage = messages.find(m => m.role === 'user');
+    const userMessage = messages[messages.length-1];
     if (userMessage) {
-      yield { content: `Echo: ${userMessage.content}` };
+      const response = `Echo: ${userMessage.content}`;
+      let streamDelay = 100; // milliseconds
+      for (let i = 0; i < response.length; i += 3) {
+        await new Promise(resolve => setTimeout(resolve, streamDelay));
+        yield { content: response.substring(i, i + 3) };
+      }
     }
   }
 
   async getCompletion(messages) {
-    const userMessage = messages.find(m => m.role === 'user');
+    const userMessage = messages[messages.length-1];
     return { role: 'assistant', content: `Echo: ${userMessage.content}` };
   }
 
