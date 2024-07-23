@@ -57,6 +57,8 @@ class OpenAIDialog extends DialogBase {
     const completion = await this.client.createChatCompletion({
       model: this.model,
       messages: messages,
+      tools: this.tools,
+      tool_choice: 'auto',
     });
 
     return completion.data.choices[0];
