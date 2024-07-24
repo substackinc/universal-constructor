@@ -14,6 +14,47 @@ class DialogBase extends EventEmitter {
     this.tools = null;
     this.stream = null;
     this.model = null;
+    this.summarizationThreshold = 20; // Number of messages before summarization
+    this.summarizationChunkSize = 12; // Number of messages to summarize at once
+  }
+
+  async summarizeMessages(startIndex, endIndex) {
+    console.log('Summarizing...');
+
+    const messagesToSummarize = this.messages.slice(startIndex, endIndex);
+    const context = this.messages.slice(0, startIndex).map(m => `${m.role}: ${m.content}`).join('\n');
+    
+    const summarizationPrompt = `
+      Summarize the following conversation in a concise manner, capturing key points and decisions:
+      
+      Context:
+      ${context}
+      
+      Conversation to summarize:
+      ${messagesToSummarize.map(m => `${m.role}: ${m.content}`).join('\n')}
+      
+      Summary:
+    `;
+
+    // Use the existing model to generate the summary
+    const { message } = await this.getCompletion([{ role: 'user', content: summarizationPrompt }]);
+
+    console.log('Summarization result:', message.content);
+
+    return {
+      role: 'system',
+      content: message.content,
+      summary: `[Summary of messages ${startIndex} to ${endIndex - 1}]`
+    };
+  }
+
+  async checkAndSummarize() {
+    if (this.messages.length >= this.summarizationThreshold) {
+      const summarizationIndex = this.messages.length - this.summarizationChunkSize;
+      const summary = await this.summarizeMessages(1, summarizationIndex);
+      this.messages = [this.messages[0], summary, ...this.messages.slice(summarizationIndex)];
+      await this.save();
+    }
   }
 
   async setup({
@@ -78,6 +119,9 @@ class DialogBase extends EventEmitter {
       this.emit('message', m);
     }
     await this.save();
+    
+    // Check and summarize after adding a new message
+    await this.checkAndSummarize();
   }
 
   async save() {
