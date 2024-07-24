@@ -7,10 +7,10 @@ import * as util from 'util';
 dotenv.config();
 
 class AnthropicDialog extends DialogBase {
-    constructor() {
+    constructor({ model = 'claude-3-5-sonnet-20240620'} = {}) {
         super();
         this.client = null;
-        this.model = process.env.UC_MODEL || 'claude-3-5-sonnet-20240620';
+        this.model = model;
         this.stream = false; // TODO: make streaming work.
         this.client = new Anthropic(process.env.ANTHROPIC_API_KEY);
     }

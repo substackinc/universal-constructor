@@ -11,12 +11,12 @@ import { getFileChangeSummary, UC_DIR } from './dirUtils.js';
 import Listener from './listener.js';
 import speak from './speaker.js';
 import minimist from 'minimist';
-import Dialog from './dialog.js';
 import RevisableTerminalWriter from './RevisableTerminalWriter.js';
 import StreamingSpeaker from './StreamingSpeaker.js';
 import openAIDialog from './OpenAIDialog.js';
 import EchoDialog from './EchoDialog.js';
 import AnthropicDialog from './AnthropicDialog.js';
+import GroqDialog from './GroqDialog.js';
 
 marked.use(
     markedTerminal({
@@ -40,9 +40,10 @@ let shouldUpdate = false;
 
 async function main() {
     const args = minimist(process.argv.slice(2), {
+        string: ['api', 'model'],
         boolean: ['listen', 'speak', 'update', 'reset'],
         alias: { l: 'listen', s: 'speak', u: 'update', h: 'help', r: 'reset' },
-        default: { listen: false, speak: false, updates: false },
+        default: { listen: false, speak: false, updates: false},
     });
     // Handle --help option
     if (args.help) {
@@ -70,25 +71,7 @@ async function main() {
         console.log("File and command updates enabled");
     }
 
-    if (process.env.UC_NEW_DIALOG) {
-        console.log('CBTEST NEW dialog');
-        switch (process.env.UC_API) {
-            case 'openai':
-                dialog = new openAIDialog();
-                break;
-            case 'echo':
-                dialog = new EchoDialog();
-                break;
-            case 'anthropic':
-                dialog = new AnthropicDialog();
-                break;
-            default:
-                throw new Error('Unknown API: ' + process.env.UC_API);
-        }
-    } else {
-        console.log('CBTEST OLD dialog');
-        dialog = new Dialog();
-    }
+    dialog = createDialog(args);
 
     dialog.on('message', handleMessage);
     dialog.on('start_thinking', handleStartThinking);
@@ -118,6 +101,58 @@ async function main() {
     });
 
     prompt();
+}
+
+function createDialog({model, api}) {
+
+    model = model || process.env.UC_MODEL;
+    api = api || process.env.UC_API;
+
+    // default anthropic model
+    if (!model && api === 'anthropic') {
+        model = 'claude-3-5-sonnet-20240620'
+    }
+
+    // default groq model
+    if (!model && api === 'groq') {
+        model = 'llama-3.1-70b-versatile';
+    }
+
+    // otherwise default to gpt-4o
+    if (!model && (!api || api === 'openai')) {
+        model = 'gpt-4o';
+    }
+
+    // guess API based on model name
+    if (!api) {
+        if (model.indexOf('gpt') !== -1) {
+            api = 'openai';
+        } else if (model.indexOf('claude') !== -1) {
+            api = 'anthropic';
+        } else if (model.indexOf('llama') !== -1) {
+            api = 'groq';
+        } else {
+            throw new Error("Not sure which API to use for model: " + model);
+        }
+    }
+
+    console.log(`Model: ${model} (${api})`)
+
+    switch (api) {
+        case 'openai':
+            return new openAIDialog();
+        case 'echo':
+            return new EchoDialog();
+            break;
+        case 'anthropic':
+            return new AnthropicDialog();
+            break;
+        case 'groq':
+            return new GroqDialog();
+            break
+        default:
+            throw new Error('Unknown API: ' + process.env.UC_API);
+    }
 }
 
 async function startListening() {
@@ -376,6 +411,8 @@ function printHelp() {
     console.log(`  --speak, -s           Speak out the content`);
     console.log(`  --updates, -u         Watch file & command-line updates`);
     console.log(`  --help, -h            Display this help message and exit`);
+    console.log(`  --model               Specify a model to use (default gpt-4o)`);
+    console.log(`  --api                 openai, anthropic, groq, echo. Leave blank to guess based on model.`);
 }
 
 // run the main function
