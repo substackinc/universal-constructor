@@ -69,7 +69,7 @@ class AnthropicDialog extends DialogBase {
 
         let translatedMessage = {
             role: res.role,
-            content: res.content[0].text,
+            content: text,
         };
         if (tool_calls.length > 0) {
             translatedMessage.tool_calls = tool_calls;
@@ -127,7 +127,7 @@ class AnthropicDialog extends DialogBase {
                     role: message.role,
                     content: [{
                         type: 'text',
-                        text: message.content
+                        text: message.content || ''
                     }]
                 }
                 if (message.tool_calls) {
