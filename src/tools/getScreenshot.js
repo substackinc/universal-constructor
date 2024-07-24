@@ -1,5 +1,6 @@
 import screenshot from 'screenshot-desktop';
 import { execShell } from './index.js';
+import sharp from 'sharp';
 
 getScreenshot.spec = {
     name: getScreenshot.name,
@@ -9,19 +10,11 @@ getScreenshot.spec = {
         properties: {
             options: {
                 type: 'object',
-                description: 'Options to control screenshot capture, such as screen ID, format, and filename.',
+                description: 'Options to control screenshot capture, such as screen ID',
                 properties: {
                     screen: {
                         type: 'number',
                         description: 'Screen ID to capture.',
-                    },
-                    format: {
-                        type: 'string',
-                        description: 'Image format (e.g., jpg, png).',
-                    },
-                    filename: {
-                        type: 'string',
-                        description: 'Full path to save the screenshot file.',
                     },
                 },
             },
@@ -31,9 +24,13 @@ getScreenshot.spec = {
 };
 
 export default async function getScreenshot(options = {}) {
-    console.log(`Capturing screenshot.`);
+    console.log(`Capturing screenshot. Options:`, JSON.stringify(options));
     try {
-        const img = await screenshot(options);
+        const screenshotOptions = Object.assign({format: 'png'}, options);
+        const img = await screenshot(screenshotOptions);
+        //console.log('CBTEST original size: ', img.length);
+        let resized =await sharp(img).jpeg({ mozjpeg: true }).toBuffer();
+        //console.log('CBTEST new size: ', resized.length);
 
         let content = [
             { type: 'text', text: 'Screenshot captured successfully. Image to follow.' },
@@ -44,7 +41,7 @@ export default async function getScreenshot(options = {}) {
             {
                 type: 'image_url',
                 image_url: {
-                    url: `data:image/jpeg;base64,${img.toString('base64')}`,
+                    url: `data:image/jpeg;base64,${resized.toString('base64')}`,
                 },
             }];
 

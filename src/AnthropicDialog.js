@@ -116,14 +116,33 @@ class AnthropicDialog extends DialogBase {
         switch(message.role) {
             case 'user':
             case 'assistant':
+                let r = { role: message.role }
 
-                let r =  {
-                    role: message.role,
-                    content: [{
+                if (typeof message.content === 'string') {
+                    r.content = [{
                         type: 'text',
-                        text: message.content || ''
-                    }]
+                        text: message.content
+                    }];
+                } else if (Array.isArray(message.content)) {
+                    r.content = message.content.map(c => {
+                       if (c.type === 'image_url') {
+                           console.log("CBTEST c=", c);
+                           return {
+                               type: 'image',
+                               source: {
+                                   type: 'base64',
+                                   media_type: 'image/jpeg',
+                                   data: c.image_url.url.split(',')[1],
+                               },
+                           }
+                       } else {
+                           return c;
+                       }
+                    });
+                } else {
+                    throw new Error('Unknown content type: ' + message.content);
                 }
+
                 if (message.tool_calls) {
                     r.content = [...r.content, ...message.tool_calls.map(tc => ({
                         type: 'tool_use',
