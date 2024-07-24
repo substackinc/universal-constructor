@@ -40,8 +40,6 @@ class AnthropicDialog extends DialogBase {
 
     async getCompletion(messages) {
 
-        // console.log("CBETEST TOOLS");
-        // console.log(util.inspect(this.toolsAnthropicFormat(), {depth: null}))
         let res;
 
         try {
@@ -59,8 +57,6 @@ class AnthropicDialog extends DialogBase {
             throw ex;
         }
 
-        //console.log(res);
-
         let textContents = res.content.filter(c => c.type === 'text');
         let toolContents = res.content.filter(c => c.type === 'tool_use');
 
@@ -74,8 +70,6 @@ class AnthropicDialog extends DialogBase {
         if (tool_calls.length > 0) {
             translatedMessage.tool_calls = tool_calls;
         }
-
-        //console.log(translatedMessage);
 
         let reasonTranslation = {
             end_turn: 'stop',

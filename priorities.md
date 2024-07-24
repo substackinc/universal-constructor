@@ -8,7 +8,7 @@ This file outlines the current priorities for the Universal Constructor project.
 -   [x] Create command line REPL that lets you talk to the assistant
 -   [x] Add basic ability to read and edit files so it can work on itself
 -   [x] Clean up, add a README and push to GitHub so others can try it
--   [ ] Make the search/edit functionality robust, so that UC can reliably commit changes
+-   [x] Make the search/edit functionality robust, so that UC can reliably commit changes
 -   [ ] Simplify the tools code until UC can reliably add and edit its own tools
 -   [ ] Add the ability to reliably verify if a given changeset is valid/working/good
 -   [ ] Add the ability to make modest changes end-to-end (from description to tested, merged PR)
