@@ -1,4 +1,5 @@
 import DialogBase from './dialogBase.js';
+import OpenAI from 'openai';
 
 class OpenAIDialog extends DialogBase {
   constructor() {
@@ -6,12 +7,7 @@ class OpenAIDialog extends DialogBase {
     this.client = null;
     this.model = process.env.UC_MODEL || 'gpt-4o';
     this.stream = true;
-  }
-
-  async setupClient() {
-
-    const { default: OpenAIApi } = await import('openai');
-    this.client = new OpenAIApi(process.env.OPENAI_API_KEY);
+    this.client = new OpenAI(process.env.OPENAI_API_KEY);
   }
 
   async* streamCompletion(messages) {

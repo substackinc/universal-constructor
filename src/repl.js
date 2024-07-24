@@ -16,6 +16,7 @@ import RevisableTerminalWriter from './RevisableTerminalWriter.js';
 import StreamingSpeaker from './StreamingSpeaker.js';
 import openAIDialog from './OpenAIDialog.js';
 import EchoDialog from './EchoDialog.js';
+import AnthropicDialog from './AnthropicDialog.js';
 
 marked.use(
     markedTerminal({
@@ -77,6 +78,9 @@ async function main() {
                 break;
             case 'echo':
                 dialog = new EchoDialog();
+                break;
+            case 'anthropic':
+                dialog = new AnthropicDialog();
                 break;
             default:
                 throw new Error('Unknown API: ' + process.env.UC_API);

@@ -68,7 +68,7 @@ class DialogBase extends EventEmitter {
     }
 
     let lastMessage = this.messages[this.messages.length - 1];
-    if (allowCombining && lastMessage.role === m.role && m.ts - lastMessage.ts < 1000 * 60) {
+    if (allowCombining && lastMessage?.role === m.role && m.ts - lastMessage.ts < 1000 * 60) {
       this.messages[this.messages.length - 1].content += '\n' + m.content;
     } else {
       this.messages.push(m);
@@ -91,7 +91,7 @@ class DialogBase extends EventEmitter {
     let toolCallsByIndex = {};
     if (this.stream) {
       m = { role: 'assistant', content: '' };
-      let messagesCopy = stripDialog(this.messages);
+      let messagesCopy = this.stripDialog(this.messages);
       this.messages.push(m);
       let first = true;
       for await (let { content, tool_calls } of this.streamCompletion(messagesCopy)) {
@@ -115,7 +115,7 @@ class DialogBase extends EventEmitter {
         }
       }
     } else {
-      let messagesCopy = stripDialog(this.messages);
+      let messagesCopy = this.stripDialog(this.messages);
       let { finish_reason, message } = await this.getCompletion(messagesCopy);
       m = message;
       if (finish_reason === 'stop') {
@@ -126,7 +126,7 @@ class DialogBase extends EventEmitter {
           this.emit('start_thinking', { tool: true });
         }
       } else {
-        console.log('CTEST', finish_reason, message);
+        console.log('CBTEST unexpected finish reason', finish_reason, message);
         throw new Error('Unexpected finish reason: ' + finish_reason);
       }
     }
@@ -246,16 +246,17 @@ class DialogBase extends EventEmitter {
   async cancelOutstanding() {
     throw new Error('cancelOutstanding method not implemented');
   }
+
+  stripDialog(messages) {
+    return messages.map(({ role, content, name, tool_calls, tool_call_id }) => ({
+      role,
+      content,
+      name,
+      tool_calls,
+      tool_call_id,
+    }));
+  }
 }
 
-function stripDialog(messages) {
-  return messages.map(({ role, content, name, tool_calls, tool_call_id }) => ({
-    role,
-    content,
-    name,
-    tool_calls,
-    tool_call_id,
-  }));
-}
 
 export default DialogBase;
