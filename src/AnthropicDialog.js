@@ -126,7 +126,7 @@ class AnthropicDialog extends DialogBase {
                 } else if (Array.isArray(message.content)) {
                     r.content = message.content.map(c => {
                        if (c.type === 'image_url') {
-                           console.log("CBTEST c=", c);
+                           //console.log("CBTEST c=", c);
                            return {
                                type: 'image',
                                source: {
