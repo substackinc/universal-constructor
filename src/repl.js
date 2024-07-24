@@ -101,7 +101,7 @@ async function main() {
     }
 
     await dialog.setup({
-        threadFile: path.resolve(UC_DIR, process.env.UC_NEW_DIALOG ? '.thread2' : '.thread'),
+        threadFile: path.resolve(UC_DIR, '.thread'),
         assistantFile: path.resolve(UC_DIR, '.assistant'),
         instructionsFile: path.resolve(UC_DIR, 'instructions.md'),
     });

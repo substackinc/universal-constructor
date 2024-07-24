@@ -123,7 +123,6 @@ class DialogBase extends EventEmitter {
       } else if (finish_reason === 'tool_calls') {
         for (let c of message.tool_calls) {
           toolCallsByIndex[c.id] = c;
-          this.emit('start_thinking', { tool: true });
         }
       } else {
         console.log('CBTEST unexpected finish reason', finish_reason, message);
@@ -133,8 +132,10 @@ class DialogBase extends EventEmitter {
 
     let tool_calls = Object.values(toolCallsByIndex);
     if (tool_calls.length) {
+      this.emit('start_thinking', { tool: true });
       let callMessage = {
         role: 'assistant',
+        content: m.content,
         tool_calls,
         summary: 'Using tool ' + tool_calls.map((c) => c.function.name).join(', '),
       };
