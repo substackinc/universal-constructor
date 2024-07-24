@@ -57,6 +57,10 @@ class AnthropicDialog extends DialogBase {
             throw ex;
         }
 
+        if (res.usage.input_tokens > 50000) {
+            console.log("Usage:", res.usage);
+        }
+
         let textContents = res.content.filter(c => c.type === 'text');
         let toolContents = res.content.filter(c => c.type === 'tool_use');
 

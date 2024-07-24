@@ -23,12 +23,26 @@ class OpenAIDialog extends DialogBase {
             model: this.model,
             messages: messages,
             stream: true,
+            stream_options: {
+                include_usage: true
+            },
             tools: this.tools,
             tool_choice: 'auto',
         });
 
         for await (const chunk of completion) {
+            if (chunk.usage) {
+                if (chunk.usage.prompt_tokens > 50000) {
+                    console.log("\nUsage:", chunk.usage);
+                }
+                continue;
+            }
             if (shouldCancel) {
+                try {
+                    completion.controller.abort();
+                } catch (ex) {
+                    console.error("Error aborting stream:", ex);
+                }
                 yield { content: '... [cancelled]\n' };
                 break;
             }
@@ -38,7 +52,7 @@ class OpenAIDialog extends DialogBase {
                 } else {
                     yield chunk.choices[0]?.delta || '\n';
                 }
-                break;
+                //break;
             } else {
                 yield chunk.choices[0]?.delta;
             }
@@ -54,6 +68,10 @@ class OpenAIDialog extends DialogBase {
             tools: this.tools,
             tool_choice: 'auto',
         });
+
+        if (completion.usage.prompt_tokens > 50000) {
+            console.log("Usage:", completion.usage);
+        }
 
         //console.log('CBTEST completion:', util.inspect(completion, { depth: null }));
         return completion.choices[0];

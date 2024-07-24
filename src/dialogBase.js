@@ -88,11 +88,6 @@ class DialogBase extends EventEmitter {
     this.emit('start_thinking');
     let m;
 
-    let l = (JSON.stringify(this.messages).length / 1024);
-    if (l > 100) {
-      console.log("Context size", Math.round(l), 'Kchar');
-    }
-
     let toolCallsByIndex = {};
     if (this.stream) {
       m = { role: 'assistant', content: '' };
