@@ -15,7 +15,8 @@ class AnthropicDialog extends DialogBase {
     }
 
     async* streamCompletion(messages) {
-        await this.setupClient();
+        throw new Error("TODO: Implement");
+        /*
         const completion = await this.client.createCompletion({
             model: this.model,
             prompt: messages.map(m => `${m.role}: ${m.content}`).join('\n') + '\nassistant: ',
@@ -33,7 +34,7 @@ class AnthropicDialog extends DialogBase {
             } else {
                 yield chunk.choices[0].delta;
             }
-        }
+        }*/
     }
 
     async getCompletion(messages) {
@@ -74,20 +75,22 @@ class AnthropicDialog extends DialogBase {
             let m = messages.shift();
             let p = alternating[alternating.length - 1];
             if (p && p.role === m.role) {
-                p.content += '\n' + m.content;
+                p.content.push({
+                    type: 'text',
+                    text: m.content,
+                });
             } else {
-                alternating.push(m);
+                // translate to Anthropic message format
+                alternating.push({
+                    role: m.role,
+                    content: [{
+                        type: 'text',
+                        text: m.content,
+                    }]
+                });
             }
         }
-
-        // translate to Anthropic format
-        return alternating.map(m => ({
-            role: m.role,
-            content: [{
-                type: 'text',
-                text: m.content,
-            }],
-        }));
+        return alternating;
     }
 }
 
