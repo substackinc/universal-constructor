@@ -4,14 +4,12 @@ import OpenAI from 'openai';
 class OpenAIDialog extends DialogBase {
   constructor() {
     super();
-    this.client = null;
     this.model = process.env.UC_MODEL || 'gpt-4o';
     this.stream = true;
     this.client = new OpenAI(process.env.OPENAI_API_KEY);
   }
 
   async* streamCompletion(messages) {
-    await this.setupClient();
     this.cancelStream && this.cancelStream();
     let shouldCancel = false;
     let completion;
