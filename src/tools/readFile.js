@@ -1,11 +1,10 @@
 // src/tools/readFile.js
 import fs from 'fs/promises';
 import path from 'path';
-import { execMulti } from './execShell.js';
 
 readFile.spec = {
     name: readFile.name,
-    description: 'Retrieves the full content of the file and some relevant info.',
+    description: 'Retrieves the full content of the file and some relevant info. Line numbers are artifially added to the content.',
     parameters: {
         type: 'object',
         properties: {
@@ -23,18 +22,37 @@ readFile.spec = {
     },
 };
 
-export default async function readFile({ filepath, range }) {
+export default async function readFile({ filepath, range, omitLineNumbers = false }) {
     console.log(`Reading ${filepath}${range ? ` Lines: ${range}` : ''}`);
     const fullPath = path.resolve(filepath);
     try {
         let content = await fs.readFile(fullPath, 'utf8');
+        if (omitLineNumbers) {
+            if (range) {
+                const [start, end] = range.split('-').map(Number);
+                const lines = content.split('\n');
+                content = lines.slice(start - 1, end).join('\n');
+            }
+            return { content };
+        }
+        content = addLineNumbers(content);
         if (range) {
             const [start, end] = range.split('-').map(Number);
             const lines = content.split('\n');
             content = lines.slice(start - 1, end).join('\n');
         }
-        return { content };
+        return {
+            content,
+        };
     } catch (error) {
         throw error; // Rethrow the error to be handled by the caller
     }
+}
+
+function addLineNumbers(content) {
+    const withNumbers = content.split('\n').map((l, i) => {
+        return `${i + 1}   ${l}`;
+    });
+
+    return withNumbers.join('\n');
 }
