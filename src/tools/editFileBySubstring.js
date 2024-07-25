@@ -23,7 +23,7 @@ editFileBySubstring.spec = {
             },
             replacement: {
                 type: 'string',
-                description: 'The text that should replace the target substring. DO NOT include line numbers.',
+                description: 'The text content (discluding line numbers) that should replace the target substring.',
             },
         },
         required: ['filepath', 'uniqueContext', 'exactTarget', 'replacements'],
