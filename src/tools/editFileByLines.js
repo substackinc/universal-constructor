@@ -47,8 +47,6 @@ export default async function editFileByLines({ filepath, range, replacement }) 
 
     let updatedFileContents = [...lines.slice(0, start - 1), ...toInsert, ...lines.slice(end)].join("\n");
 
-    console.log('ATTEST: ', updatedFileContents);
-
     await fs.writeFile(fullPath, updatedFileContents, 'utf8');
     return {
         success: true,
