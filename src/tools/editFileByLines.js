@@ -17,12 +17,11 @@ editFileByLines.spec = {
             range: {
                 type: 'string',
                 pattern: '^d+-d+$',
-                description:
-                    'The range of line numbers to replace, formatted as "start-end".',
+                description: 'The range of line numbers to replace, formatted as "start-end".',
             },
             replacement: {
                 type: 'string',
-                description: 'The text that should replace the target lines. DO NOT include line numbers.',
+                description: 'The text content (discluding line numbers) that should replace the target lines.',
             },
         },
         required: ['filepath', 'range', 'replacement'],
@@ -32,6 +31,8 @@ editFileByLines.spec = {
 export default async function editFileByLines({ filepath, range, replacement }) {
     console.log('Editing by lines', filepath);
     const fullPath = path.resolve(filepath);
+
+    console.log('Replacing with: ', replacement);
 
     const exists = existsSync(fullPath);
     if (!exists) {
@@ -45,7 +46,7 @@ export default async function editFileByLines({ filepath, range, replacement }) 
 
     const toInsert = replacement.split('\n');
 
-    let updatedFileContents = [...lines.slice(0, start - 1), ...toInsert, ...lines.slice(end)].join("\n");
+    let updatedFileContents = [...lines.slice(0, start - 1), ...toInsert, ...lines.slice(end)].join('\n');
 
     await fs.writeFile(fullPath, updatedFileContents, 'utf8');
     return {
