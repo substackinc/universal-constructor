@@ -125,7 +125,7 @@ function createDialog({model, api}) {
 
     // guess API based on model name
     if (!api) {
-        if (model.indexOf('gpt') !== -1) {
+        if (model.indexOf('gpt') !== -1 || model.indexOf('o1') !== -1) {
             api = 'openai';
         } else if (model.indexOf('claude') !== -1) {
             api = 'anthropic';
