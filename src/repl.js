@@ -17,6 +17,8 @@ import openAIDialog from './OpenAIDialog.js';
 import EchoDialog from './EchoDialog.js';
 import AnthropicDialog from './AnthropicDialog.js';
 import GroqDialog from './GroqDialog.js';
+import PushListener from './pushListener.js';
+import { GlobalKeyboardListener } from 'node-global-key-listener';
 
 marked.use(
     markedTerminal({
@@ -31,6 +33,7 @@ const chalk2 = chalk.hex('#fcad01').bold;
 const chalk3 = chalk.gray.bold;
 
 let dialog;
+let pushListener;
 let rl;
 let lastInput = +new Date();
 let listener = null;
@@ -81,6 +84,8 @@ async function main() {
     // If listen flag is true, start microphone listener
     if (args.listen) {
         await startListening();
+    } else {
+        setupPushToTalk()
     }
 
     await dialog.setup({
@@ -143,13 +148,10 @@ function createDialog({model, api}) {
             return new openAIDialog();
         case 'echo':
             return new EchoDialog();
-            break;
         case 'anthropic':
             return new AnthropicDialog();
-            break;
         case 'groq':
             return new GroqDialog();
-            break
         default:
             throw new Error('Unknown API: ' + process.env.UC_API);
     }
@@ -183,6 +185,32 @@ async function startListening() {
     console.log("Listening...")
 }
 
+
+function setupPushToTalk() {
+    const v = new GlobalKeyboardListener();
+    console.log("Push-to-talk enabled. Press and hold the right Option key to speak.");
+    pushListener = new PushListener();
+
+    v.addListener(async function (e) {
+        if (e.name === 'RIGHT ALT' && e.state === 'DOWN') {
+            // Right Option key pressed
+            pushListener.start();
+        } else if (e.name === 'RIGHT ALT' && e.state === 'UP') {
+            // Right Option key released
+            startSpinner();
+            let transcription = await pushListener.stop();
+            if (transcription) {
+                working = true;
+                await dialog.addMessage(transcription);
+                await dialog.processRun();
+                working = false;
+            } else {
+                stopSpinner();
+            }
+            prompt();
+        }
+    });
+}
 
 function setupReadline(commands) {
     let rl = readline.createInterface({
