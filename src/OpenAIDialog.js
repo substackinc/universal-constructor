@@ -51,7 +51,7 @@ class OpenAIDialog extends DialogBase {
                 if (!['stop', 'function_call', 'tool_calls'].includes(chunk.choices[0].finish_reason)) {
                     console.error('\nFinish reason: ' + chunk.choices[0].finish_reason);
                 } else {
-                    yield chunk.choices[0]?.delta || '\n';
+                    yield chunk.choices[0]?.delta;
                 }
                 //break;
             } else {

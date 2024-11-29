@@ -94,7 +94,8 @@ class DialogBase extends EventEmitter {
       let messagesCopy = this.stripDialog(this.messages);
       this.messages.push(m);
       let first = true;
-      for await (let { content, tool_calls } of this.streamCompletion(messagesCopy)) {
+      for await (let delta of this.streamCompletion(messagesCopy)) {
+        const { content, tool_calls } = delta;
         if (content) {
           m.content += content;
           this.emit('chunk', {
