@@ -155,6 +155,12 @@ class AnthropicDialog extends DialogBase {
                         input: JSON.parse(tc.function.arguments)
                     }))];
                 }
+
+                if (!r.tool_calls && message.content === '') {
+                    // anthropic pukes at the empty string
+                    return null;
+                }
+
                 return r;
             case 'tool':
                 return {

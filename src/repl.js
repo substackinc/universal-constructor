@@ -19,6 +19,7 @@ import AnthropicDialog from './AnthropicDialog.js';
 import GroqDialog from './GroqDialog.js';
 import PushListener from './pushListener.js';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
+import XaiDialog from './XaiDialog.js';
 
 marked.use(
     markedTerminal({
@@ -143,15 +144,19 @@ function createDialog({model, api}) {
 
     console.log(`Model: ${model} (${api})`)
 
-    switch (api) {
+    switch (api.toLowerCase()) {
         case 'openai':
-            return new openAIDialog();
+            return new openAIDialog(model);
         case 'echo':
             return new EchoDialog();
         case 'anthropic':
             return new AnthropicDialog();
         case 'groq':
             return new GroqDialog();
+        case 'x':
+        case 'xai':
+        case 'grok':
+            return new XaiDialog(model || 'grok-beta');
         default:
             throw new Error('Unknown API: ' + process.env.UC_API);
     }
