@@ -1,6 +1,5 @@
 import DialogBase from './dialogBase.js';
 import OpenAI from 'openai';
-import * as util from 'util';
 
 class OpenAIDialog extends DialogBase {
     constructor({ model = 'gpt-4o', client = new OpenAI(process.env.OPENAI_API_KEY), stream = true } = {}) {
@@ -35,7 +34,9 @@ class OpenAIDialog extends DialogBase {
                 if (chunk.usage.prompt_tokens > 50000) {
                     console.log("\nUsage:", chunk.usage);
                 }
-                continue;
+                if (!chunk.choices || chunk.choices.length === 0) {
+                    continue;
+                }
             }
             if (shouldCancel) {
                 try {
@@ -47,7 +48,7 @@ class OpenAIDialog extends DialogBase {
                 break;
             }
             if (chunk.choices[0]?.finish_reason) {
-                if (chunk.choices[0].finish_reason !== 'stop' && chunk.choices[0].finish_reason !== 'function_call') {
+                if (!['stop', 'function_call', 'tool_calls'].includes(chunk.choices[0].finish_reason)) {
                     console.error('\nFinish reason: ' + chunk.choices[0].finish_reason);
                 } else {
                     yield chunk.choices[0]?.delta || '\n';

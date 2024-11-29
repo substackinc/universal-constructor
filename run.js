@@ -2,6 +2,7 @@
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import * as inspector from 'inspector';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,10 @@ function start() {
 
     childProcess.on('exit', (code) => {
         firstRun = false;
-        if (code === 0) {
+        if (inspector.url() !== undefined) {
+            console.log("Debugger attached. No restart.")
+        }
+        else if (code === 0) {
             console.log('Restarting. (Press ctrl-c twice to exit)');
             start();
         } else {
