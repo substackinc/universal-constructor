@@ -137,6 +137,8 @@ function createDialog({model, api}) {
             api = 'anthropic';
         } else if (model.indexOf('llama') !== -1) {
             api = 'groq';
+        } else if (model.indexOf('grok') !== -1 || model.indexOf('xai') != -1) {
+            api = 'xai';
         } else {
             throw new Error("Not sure which API to use for model: " + model);
         }
