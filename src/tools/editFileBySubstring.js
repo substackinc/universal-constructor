@@ -1,9 +1,9 @@
-// src/tools/editFile.js
+// src/tools/editFileBySubstring.js
 import fs from 'fs/promises';
 import path from 'path';
 
-editFile.spec = {
-    name: editFile.name,
+editFileBySubstring.spec = {
+    name: editFileBySubstring.name,
     description:
         'Replaces a specific substring within a file. Will replace the first instance after the start of the specified unique search context.',
     parameters: {
@@ -23,7 +23,7 @@ editFile.spec = {
             },
             replacement: {
                 type: 'string',
-                description: 'The text that should replace the target substring.',
+                description: 'The text content (discluding line numbers) that should replace the target substring.',
             },
         },
         required: ['filepath', 'uniqueContext', 'exactTarget', 'replacements'],
@@ -37,12 +37,13 @@ editFile.spec = {
  *
  * This thing tries to make this ergonomic for UC
  */
-export default async function editFile({ filepath, uniqueContext, exactTarget, replacement }) {
-    console.log('Editing', filepath);
+export default async function editFileBySubstring({ filepath, uniqueContext, exactTarget, replacement }) {
+    console.log('Editing by substring', filepath);
     // console.log('CBTEST ctx', uniqueContext)
     // console.log('CBTEST sbstr', exactTarget)
     // console.log('CBTEST repl', replacement)
     const fullPath = path.resolve(filepath);
+
     const fileContents = await fs.readFile(fullPath, 'utf8');
 
     const chunks = fileContents.split(uniqueContext);

@@ -1,5 +1,6 @@
 // src/tools/index.js
-export { default as editFile } from './editFile.js';
+export { default as editFileBySubstring } from './editFileBySubstring.js';
+export { default as editFileByLines } from './editFileByLines.js';
 export { default as execShell } from './execShell.js';
 export { default as getSummary } from './getSummary.js';
 export { default as regexReplace } from './regexReplace.js';
@@ -25,10 +26,10 @@ export default async function importAllTools(directory = dirname(fileURLToPath(i
             const module = await import(filePath);
             let toolsFound = 0;
             for (let k of Object.keys(module)) {
-                if (typeof module[k] === 'function' && module[k].spec) {
+                if (typeof module[k] === 'function' && module[k].spec && !module[k].spec.exclude) {
                     const name = module[k].name;
                     if (toolsByName[name]) {
-                        throw new Error("Duplicate tool name: " + name);
+                        throw new Error('Duplicate tool name: ' + name);
                     }
                     toolsByName[name] = module[k];
                     toolsFound++;

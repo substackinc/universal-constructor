@@ -19,14 +19,29 @@ test.after.always(async () => {
     await fs.rm(testDir, { recursive: true, force: true });
 });
 
-test('readFile reads and returns content of a file', async (t) => {
-    const result = await readFile({ filepath: testFilePath });
-    t.is(result.content, testContent, 'Content should match the test content');
+test('readFile reads and returns content of a file without line numbers', async (t) => {
+    const result = await readFile({ filepath: testFilePath, omitLineNumbers: true });
+    t.is(result.content, testContent, 'Content should match the test content exactly');
 });
 
-test('readFile reads and returns a correct range of lines from a file', async (t) => {
+test('readFile reads and returns the content of a file with line numbers', async (t) => {
+    const expectedResult = '1   Line 1\n2   Line 2\n3   Line 3';
+    const result = await readFile({
+        filepath: testFilePath,
+    });
+    t.is(result.content, expectedResult, 'Content should match the test content plus line numbers');
+});
+
+test('readFile reads and returns a correct range of lines from a file without line numbers', async (t) => {
     const range = '2-3';
     const expectedResult = 'Line 2\nLine 3';
+    const result = await readFile({ filepath: testFilePath, range, omitLineNumbers: true });
+    t.is(result.content, expectedResult, 'Content should match lines 2 to 3 inclusive without line numbers');
+});
+
+test('readFile reads and returns a correct range of lines from a file with line numbers', async (t) => {
+    const range = '2-3';
+    const expectedResult = '2   Line 2\n3   Line 3';
     const result = await readFile({ filepath: testFilePath, range });
-    t.is(result.content, expectedResult, 'Content should match lines 2 to 3 inclusive');
+    t.is(result.content, expectedResult, 'Content should match lines 2 to 3 inclusive with line numbers');
 });

@@ -1,5 +1,5 @@
 import test from 'ava';
-import editFile from '../../src/tools/editFile.js';
+import editFileBySubstring from '../../src/tools/editFileBySubstring.js';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
@@ -23,10 +23,10 @@ test.after.always(async () => {
     await fs.rm(testDir, { force: true, recursive: true });
 });
 
-test('editFile replaces a string within a file', async (t) => {
+test('editFileBySubstring replaces a string within a file', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World, Hello Universe', 'utf8');
-    await editFile({
+    await editFileBySubstring({
         filepath: testFile,
         uniqueContext: 'Hello World, Hello Universe',
         exactTarget: 'Universe',
@@ -36,27 +36,27 @@ test('editFile replaces a string within a file', async (t) => {
     t.is(content, 'Hello World, Hello AVA', 'Content should be replaced correctly');
 });
 
-test('editFile fails with multiple instances of the search context', async (t) => {
+test('editFileBySubstring fails with multiple instances of the search context', async (t) => {
     const { testFile } = setup();
     await fs.writeFile(testFile, 'Hello World. Hello World.', 'utf8');
     try {
-        await editFile({
+        await editFileBySubstring({
             filepath: testFile,
             uniqueContext: 'Hello World',
             exactTarget: 'World',
             replacement: 'AVA',
         });
-        t.fail('editFile should throw an error if the search context appears more than once.');
+        t.fail('editFileBySubstring should throw an error if the search context appears more than once.');
     } catch (error) {
-        t.pass('editFile should throw an error if the search context appears more than once.');
+        t.pass('editFileBySubstring should throw an error if the search context appears more than once.');
     }
 });
 
-test('editFile works on a file with many lines', async (t) => {
+test('editFileBySubstring works on a file with many lines', async (t) => {
     const { testFile } = setup();
     const multilineContent = `First line\nSecond line target\nThird line`;
     await fs.writeFile(testFile, multilineContent);
-    await editFile({
+    await editFileBySubstring({
         filepath: testFile,
         uniqueContext: '\nSecond line target\n',
         exactTarget: 'target',
@@ -70,11 +70,11 @@ test('editFile works on a file with many lines', async (t) => {
     );
 });
 
-test('editFile uniqueContext lets you specify a given replacement among many', async (t) => {
+test('editFileBySubstring uniqueContext lets you specify a given replacement among many', async (t) => {
     const { testFile } = setup();
     const multiTargetContent = `Target line one\nUseless line\nTarget line two\nTarget line one`;
     await fs.writeFile(testFile, multiTargetContent);
-    await editFile({
+    await editFileBySubstring({
         filepath: testFile,
         uniqueContext: 'Target line two',
         exactTarget: 'Target',
