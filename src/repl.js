@@ -20,6 +20,7 @@ import GroqDialog from './GroqDialog.js';
 import PushListener from './pushListener.js';
 import { GlobalKeyboardListener } from 'node-global-key-listener';
 import XaiDialog from './XaiDialog.js';
+import DeepSeekDialog from './DeepSeekDialog.js';
 
 marked.use(
     markedTerminal({
@@ -149,6 +150,8 @@ function createDialog({model, api}) {
     switch (api.toLowerCase()) {
         case 'openai':
             return new openAIDialog(model);
+        case 'deepseek':
+            return new DeepSeekDialog(model);
         case 'echo':
             return new EchoDialog();
         case 'anthropic':
