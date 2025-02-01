@@ -226,8 +226,7 @@ class DialogBase extends EventEmitter {
       return JSON.parse(argumentsStr);
     } catch (parseError) {
       if (
-        parseError instanceof SyntaxError &&
-        parseError.message.includes('Unexpected non-whitespace character after JSON')
+        parseError instanceof SyntaxError
       ) {
         let trimmedArguments = argumentsStr.replace(/}\s*$/, '');
         return JSON.parse(trimmedArguments);
